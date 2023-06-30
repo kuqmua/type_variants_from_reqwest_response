@@ -86,7 +86,7 @@ pub fn type_variants_from_reqwest_response(
     } else {
         panic!("{macro_name} syn::Data is not a syn::Data::Enum");
     };
-    data_enum.variants.into_iter().for_each(|variant| {
+    let f = data_enum.variants.into_iter().map(|variant| {
         let mut option_attribute = None;
         variant.attrs.iter().for_each(|attr| {
             if let true = attr.path.segments.len() == 1 {
@@ -102,13 +102,112 @@ pub fn type_variants_from_reqwest_response(
             }
         });
         println!("{option_attribute:#?}");
-        match variant.fields {
-            syn::Fields::Named(fields_named) => {}
-            syn::Fields::Unnamed(fields_unnamed) => {}
-            syn::Fields::Unit => panic!("{macro_name} does not support syn::Fields::Unit"),
-        }
+        // match variant.fields {
+        //     syn::Fields::Named(fields_named) => {}
+        //     syn::Fields::Unnamed(fields_unnamed) => {}
+        //     syn::Fields::Unit => panic!("{macro_name} does not support syn::Fields::Unit"),
+        // };
+        (
+            quote::quote! {
+                // #[derive(Debug, serde :: Serialize, serde :: Deserialize)]
+                // enum GetHttpResponseVariantsInternalServerError {
+                //     Configuration {
+                //         configuration_box_dyn_error: std::string::String,
+                //         code_occurence: crate::common::code_occurence::CodeOccurenceWithSerializeDeserialize,
+                //     },
+                //     Database {
+                //         box_dyn_database_error: std::string::String,
+                //         code_occurence: crate::common::code_occurence::CodeOccurenceWithSerializeDeserialize,
+                //     },
+                // }
+                // impl std::convert::From<GetHttpResponseVariantsInternalServerError> for GetHttpResponseVariants {
+                //     fn from(val: GetHttpResponseVariantsInternalServerError) -> Self {
+                //         match val {
+                //             GetHttpResponseVariantsInternalServerError::Configuration {
+                //                 configuration_box_dyn_error,
+                //                 code_occurence,
+                //             } => Self::Configuration {
+                //                 configuration_box_dyn_error,
+                //                 code_occurence,
+                //             },
+                //         }
+                //     }
+                // }
+            },
+            quote::quote! {},
+        )
     });
-    let gen = quote::quote! {};
+    let gen = quote::quote! {
+    // impl std::convert::TryFrom<reqwest::Response> for GetHttpResponseVariants {
+    //     type Error = GetHttpResponseVariantsTryFromReqwestResponseVariant;
+    //     fn try_from(response: reqwest::Response) -> Result<Self, Self::Error> {
+    //         let status_code = response.status();
+    //         if status_code == http::StatusCode::OK {
+    //             match futures::executor::block_on(response.json::<GetHttpResponseVariantsOk>()) {
+    //                 Ok(value) => Ok(GetHttpResponseVariants::from(value)),
+    //                 Err(e) => Err(
+    //                     GetHttpResponseVariantsTryFromReqwestResponseVariant::DeserializeResponse {
+    //                         reqwest: e,
+    //                         status_code,
+    //                     },
+    //                 ),
+    //             }
+    //         } else if status_code == http::StatusCode::BAD_REQUEST {
+    //             match futures::executor::block_on(response.json::<GetHttpResponseVariantsBadRequest>())
+    //             {
+    //                 Ok(value) => Ok(GetHttpResponseVariants::from(value)),
+    //                 Err(e) => Err(
+    //                     GetHttpResponseVariantsTryFromReqwestResponseVariant::DeserializeResponse {
+    //                         reqwest: e,
+    //                         status_code,
+    //                     },
+    //                 ),
+    //             }
+    //         } else if status_code == http::StatusCode::INTERNAL_SERVER_ERROR {
+    //             match futures::executor::block_on(
+    //                 response.json::<GetHttpResponseVariantsInternalServerError>(),
+    //             ) {
+    //                 Ok(value) => Ok(GetHttpResponseVariants::from(value)),
+    //                 Err(e) => Err(
+    //                     GetHttpResponseVariantsTryFromReqwestResponseVariant::DeserializeResponse {
+    //                         reqwest: e,
+    //                         status_code,
+    //                     },
+    //                 ),
+    //             }
+    //         } else if status_code == http::StatusCode::NOT_FOUND {
+    //             match futures::executor::block_on(response.json::<GetHttpResponseVariantsNotFound>()) {
+    //                 Ok(value) => Ok(GetHttpResponseVariants::from(value)),
+    //                 Err(e) => Err(
+    //                     GetHttpResponseVariantsTryFromReqwestResponseVariant::DeserializeResponse {
+    //                         reqwest: e,
+    //                         status_code,
+    //                     },
+    //                 ),
+    //             }
+    //         } else if status_code == http::StatusCode::REQUEST_TIMEOUT {
+    //             match futures::executor::block_on(
+    //                 response.json::<GetHttpResponseVariantsRequestTimeout>(),
+    //             ) {
+    //                 Ok(value) => Ok(GetHttpResponseVariants::from(value)),
+    //                 Err(e) => Err(
+    //                     GetHttpResponseVariantsTryFromReqwestResponseVariant::DeserializeResponse {
+    //                         reqwest: e,
+    //                         status_code,
+    //                     },
+    //                 ),
+    //             }
+    //         } else {
+    //             Err(
+    //                 GetHttpResponseVariantsTryFromReqwestResponseVariant::UnexpectedStatusCode {
+    //                     status_code,
+    //                 },
+    //             )
+    //         }
+    //     }
+    // }
+
+        };
     //println!("{gen}");
     gen.into()
 }
