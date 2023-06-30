@@ -100,7 +100,6 @@ pub fn type_variants_from_reqwest_response(
                     }
                 }
             }
-            println!("tokens{:#?}token", attr);
         });
         println!("{option_attribute:#?}");
         match variant.fields {
@@ -176,6 +175,85 @@ enum NamedAttribute {
     Tvfrr508,
     Tvfrr510,
     Tvfrr511,
+}
+
+impl NamedAttribute {
+    fn to_http_status_code_quote<'a>(&self) -> proc_macro2::TokenStream {
+        match self {
+            NamedAttribute::Tvfrr100 => quote::quote! {http::StatusCode::CONTINUE},
+            NamedAttribute::Tvfrr101 => quote::quote! {http::StatusCode::SWITCHING_PROTOCOLS},
+            NamedAttribute::Tvfrr102 => quote::quote! {http::StatusCode::PROCESSING},
+            NamedAttribute::Tvfrr200 => quote::quote! {http::StatusCode::OK},
+            NamedAttribute::Tvfrr201 => quote::quote! {http::StatusCode::CREATED},
+            NamedAttribute::Tvfrr202 => quote::quote! {http::StatusCode::ACCEPTED},
+            NamedAttribute::Tvfrr203 => {
+                quote::quote! {http::StatusCode::NON_AUTHORITATIVE_INFORMATION}
+            }
+            NamedAttribute::Tvfrr204 => quote::quote! {http::StatusCode::NO_CONTENT},
+            NamedAttribute::Tvfrr205 => quote::quote! {http::StatusCode::RESET_CONTENT},
+            NamedAttribute::Tvfrr206 => quote::quote! {http::StatusCode::PARTIAL_CONTENT},
+            NamedAttribute::Tvfrr207 => quote::quote! {http::StatusCode::MULTI_STATUS},
+            NamedAttribute::Tvfrr208 => quote::quote! {http::StatusCode::ALREADY_REPORTED},
+            NamedAttribute::Tvfrr226 => quote::quote! {http::StatusCode::IM_USED},
+            NamedAttribute::Tvfrr300 => quote::quote! {http::StatusCode::MULTIPLE_CHOICES},
+            NamedAttribute::Tvfrr301 => quote::quote! {http::StatusCode::MOVED_PERMANENTLY},
+            NamedAttribute::Tvfrr302 => quote::quote! {http::StatusCode::FOUND},
+            NamedAttribute::Tvfrr303 => quote::quote! {http::StatusCode::SEE_OTHER},
+            NamedAttribute::Tvfrr304 => quote::quote! {http::StatusCode::NOT_MODIFIED},
+            NamedAttribute::Tvfrr305 => quote::quote! {http::StatusCode::USE_PROXY},
+            NamedAttribute::Tvfrr307 => quote::quote! {http::StatusCode::TEMPORARY_REDIRECT},
+            NamedAttribute::Tvfrr308 => quote::quote! {http::StatusCode::PERMANENT_REDIRECT},
+            NamedAttribute::Tvfrr400 => quote::quote! {http::StatusCode::BAD_REQUEST},
+            NamedAttribute::Tvfrr401 => quote::quote! {http::StatusCode::UNAUTHORIZED},
+            NamedAttribute::Tvfrr402 => quote::quote! {http::StatusCode::PAYMENT_REQUIRED},
+            NamedAttribute::Tvfrr403 => quote::quote! {http::StatusCode::FORBIDDEN},
+            NamedAttribute::Tvfrr404 => quote::quote! {http::StatusCode::NOT_FOUND},
+            NamedAttribute::Tvfrr405 => quote::quote! {http::StatusCode::METHOD_NOT_ALLOWED},
+            NamedAttribute::Tvfrr406 => quote::quote! {http::StatusCode::NOT_ACCEPTABLE},
+            NamedAttribute::Tvfrr407 => {
+                quote::quote! {http::StatusCode::PROXY_AUTHENTICATION_REQUIRED}
+            }
+            NamedAttribute::Tvfrr408 => quote::quote! {http::StatusCode::REQUEST_TIMEOUT},
+            NamedAttribute::Tvfrr409 => quote::quote! {http::StatusCode::CONFLICT},
+            NamedAttribute::Tvfrr410 => quote::quote! {http::StatusCode::GONE},
+            NamedAttribute::Tvfrr411 => quote::quote! {http::StatusCode::LENGTH_REQUIRED},
+            NamedAttribute::Tvfrr412 => quote::quote! {http::StatusCode::PRECONDITION_FAILED},
+            NamedAttribute::Tvfrr413 => quote::quote! {http::StatusCode::PAYLOAD_TOO_LARGE},
+            NamedAttribute::Tvfrr414 => quote::quote! {http::StatusCode::URI_TOO_LONG},
+            NamedAttribute::Tvfrr415 => quote::quote! {http::StatusCode::UNSUPPORTED_MEDIA_TYPE},
+            NamedAttribute::Tvfrr416 => quote::quote! {http::StatusCode::RANGE_NOT_SATISFIABLE},
+            NamedAttribute::Tvfrr417 => quote::quote! {http::StatusCode::EXPECTATION_FAILED},
+            NamedAttribute::Tvfrr418 => quote::quote! {http::StatusCode::IM_A_TEAPOT},
+            NamedAttribute::Tvfrr421 => quote::quote! {http::StatusCode::MISDIRECTED_REQUEST},
+            NamedAttribute::Tvfrr422 => quote::quote! {http::StatusCode::UNPROCESSABLE_ENTITY},
+            NamedAttribute::Tvfrr423 => quote::quote! {http::StatusCode::LOCKED},
+            NamedAttribute::Tvfrr424 => quote::quote! {http::StatusCode::FAILED_DEPENDENCY},
+            NamedAttribute::Tvfrr426 => quote::quote! {http::StatusCode::UPGRADE_REQUIRED},
+            NamedAttribute::Tvfrr428 => quote::quote! {http::StatusCode::PRECONDITION_REQUIRED},
+            NamedAttribute::Tvfrr429 => quote::quote! {http::StatusCode::TOO_MANY_REQUESTS},
+            NamedAttribute::Tvfrr431 => {
+                quote::quote! {http::StatusCode::REQUEST_HEADER_FIELDS_TOO_LARGE}
+            }
+            NamedAttribute::Tvfrr451 => {
+                quote::quote! {http::StatusCode::UNAVAILABLE_FOR_LEGAL_REASONS}
+            }
+            NamedAttribute::Tvfrr500 => quote::quote! {http::StatusCode::INTERNAL_SERVER_ERROR},
+            NamedAttribute::Tvfrr501 => quote::quote! {http::StatusCode::NOT_IMPLEMENTED},
+            NamedAttribute::Tvfrr502 => quote::quote! {http::StatusCode::BAD_GATEWAY},
+            NamedAttribute::Tvfrr503 => quote::quote! {http::StatusCode::SERVICE_UNAVAILABLE},
+            NamedAttribute::Tvfrr504 => quote::quote! {http::StatusCode::GATEWAY_TIMEOUT},
+            NamedAttribute::Tvfrr505 => {
+                quote::quote! {http::StatusCode::HTTP_VERSION_NOT_SUPPORTED}
+            }
+            NamedAttribute::Tvfrr506 => quote::quote! {http::StatusCode::VARIANT_ALSO_NEGOTIATES},
+            NamedAttribute::Tvfrr507 => quote::quote! {http::StatusCode::INSUFFICIENT_STORAGE},
+            NamedAttribute::Tvfrr508 => quote::quote! {http::StatusCode::LOOP_DETECTED},
+            NamedAttribute::Tvfrr510 => quote::quote! {http::StatusCode::NOT_EXTENDED},
+            NamedAttribute::Tvfrr511 => {
+                quote::quote! {http::StatusCode::NETWORK_AUTHENTICATION_REQUIRED}
+            }
+        }
+    }
 }
 
 // impl NamedAttribute {
