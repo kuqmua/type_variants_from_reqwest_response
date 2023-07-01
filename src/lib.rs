@@ -138,8 +138,12 @@ pub fn type_variants_from_reqwest_response(
     } else {
         panic!("{macro_name} {ident} syn::Data is not a syn::Data::Enum");
     };
-    let unique_status_codes = data_enum.variants.iter().fold(
-        Vec::with_capacity(data_enum.variants.len()),
+    let variants_len = data_enum.variants.len();
+    let (unique_status_codes, variants_with_status_code) = data_enum.variants.into_iter().fold(
+        (
+            Vec::with_capacity(variants_len),
+            Vec::with_capacity(variants_len),
+        ),
         |mut acc, variant| {
             let mut option_attribute = None;
             variant.attrs.iter().for_each(|attr| {
@@ -158,15 +162,29 @@ pub fn type_variants_from_reqwest_response(
             } else {
                 panic!("{macro_name} {ident} no supported attribute");
             };
-            if !acc.contains(&attr) {
-                acc.push(attr)
+            if !acc.0.contains(&attr) {
+                acc.0.push(attr.clone())
             }
+            acc.1.push((attr, variant));
             acc
         },
     );
-    println!("unique_status_codes {unique_status_codes:#?}");
-    // unique_status_codes.iter().for_each(||)
-    let gen = quote::quote! {
+    // println!("unique_status_codes {unique_status_codes:#?}");
+    unique_status_codes
+        .iter()
+        .for_each(|status_code_attribute| {
+            let status_code_enum_name = format!("{ident}{status_code_attribute}");
+            println!("{status_code_enum_name}");
+            let status_code_variants_vec = variants_with_status_code.iter().fold(
+                Vec::with_capacity(variants_len),
+                |mut acc, (attribute, variant)| {
+                    if let true = status_code_attribute == attribute {
+                        acc.push(variant);
+                    }
+                    acc
+                },
+            );
+            println!("{}", status_code_variants_vec.len());
             // (
             //     quote::quote! {
             //         // #[derive(Debug, serde :: Serialize, serde :: Deserialize)]
@@ -196,6 +214,9 @@ pub fn type_variants_from_reqwest_response(
             //     },
             //     quote::quote! {},
             // )
+        });
+    let gen = quote::quote! {
+
 
     // impl std::convert::TryFrom<reqwest::Response> for GetHttpResponseVariants {
     //     type Error = GetHttpResponseVariantsTryFromReqwestResponseVariant;
@@ -278,6 +299,7 @@ pub fn type_variants_from_reqwest_response(
     enum_extension::EnumExtension,
     PartialEq,
     Eq,
+    Clone,
 )]
 enum Attribute {
     Tvfrr100Continue,
