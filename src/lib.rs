@@ -128,7 +128,8 @@ pub fn type_variants_from_reqwest_response(
     // let tvfrr_508 = "tvfrr_508";
     // let tvfrr_510 = "tvfrr_510";
     // let tvfrr_511 = "tvfrr_511";
-
+    let parse_proc_macro2_token_stream_failed_message =
+        ".parse::<proc_macro2::TokenStream>() failed";
     let ast: syn::DeriveInput = syn::parse(input).unwrap_or_else(|_| {
         panic!("{macro_name} let ast: syn::DeriveInput = syn::parse(input) failed")
     });
@@ -171,21 +172,17 @@ pub fn type_variants_from_reqwest_response(
                 if !acc.0.contains(&attr) {
                     acc.0.push(attr.clone())
                 }
-                let http_status_code_variant_match = {
+                acc.2.push({
                     let variant_ident = &variant.ident;
                     let http_status_code_token_stream = attr.to_http_status_code_quote();
                     match &variant.fields {
                         syn::Fields::Named(fields_named) => {
-                            let fields_token_stream = fields_named
-                                .named
-                                .iter()
-                                .map(|field| {
-                                    let field_ident = field.ident.clone().unwrap_or_else(|| {
-                                        panic!("{macro_name} {ident} named field ident is None");
-                                    });
-                                    quote::quote! { #field_ident: _ }
-                                })
-                                .collect::<Vec<proc_macro2::TokenStream>>();
+                            let fields_token_stream = fields_named.named.iter().map(|field| {
+                                let field_ident = field.ident.clone().unwrap_or_else(|| {
+                                    panic!("{macro_name} {ident} named field ident is None");
+                                });
+                                quote::quote! { #field_ident: _ }
+                            });
                             quote::quote! {
                                 #ident::#variant_ident {
                                      #(#fields_token_stream),*
@@ -193,35 +190,32 @@ pub fn type_variants_from_reqwest_response(
                             }
                         }
                         syn::Fields::Unnamed(fields_unnamed) => {
-                            let fields_token_stream = fields_unnamed
-                                .unnamed
-                                .iter()
-                                .map(|_field| {
-                                    quote::quote! { _ }
-                                })
-                                .collect::<Vec<proc_macro2::TokenStream>>();
+                            let fields_token_stream = if let true = fields_unnamed.unnamed.len() == 1 {
+                                quote::quote! { _ }
+                            }
+                            else {
+                                panic!("{macro_name} {ident} fields_unnamed.unnamed.len() != 1");                                
+                            };
                             quote::quote! {
-                                #ident::#variant_ident(
-                                    #(#fields_token_stream),*
-                                ) => #http_status_code_token_stream
+                                #ident::#variant_ident(#fields_token_stream) => #http_status_code_token_stream
                             }
                         }
                         syn::Fields::Unit => {
                             panic!("{macro_name} {ident} syn::Data is not a syn::Data::Enum")
                         }
                     }
-                };
-                acc.2.push(http_status_code_variant_match);
+                });
                 acc.1.push((attr, variant));
                 acc
             },
         );
-    // println!("unique_status_codes {unique_status_codes:#?}");
-    unique_status_codes
+    let status_codes_enums_with_from_impl = unique_status_codes
         .iter()
-        .for_each(|status_code_attribute| {
-            let status_code_enum_name = format!("{ident}{status_code_attribute}");
-            println!("{status_code_enum_name}");
+        .map(|status_code_attribute| {
+            let status_code_enum_name_stringified = format!("{ident}{status_code_attribute}");
+            let status_code_enum_name_token_stream = status_code_enum_name_stringified
+            .parse::<proc_macro2::TokenStream>()
+            .unwrap_or_else(|_| panic!("{macro_name} {ident} {status_code_enum_name_stringified} {parse_proc_macro2_token_stream_failed_message}"));
             let status_code_variants_vec = variants_with_status_code.iter().fold(
                 Vec::with_capacity(variants_len),
                 |mut acc, (attribute, variant)| {
@@ -231,38 +225,88 @@ pub fn type_variants_from_reqwest_response(
                     acc
                 },
             );
-            println!("{}", status_code_variants_vec.len());
-            // status_code_variants_vec.f
+            let status_code_variants_vec_len = status_code_variants_vec.len();
+            let (status_code_variants_vec_token_stream, status_code_variants_vec_from_token_stream)  = status_code_variants_vec
+                .iter()
+                .fold(
+                    (
+                        Vec::with_capacity(status_code_variants_vec_len),
+                        Vec::with_capacity(status_code_variants_vec_len),
+                    ),
+                    |mut acc, variant| {
+                        let variant_ident = &variant.ident;
+                        match &variant.fields {
+                            syn::Fields::Named(fields_named) => {
+                                let (enum_fields_token_stream, from_enum_fields_token_stream) = fields_named.named.iter().fold(
+                                    (
+                                        Vec::with_capacity(fields_named.named.len()),
+                                        Vec::with_capacity(fields_named.named.len()),
+                                    ),
+                                    |mut acc, field| {
+                                    let field_ident = field.ident.clone().unwrap_or_else(|| {
+                                            panic!("{macro_name} {ident} named field ident is None");
+                                        });
+                                    let field_ty = &field.ty;
+                                    acc.0.push(quote::quote! { #field_ident: #field_ty });
+                                    acc.1.push(quote::quote! { #field_ident });
+                                    acc
+                                });
+                                acc.0.push(quote::quote! {
+                                        #variant_ident {
+                                            #(#enum_fields_token_stream),*
+                                        }
+                                    });
+                                acc.1.push(quote::quote! {
+                                    #status_code_enum_name_token_stream::#variant_ident {
+                                        #(#from_enum_fields_token_stream),*
+                                    } => Self::#variant_ident {
+                                        #(#from_enum_fields_token_stream),*
+                                    }
+                                });
+                                acc
+                            },
+                            syn::Fields::Unnamed(fields_unnamed) => {
+                                let fields_token_stream = if let true = fields_unnamed.unnamed.len() == 1 {
+                                    let field_ty = &fields_unnamed.unnamed[0].ty;
+                                    quote::quote! { #field_ty }
+                                }
+                                else {
+                                    panic!("{macro_name} {ident} fields_unnamed.unnamed.len() != 1");                                       
+                                };
+                                acc.0.push(quote::quote! {
+                                        #variant_ident(#fields_token_stream)
+                                    });
+                                acc.1.push(quote::quote! {
+                                    #status_code_enum_name_token_stream::#variant_ident(i) => Self::#variant_ident(i)
+                                });
+                                acc
+                            },
+                            syn::Fields::Unit => {
+                                panic!("{macro_name} {ident} syn::Data is not a syn::Data::Enum")
+                            }
+                        }
+                    }
+                );
             // (
-            //     quote::quote! {
-            //         // #[derive(Debug, serde :: Serialize, serde :: Deserialize)]
-            //         // enum GetHttpResponseVariantsInternalServerError {
-            //         //     Configuration {
-            //         //         configuration_box_dyn_error: std::string::String,
-            //         //         code_occurence: crate::common::code_occurence::CodeOccurenceWithSerializeDeserialize,
-            //         //     },
-            //         //     Database {
-            //         //         box_dyn_database_error: std::string::String,
-            //         //         code_occurence: crate::common::code_occurence::CodeOccurenceWithSerializeDeserialize,
-            //         //     },
-            //         // }
-            //         // impl std::convert::From<GetHttpResponseVariantsInternalServerError> for GetHttpResponseVariants {
-            //         //     fn from(val: GetHttpResponseVariantsInternalServerError) -> Self {
-            //         //         match val {
-            //         //             GetHttpResponseVariantsInternalServerError::Configuration {
-            //         //                 configuration_box_dyn_error,
-            //         //                 code_occurence,
-            //         //             } => Self::Configuration {
-            //         //                 configuration_box_dyn_error,
-            //         //                 code_occurence,
-            //         //             },
-            //         //         }
-            //         //     }
-            //         // }
-            //     },
+            let r = quote::quote! {
+                    #[derive(Debug, serde::Serialize, serde::Deserialize)]
+                    enum #status_code_enum_name_token_stream {
+                        #(#status_code_variants_vec_token_stream),*
+                    }
+                    impl std::convert::From<#status_code_enum_name_token_stream> for #ident {
+                        fn from(value: #status_code_enum_name_token_stream) -> Self {
+                            match value {
+                                #(#status_code_variants_vec_from_token_stream),*
+                            }
+                        }
+                    }
+                };
+                println!("{r}");
+                r
             //     quote::quote! {},
             // )
         });
+    // println!("----------{status_codes_enums_with_from_impl:#?}");
     let gen = quote::quote! {
     impl std::convert::From<&#ident> for http::StatusCode {
         fn from(value: &#ident) -> Self {
@@ -271,6 +315,7 @@ pub fn type_variants_from_reqwest_response(
             }
         }
     }
+    #(#status_codes_enums_with_from_impl)*
 
     // impl std::convert::TryFrom<reqwest::Response> for GetHttpResponseVariants {
     //     type Error = GetHttpResponseVariantsTryFromReqwestResponseVariant;
@@ -309,7 +354,7 @@ pub fn type_variants_from_reqwest_response(
     // }
 
         };
-    //println!("{gen}");
+    // println!("{gen}");
     gen.into()
 }
 
