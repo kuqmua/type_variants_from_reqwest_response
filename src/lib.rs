@@ -68,66 +68,6 @@ pub fn type_variants_from_reqwest_response(
 ) -> proc_macro::TokenStream {
     proc_macro_helpers::panic_location::panic_location(); //panic_location function from https://github.com/kuqmua/proc_macro_helpers
     let macro_name = "TypeVariantsFromReqwestResponse";
-    // let tvfrr_100 = "tvfrr_100";
-    // let tvfrr_101 = "tvfrr_101";
-    // let tvfrr_102 = "tvfrr_102";
-    // let tvfrr_200 = "tvfrr_200";
-    // let tvfrr_201 = "tvfrr_201";
-    // let tvfrr_202 = "tvfrr_202";
-    // let tvfrr_203 = "tvfrr_203";
-    // let tvfrr_204 = "tvfrr_204";
-    // let tvfrr_205 = "tvfrr_205";
-    // let tvfrr_206 = "tvfrr_206";
-    // let tvfrr_207 = "tvfrr_207";
-    // let tvfrr_208 = "tvfrr_208";
-    // let tvfrr_226 = "tvfrr_226";
-    // let tvfrr_300 = "tvfrr_300";
-    // let tvfrr_301 = "tvfrr_301";
-    // let tvfrr_302 = "tvfrr_302";
-    // let tvfrr_303 = "tvfrr_303";
-    // let tvfrr_304 = "tvfrr_304";
-    // let tvfrr_305 = "tvfrr_305";
-    // let tvfrr_307 = "tvfrr_307";
-    // let tvfrr_308 = "tvfrr_308";
-    // let tvfrr_400 = "tvfrr_400";
-    // let tvfrr_401 = "tvfrr_401";
-    // let tvfrr_402 = "tvfrr_402";
-    // let tvfrr_403 = "tvfrr_403";
-    // let tvfrr_404 = "tvfrr_404";
-    // let tvfrr_405 = "tvfrr_405";
-    // let tvfrr_406 = "tvfrr_406";
-    // let tvfrr_407 = "tvfrr_407";
-    // let tvfrr_408 = "tvfrr_408";
-    // let tvfrr_409 = "tvfrr_409";
-    // let tvfrr_410 = "tvfrr_410";
-    // let tvfrr_411 = "tvfrr_411";
-    // let tvfrr_412 = "tvfrr_412";
-    // let tvfrr_413 = "tvfrr_413";
-    // let tvfrr_414 = "tvfrr_414";
-    // let tvfrr_415 = "tvfrr_415";
-    // let tvfrr_416 = "tvfrr_416";
-    // let tvfrr_417 = "tvfrr_417";
-    // let tvfrr_418 = "tvfrr_418";
-    // let tvfrr_421 = "tvfrr_421";
-    // let tvfrr_422 = "tvfrr_422";
-    // let tvfrr_423 = "tvfrr_423";
-    // let tvfrr_424 = "tvfrr_424";
-    // let tvfrr_426 = "tvfrr_426";
-    // let tvfrr_428 = "tvfrr_428";
-    // let tvfrr_429 = "tvfrr_429";
-    // let tvfrr_431 = "tvfrr_431";
-    // let tvfrr_451 = "tvfrr_451";
-    // let tvfrr_500 = "tvfrr_500";
-    // let tvfrr_501 = "tvfrr_501";
-    // let tvfrr_502 = "tvfrr_502";
-    // let tvfrr_503 = "tvfrr_503";
-    // let tvfrr_504 = "tvfrr_504";
-    // let tvfrr_505 = "tvfrr_505";
-    // let tvfrr_506 = "tvfrr_506";
-    // let tvfrr_507 = "tvfrr_507";
-    // let tvfrr_508 = "tvfrr_508";
-    // let tvfrr_510 = "tvfrr_510";
-    // let tvfrr_511 = "tvfrr_511";
     let parse_proc_macro2_token_stream_failed_message =
         ".parse::<proc_macro2::TokenStream>() failed";
     let ast: syn::DeriveInput = syn::parse(input).unwrap_or_else(|_| {
@@ -209,9 +149,22 @@ pub fn type_variants_from_reqwest_response(
                 acc
             },
         );
-    let status_codes_enums_with_from_impl = unique_status_codes
+    let unique_status_codes_len = unique_status_codes.len();
+    if let true = unique_status_codes.is_empty() {
+        panic!("{macro_name} {ident} true = unique_status_codes.is_empty()");
+    }
+    let unique_status_codes_len_minus_one = unique_status_codes_len - 1;
+    let mut is_last_element_found = false;
+    let (status_codes_enums_with_from_impl, status_code_enums_try_from) = unique_status_codes
         .iter()
-        .map(|status_code_attribute| {
+        .enumerate()
+        .fold(
+            (
+                Vec::with_capacity(unique_status_codes_len),
+                Vec::with_capacity(unique_status_codes_len),
+            ),
+            |mut acc, (index, status_code_attribute)| 
+        {
             let status_code_enum_name_stringified = format!("{ident}{status_code_attribute}");
             let status_code_enum_name_token_stream = status_code_enum_name_stringified
             .parse::<proc_macro2::TokenStream>()
@@ -287,74 +240,93 @@ pub fn type_variants_from_reqwest_response(
                         }
                     }
                 );
-            // (
-            let r = quote::quote! {
-                    #[derive(Debug, serde::Serialize, serde::Deserialize)]
-                    enum #status_code_enum_name_token_stream {
-                        #(#status_code_variants_vec_token_stream),*
-                    }
-                    impl std::convert::From<#status_code_enum_name_token_stream> for #ident {
-                        fn from(value: #status_code_enum_name_token_stream) -> Self {
-                            match value {
-                                #(#status_code_variants_vec_from_token_stream),*
-                            }
+            acc.0.push(quote::quote! {
+                #[derive(Debug, serde::Serialize, serde::Deserialize)]
+                enum #status_code_enum_name_token_stream {
+                    #(#status_code_variants_vec_token_stream),*
+                }
+                impl std::convert::From<#status_code_enum_name_token_stream> for #ident {
+                    fn from(value: #status_code_enum_name_token_stream) -> Self {
+                        match value {
+                            #(#status_code_variants_vec_from_token_stream),*
                         }
                     }
-                };
-                println!("{r}");
-                r
-            //     quote::quote! {},
-            // )
+                }
+            });
+            let http_status_code_token_stream = status_code_attribute.to_http_status_code_quote();
+            match index {
+                0 => {
+                    acc.1.push(quote::quote! {
+                        if status_code == #http_status_code_token_stream {
+                            match futures::executor::block_on(response.json::<#status_code_enum_name_token_stream>()) {
+                                Ok(value) => Ok(#ident::from(value)),
+                                Err(e) => Err(
+                                    crate::common::api_request_unexpected_error::ApiRequestUnexpectedError::DeserializeBody {
+                                        reqwest: e,
+                                        status_code,
+                                    },
+                                ),
+                            }
+                        }
+                    });
+                },
+                _ => match index == unique_status_codes_len_minus_one{
+                    true => {
+                        is_last_element_found = true;
+                        acc.1.push(quote::quote! {
+                            else {
+                                Err(
+                                    crate::common::api_request_unexpected_error::ApiRequestUnexpectedError::StatusCode {
+                                        status_code,
+                                    },
+                                )
+                            }
+                        });
+                    },
+                    false => {
+                        acc.1.push(quote::quote! {
+                            else if status_code == #http_status_code_token_stream {
+                                match futures::executor::block_on(
+                                    response.json::<#status_code_enum_name_token_stream>(),
+                                ) {
+                                    Ok(value) => Ok(#ident::from(value)),
+                                    Err(e) => Err(
+                                        crate::common::api_request_unexpected_error::ApiRequestUnexpectedError::DeserializeBody{
+                                            reqwest: e,
+                                            status_code,
+                                        },
+                                    ),
+                                }
+                            }
+                        });
+                    },
+                }
+            }
+            acc
         });
-    // println!("----------{status_codes_enums_with_from_impl:#?}");
+    if let false = is_last_element_found {
+        panic!("{macro_name} {ident} false = is_last_element_found");
+    }
     let gen = quote::quote! {
-    impl std::convert::From<&#ident> for http::StatusCode {
-        fn from(value: &#ident) -> Self {
-            match value {
-                #(#variants_from_status_code),*
+        impl std::convert::From<&#ident> for http::StatusCode {
+            fn from(value: &#ident) -> Self {
+                match value {
+                    #(#variants_from_status_code),*
+                }
             }
         }
-    }
-    #(#status_codes_enums_with_from_impl)*
-
-    // impl std::convert::TryFrom<reqwest::Response> for GetHttpResponseVariants {
-    //     type Error = GetHttpResponseVariantsTryFromReqwestResponseVariant;
-    //     fn try_from(response: reqwest::Response) -> Result<Self, Self::Error> {
-    //         let status_code = response.status();
-    //         if status_code == http::StatusCode::OK {
-    //             match futures::executor::block_on(response.json::<GetHttpResponseVariantsOk>()) {
-    //                 Ok(value) => Ok(GetHttpResponseVariants::from(value)),
-    //                 Err(e) => Err(
-    //                     GetHttpResponseVariantsTryFromReqwestResponseVariant::DeserializeResponse {
-    //                         reqwest: e,
-    //                         status_code,
-    //                     },
-    //                 ),
-    //             }
-    //         } else if status_code == http::StatusCode::REQUEST_TIMEOUT {
-    //             match futures::executor::block_on(
-    //                 response.json::<GetHttpResponseVariantsRequestTimeout>(),
-    //             ) {
-    //                 Ok(value) => Ok(GetHttpResponseVariants::from(value)),
-    //                 Err(e) => Err(
-    //                     GetHttpResponseVariantsTryFromReqwestResponseVariant::DeserializeResponse {
-    //                         reqwest: e,
-    //                         status_code,
-    //                     },
-    //                 ),
-    //             }
-    //         } else {
-    //             Err(
-    //                 GetHttpResponseVariantsTryFromReqwestResponseVariant::UnexpectedStatusCode {
-    //                     status_code,
-    //                 },
-    //             )
-    //         }
-    //     }
+        #(#status_codes_enums_with_from_impl)*
+        impl std::convert::TryFrom<reqwest::Response> for #ident {
+            type Error = crate::common::api_request_unexpected_error::ApiRequestUnexpectedError;
+            fn try_from(response: reqwest::Response) -> Result<Self, Self::Error> {
+                let status_code = response.status();
+                #(#status_code_enums_try_from)*
+            }
+        }
+    };
+    // if ident == "" {
+    //     println!("{gen}");
     // }
-
-        };
-    // println!("{gen}");
     gen.into()
 }
 
@@ -564,73 +536,6 @@ impl Attribute {
         }
     }
 }
-
-// impl Attribute {
-//     fn to_str_attribute<'a>(&self) -> &'a str {
-//         match self {
-//             Attribute::Tvfrr100 => "tvfrr_100",
-//             Attribute::Tvfrr101 => "tvfrr_101",
-//             Attribute::Tvfrr102 => "tvfrr_102",
-//             Attribute::Tvfrr200 => "tvfrr_200",
-//             Attribute::Tvfrr201 => "tvfrr_201",
-//             Attribute::Tvfrr202 => "tvfrr_202",
-//             Attribute::Tvfrr203 => "tvfrr_203",
-//             Attribute::Tvfrr204 => "tvfrr_204",
-//             Attribute::Tvfrr205 => "tvfrr_205",
-//             Attribute::Tvfrr206 => "tvfrr_206",
-//             Attribute::Tvfrr207 => "tvfrr_207",
-//             Attribute::Tvfrr208 => "tvfrr_208",
-//             Attribute::Tvfrr226 => "tvfrr_226",
-//             Attribute::Tvfrr300 => "tvfrr_300",
-//             Attribute::Tvfrr301 => "tvfrr_301",
-//             Attribute::Tvfrr302 => "tvfrr_302",
-//             Attribute::Tvfrr303 => "tvfrr_303",
-//             Attribute::Tvfrr304 => "tvfrr_304",
-//             Attribute::Tvfrr305 => "tvfrr_305",
-//             Attribute::Tvfrr307 => "tvfrr_307",
-//             Attribute::Tvfrr308 => "tvfrr_308",
-//             Attribute::Tvfrr400 => "tvfrr_400",
-//             Attribute::Tvfrr401 => "tvfrr_401",
-//             Attribute::Tvfrr402 => "tvfrr_402",
-//             Attribute::Tvfrr403 => "tvfrr_403",
-//             Attribute::Tvfrr404 => "tvfrr_404",
-//             Attribute::Tvfrr405 => "tvfrr_405",
-//             Attribute::Tvfrr406 => "tvfrr_406",
-//             Attribute::Tvfrr407 => "tvfrr_407",
-//             Attribute::Tvfrr408 => "tvfrr_408",
-//             Attribute::Tvfrr409 => "tvfrr_409",
-//             Attribute::Tvfrr410 => "tvfrr_410",
-//             Attribute::Tvfrr411 => "tvfrr_411",
-//             Attribute::Tvfrr412 => "tvfrr_412",
-//             Attribute::Tvfrr413 => "tvfrr_413",
-//             Attribute::Tvfrr414 => "tvfrr_414",
-//             Attribute::Tvfrr415 => "tvfrr_415",
-//             Attribute::Tvfrr416 => "tvfrr_416",
-//             Attribute::Tvfrr417 => "tvfrr_417",
-//             Attribute::Tvfrr418 => "tvfrr_418",
-//             Attribute::Tvfrr421 => "tvfrr_421",
-//             Attribute::Tvfrr422 => "tvfrr_422",
-//             Attribute::Tvfrr423 => "tvfrr_423",
-//             Attribute::Tvfrr424 => "tvfrr_424",
-//             Attribute::Tvfrr426 => "tvfrr_426",
-//             Attribute::Tvfrr428 => "tvfrr_428",
-//             Attribute::Tvfrr429 => "tvfrr_429",
-//             Attribute::Tvfrr431 => "tvfrr_431",
-//             Attribute::Tvfrr451 => "tvfrr_451",
-//             Attribute::Tvfrr500 => "tvfrr_500",
-//             Attribute::Tvfrr501 => "tvfrr_501",
-//             Attribute::Tvfrr502 => "tvfrr_502",
-//             Attribute::Tvfrr503 => "tvfrr_503",
-//             Attribute::Tvfrr504 => "tvfrr_504",
-//             Attribute::Tvfrr505 => "tvfrr_505",
-//             Attribute::Tvfrr506 => "tvfrr_506",
-//             Attribute::Tvfrr507 => "tvfrr_507",
-//             Attribute::Tvfrr508 => "tvfrr_508",
-//             Attribute::Tvfrr510 => "tvfrr_510",
-//             Attribute::Tvfrr511 => "tvfrr_511",
-//         }
-//     }
-// }
 
 impl TryFrom<&syn::Ident> for Attribute {
     type Error = ();
