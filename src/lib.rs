@@ -481,126 +481,126 @@ impl Attribute {
 impl TryFrom<&syn::Ident> for Attribute {
     type Error = ();
     fn try_from(value: &syn::Ident) -> Result<Self, Self::Error> {
-        if value == "tvfrr_100" {
-            Ok(Attribute::Tvfrr100)
-        } else if value == "tvfrr_101" {
-            Ok(Attribute::Tvfrr101)
-        } else if value == "tvfrr_102" {
-            Ok(Attribute::Tvfrr102)
-        } else if value == "tvfrr_200" {
-            Ok(Attribute::Tvfrr200)
-        } else if value == "tvfrr_201" {
-            Ok(Attribute::Tvfrr201)
-        } else if value == "tvfrr_202" {
-            Ok(Attribute::Tvfrr202)
-        } else if value == "tvfrr_203" {
-            Ok(Attribute::Tvfrr203)
-        } else if value == "tvfrr_204" {
-            Ok(Attribute::Tvfrr204)
-        } else if value == "tvfrr_205" {
-            Ok(Attribute::Tvfrr205)
-        } else if value == "tvfrr_206" {
-            Ok(Attribute::Tvfrr206)
-        } else if value == "tvfrr_207" {
-            Ok(Attribute::Tvfrr207)
-        } else if value == "tvfrr_208" {
-            Ok(Attribute::Tvfrr208)
-        } else if value == "tvfrr_226" {
-            Ok(Attribute::Tvfrr226)
-        } else if value == "tvfrr_300" {
-            Ok(Attribute::Tvfrr300)
-        } else if value == "tvfrr_301" {
-            Ok(Attribute::Tvfrr301)
-        } else if value == "tvfrr_302" {
-            Ok(Attribute::Tvfrr302)
-        } else if value == "tvfrr_303" {
-            Ok(Attribute::Tvfrr303)
-        } else if value == "tvfrr_304" {
-            Ok(Attribute::Tvfrr304)
-        } else if value == "tvfrr_305" {
-            Ok(Attribute::Tvfrr305)
-        } else if value == "tvfrr_307" {
-            Ok(Attribute::Tvfrr307)
-        } else if value == "tvfrr_308" {
-            Ok(Attribute::Tvfrr308)
-        } else if value == "tvfrr_400" {
-            Ok(Attribute::Tvfrr400)
-        } else if value == "tvfrr_401" {
-            Ok(Attribute::Tvfrr401)
-        } else if value == "tvfrr_402" {
-            Ok(Attribute::Tvfrr402)
-        } else if value == "tvfrr_403" {
-            Ok(Attribute::Tvfrr403)
-        } else if value == "tvfrr_404" {
-            Ok(Attribute::Tvfrr404)
-        } else if value == "tvfrr_405" {
-            Ok(Attribute::Tvfrr405)
-        } else if value == "tvfrr_406" {
-            Ok(Attribute::Tvfrr406)
-        } else if value == "tvfrr_407" {
-            Ok(Attribute::Tvfrr407)
-        } else if value == "tvfrr_408" {
-            Ok(Attribute::Tvfrr408)
-        } else if value == "tvfrr_409" {
-            Ok(Attribute::Tvfrr409)
-        } else if value == "tvfrr_410" {
-            Ok(Attribute::Tvfrr410)
-        } else if value == "tvfrr_411" {
-            Ok(Attribute::Tvfrr411)
-        } else if value == "tvfrr_412" {
-            Ok(Attribute::Tvfrr412)
-        } else if value == "tvfrr_413" {
-            Ok(Attribute::Tvfrr413)
-        } else if value == "tvfrr_414" {
-            Ok(Attribute::Tvfrr414)
-        } else if value == "tvfrr_415" {
-            Ok(Attribute::Tvfrr415)
-        } else if value == "tvfrr_416" {
-            Ok(Attribute::Tvfrr416)
-        } else if value == "tvfrr_417" {
-            Ok(Attribute::Tvfrr417)
-        } else if value == "tvfrr_418" {
-            Ok(Attribute::Tvfrr418)
-        } else if value == "tvfrr_421" {
-            Ok(Attribute::Tvfrr421)
-        } else if value == "tvfrr_422" {
-            Ok(Attribute::Tvfrr422)
-        } else if value == "tvfrr_423" {
-            Ok(Attribute::Tvfrr423)
-        } else if value == "tvfrr_424" {
-            Ok(Attribute::Tvfrr424)
-        } else if value == "tvfrr_426" {
-            Ok(Attribute::Tvfrr426)
-        } else if value == "tvfrr_428" {
-            Ok(Attribute::Tvfrr428)
-        } else if value == "tvfrr_429" {
-            Ok(Attribute::Tvfrr429)
-        } else if value == "tvfrr_431" {
-            Ok(Attribute::Tvfrr431)
-        } else if value == "tvfrr_451" {
-            Ok(Attribute::Tvfrr451)
-        } else if value == "tvfrr_500" {
-            Ok(Attribute::Tvfrr500)
-        } else if value == "tvfrr_501" {
-            Ok(Attribute::Tvfrr501)
-        } else if value == "tvfrr_502" {
-            Ok(Attribute::Tvfrr502)
-        } else if value == "tvfrr_503" {
-            Ok(Attribute::Tvfrr503)
-        } else if value == "tvfrr_504" {
-            Ok(Attribute::Tvfrr504)
-        } else if value == "tvfrr_505" {
-            Ok(Attribute::Tvfrr505)
-        } else if value == "tvfrr_506" {
-            Ok(Attribute::Tvfrr506)
-        } else if value == "tvfrr_507" {
-            Ok(Attribute::Tvfrr507)
-        } else if value == "tvfrr_508" {
-            Ok(Attribute::Tvfrr508)
-        } else if value == "tvfrr_510" {
-            Ok(Attribute::Tvfrr510)
-        } else if value == "tvfrr_511" {
-            Ok(Attribute::Tvfrr511)
+        if value == "tvfrr_100_continue" {
+            Ok(Attribute::Tvfrr100_continue)
+        } else if value == "tvfrr_101_switching_protocols" {
+            Ok(Attribute::Tvfrr101_switching_protocols)
+        } else if value == "tvfrr_102_processing" {
+            Ok(Attribute::Tvfrr102_processing)
+        } else if value == "tvfrr_200_ok" {
+            Ok(Attribute::Tvfrr200_ok)
+        } else if value == "tvfrr_201_created" {
+            Ok(Attribute::Tvfrr201_created)
+        } else if value == "tvfrr_202_accepted" {
+            Ok(Attribute::Tvfrr202_accepted)
+        } else if value == "tvfrr_203_non_authoritative_information" {
+            Ok(Attribute::Tvfrr203_non_authoritative_information)
+        } else if value == "tvfrr_204_no_content" {
+            Ok(Attribute::Tvfrr204_no_content)
+        } else if value == "tvfrr_205_reset_content" {
+            Ok(Attribute::Tvfrr205_reset_content)
+        } else if value == "tvfrr_206_partial_content" {
+            Ok(Attribute::Tvfrr206_partial_content)
+        } else if value == "tvfrr_207_multi_status" {
+            Ok(Attribute::Tvfrr207_multi_status)
+        } else if value == "tvfrr_208_already_reported" {
+            Ok(Attribute::Tvfrr208_already_reported)
+        } else if value == "tvfrr_226_im_used" {
+            Ok(Attribute::Tvfrr226_im_used)
+        } else if value == "tvfrr_300_multiple_choices" {
+            Ok(Attribute::Tvfrr300_multiple_choices)
+        } else if value == "tvfrr_301_moved_permanently" {
+            Ok(Attribute::Tvfrr301_moved_permanently)
+        } else if value == "tvfrr_302_found" {
+            Ok(Attribute::Tvfrr302_found)
+        } else if value == "tvfrr_303_see_other" {
+            Ok(Attribute::Tvfrr303_see_other)
+        } else if value == "tvfrr_304_not_modified" {
+            Ok(Attribute::Tvfrr304_not_modified)
+        } else if value == "tvfrr_305_use_proxy" {
+            Ok(Attribute::Tvfrr305_use_proxy)
+        } else if value == "tvfrr_307_temporary_redirect" {
+            Ok(Attribute::Tvfrr307_temporary_redirect)
+        } else if value == "tvfrr_308_permanent_redirect" {
+            Ok(Attribute::Tvfrr308_permanent_redirect)
+        } else if value == "tvfrr_400_bad_request" {
+            Ok(Attribute::Tvfrr400_bad_request)
+        } else if value == "tvfrr_401_unauthorized" {
+            Ok(Attribute::Tvfrr401_unauthorized)
+        } else if value == "tvfrr_402_payment_required" {
+            Ok(Attribute::Tvfrr402_payment_required)
+        } else if value == "tvfrr_403_forbidden" {
+            Ok(Attribute::Tvfrr403_forbidden)
+        } else if value == "tvfrr_404_not_found" {
+            Ok(Attribute::Tvfrr404_not_found)
+        } else if value == "tvfrr_405_method_not_allowed" {
+            Ok(Attribute::Tvfrr405_method_not_allowed)
+        } else if value == "tvfrr_406_not_acceptable" {
+            Ok(Attribute::Tvfrr406_not_acceptable)
+        } else if value == "tvfrr_407_proxy_authentication_required" {
+            Ok(Attribute::Tvfrr407_proxy_authentication_required)
+        } else if value == "tvfrr_408_request_timeout" {
+            Ok(Attribute::Tvfrr408_request_timeout)
+        } else if value == "tvfrr_409_conflict" {
+            Ok(Attribute::Tvfrr409_conflict)
+        } else if value == "tvfrr_410_gone" {
+            Ok(Attribute::Tvfrr410_gone)
+        } else if value == "tvfrr_411_length_required" {
+            Ok(Attribute::Tvfrr411_length_required)
+        } else if value == "tvfrr_412_precondition_failed" {
+            Ok(Attribute::Tvfrr412_precondition_failed)
+        } else if value == "tvfrr_413_payload_too_large" {
+            Ok(Attribute::Tvfrr413_payload_too_large)
+        } else if value == "tvfrr_414_uri_too_long" {
+            Ok(Attribute::Tvfrr414_uri_too_long)
+        } else if value == "tvfrr_415_unsupported_media_type" {
+            Ok(Attribute::Tvfrr415_unsupported_media_type)
+        } else if value == "tvfrr_416_range_not_satisfiable" {
+            Ok(Attribute::Tvfrr416_range_not_satisfiable)
+        } else if value == "tvfrr_417_expectation_failed" {
+            Ok(Attribute::Tvfrr417_expectation_failed)
+        } else if value == "tvfrr_418_im_a_teapot" {
+            Ok(Attribute::Tvfrr418_im_a_teapot)
+        } else if value == "tvfrr_421_misdirected_request" {
+            Ok(Attribute::Tvfrr421_misdirected_request)
+        } else if value == "tvfrr_422_unprocessable_entity" {
+            Ok(Attribute::Tvfrr422_unprocessable_entity)
+        } else if value == "tvfrr_423_locked" {
+            Ok(Attribute::Tvfrr423_locked)
+        } else if value == "tvfrr_424_failed_dependency" {
+            Ok(Attribute::Tvfrr424_failed_dependency)
+        } else if value == "tvfrr_426_upgrade_required" {
+            Ok(Attribute::Tvfrr426_upgrade_required)
+        } else if value == "tvfrr_428_precondition_required" {
+            Ok(Attribute::Tvfrr428_precondition_required)
+        } else if value == "tvfrr_429_too_many_requests" {
+            Ok(Attribute::Tvfrr429_too_many_requests)
+        } else if value == "tvfrr_431_request_header_fields_too_large" {
+            Ok(Attribute::Tvfrr431_request_header_fields_too_large)
+        } else if value == "tvfrr_451_unavailable_for_legal_reasons" {
+            Ok(Attribute::Tvfrr451_unavailable_for_legal_reasons)
+        } else if value == "tvfrr_500_internal_server_error" {
+            Ok(Attribute::Tvfrr500_internal_server_error)
+        } else if value == "tvfrr_501_not_implemented" {
+            Ok(Attribute::Tvfrr501_not_implemented)
+        } else if value == "tvfrr_502_bad_gateway" {
+            Ok(Attribute::Tvfrr502_bad_gateway)
+        } else if value == "tvfrr_503_service_unavailable" {
+            Ok(Attribute::Tvfrr503_service_unavailable)
+        } else if value == "tvfrr_504_gateway_timeout" {
+            Ok(Attribute::Tvfrr504_gateway_timeout)
+        } else if value == "tvfrr_505_http_version_not_supported" {
+            Ok(Attribute::Tvfrr505_http_version_not_supported)
+        } else if value == "tvfrr_506_variant_also_negotiates" {
+            Ok(Attribute::Tvfrr506_variant_also_negotiates)
+        } else if value == "tvfrr_507_insufficient_storage" {
+            Ok(Attribute::Tvfrr507_insufficient_storage)
+        } else if value == "tvfrr_508_loop_detected" {
+            Ok(Attribute::Tvfrr508_loop_detected)
+        } else if value == "tvfrr_510_not_extended" {
+            Ok(Attribute::Tvfrr510_not_extended)
+        } else if value == "tvfrr_511_network_authentication_required" {
+            Ok(Attribute::Tvfrr511_network_authentication_required)
         } else {
             Err(())
         }
