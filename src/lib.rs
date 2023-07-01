@@ -270,141 +270,197 @@ pub fn type_variants_from_reqwest_response(
 
 #[derive(Debug)]
 enum Attribute {
-    Tvfrr100,
-    Tvfrr101,
-    Tvfrr102,
-    Tvfrr200,
-    Tvfrr201,
-    Tvfrr202,
-    Tvfrr203,
-    Tvfrr204,
-    Tvfrr205,
-    Tvfrr206,
-    Tvfrr207,
-    Tvfrr208,
-    Tvfrr226,
-    Tvfrr300,
-    Tvfrr301,
-    Tvfrr302,
-    Tvfrr303,
-    Tvfrr304,
-    Tvfrr305,
-    Tvfrr307,
-    Tvfrr308,
-    Tvfrr400,
-    Tvfrr401,
-    Tvfrr402,
-    Tvfrr403,
-    Tvfrr404,
-    Tvfrr405,
-    Tvfrr406,
-    Tvfrr407,
-    Tvfrr408,
-    Tvfrr409,
-    Tvfrr410,
-    Tvfrr411,
-    Tvfrr412,
-    Tvfrr413,
-    Tvfrr414,
-    Tvfrr415,
-    Tvfrr416,
-    Tvfrr417,
-    Tvfrr418,
-    Tvfrr421,
-    Tvfrr422,
-    Tvfrr423,
-    Tvfrr424,
-    Tvfrr426,
-    Tvfrr428,
-    Tvfrr429,
-    Tvfrr431,
-    Tvfrr451,
-    Tvfrr500,
-    Tvfrr501,
-    Tvfrr502,
-    Tvfrr503,
-    Tvfrr504,
-    Tvfrr505,
-    Tvfrr506,
-    Tvfrr507,
-    Tvfrr508,
-    Tvfrr510,
-    Tvfrr511,
+    Tvfrr100Continue,
+    Tvfrr101SwitchingProtocols,
+    Tvfrr102Processing,
+    Tvfrr200Ok,
+    Tvfrr201Created,
+    Tvfrr202Accepted,
+    Tvfrr203NonAuthoritativeInformation,
+    Tvfrr204NoContent,
+    Tvfrr205ResetContent,
+    Tvfrr206PartialContent,
+    Tvfrr207MultiStatus,
+    Tvfrr208AlreadyReported,
+    Tvfrr226ImUsed,
+    Tvfrr300MultipleChoices,
+    Tvfrr301MovedPermanently,
+    Tvfrr302Found,
+    Tvfrr303SeeOther,
+    Tvfrr304NotModified,
+    Tvfrr305UseProxy,
+    Tvfrr307TemporaryRedirect,
+    Tvfrr308PermanentRedirect,
+    Tvfrr400BadRequest,
+    Tvfrr401Unauthorized,
+    Tvfrr402PaymentRequired,
+    Tvfrr403Forbidden,
+    Tvfrr404NotFound,
+    Tvfrr405MethodNotAllowed,
+    Tvfrr406NotAcceptable,
+    Tvfrr407ProxyAuthenticationRequired,
+    Tvfrr408RequestTimeout,
+    Tvfrr409Conflict,
+    Tvfrr410Gone,
+    Tvfrr411LengthRequired,
+    Tvfrr412PreconditionFailed,
+    Tvfrr413PayloadTooLarge,
+    Tvfrr414UriTooLong,
+    Tvfrr415UnsupportedMediaType,
+    Tvfrr416RangeNotSatisfiable,
+    Tvfrr417ExpectationFailed,
+    Tvfrr418ImATeapot,
+    Tvfrr421MisdirectedRequest,
+    Tvfrr422UnprocessableEntity,
+    Tvfrr423Locked,
+    Tvfrr424FailedDependency,
+    Tvfrr426UpgradeRequired,
+    Tvfrr428PreconditionRequired,
+    Tvfrr429TooManyRequests,
+    Tvfrr431RequestHeaderFieldsTooLarge,
+    Tvfrr451UnavailableForLegalReasons,
+    Tvfrr500InternalServerError,
+    Tvfrr501NotImplemented,
+    Tvfrr502BadGateway,
+    Tvfrr503ServiceUnavailable,
+    Tvfrr504GatewayTimeout,
+    Tvfrr505HttpVersionNotSupported,
+    Tvfrr506VariantAlsoNegotiates,
+    Tvfrr507InsufficientStorage,
+    Tvfrr508LoopDetected,
+    Tvfrr510NotExtended,
+    Tvfrr511NetworkAuthenticationRequired,
 }
 
 impl Attribute {
     fn to_http_status_code_quote<'a>(&self) -> proc_macro2::TokenStream {
         match self {
-            Attribute::Tvfrr100 => quote::quote! {http::StatusCode::CONTINUE},
-            Attribute::Tvfrr101 => quote::quote! {http::StatusCode::SWITCHING_PROTOCOLS},
-            Attribute::Tvfrr102 => quote::quote! {http::StatusCode::PROCESSING},
-            Attribute::Tvfrr200 => quote::quote! {http::StatusCode::OK},
-            Attribute::Tvfrr201 => quote::quote! {http::StatusCode::CREATED},
-            Attribute::Tvfrr202 => quote::quote! {http::StatusCode::ACCEPTED},
-            Attribute::Tvfrr203 => {
+            Attribute::Tvfrr100Continue => quote::quote! {http::StatusCode::CONTINUE},
+            Attribute::Tvfrr101SwitchingProtocols => {
+                quote::quote! {http::StatusCode::SWITCHING_PROTOCOLS}
+            }
+            Attribute::Tvfrr102Processing => quote::quote! {http::StatusCode::PROCESSING},
+            Attribute::Tvfrr200Ok => quote::quote! {http::StatusCode::OK},
+            Attribute::Tvfrr201Created => quote::quote! {http::StatusCode::CREATED},
+            Attribute::Tvfrr202Accepted => quote::quote! {http::StatusCode::ACCEPTED},
+            Attribute::Tvfrr203NonAuthoritativeInformation => {
                 quote::quote! {http::StatusCode::NON_AUTHORITATIVE_INFORMATION}
             }
-            Attribute::Tvfrr204 => quote::quote! {http::StatusCode::NO_CONTENT},
-            Attribute::Tvfrr205 => quote::quote! {http::StatusCode::RESET_CONTENT},
-            Attribute::Tvfrr206 => quote::quote! {http::StatusCode::PARTIAL_CONTENT},
-            Attribute::Tvfrr207 => quote::quote! {http::StatusCode::MULTI_STATUS},
-            Attribute::Tvfrr208 => quote::quote! {http::StatusCode::ALREADY_REPORTED},
-            Attribute::Tvfrr226 => quote::quote! {http::StatusCode::IM_USED},
-            Attribute::Tvfrr300 => quote::quote! {http::StatusCode::MULTIPLE_CHOICES},
-            Attribute::Tvfrr301 => quote::quote! {http::StatusCode::MOVED_PERMANENTLY},
-            Attribute::Tvfrr302 => quote::quote! {http::StatusCode::FOUND},
-            Attribute::Tvfrr303 => quote::quote! {http::StatusCode::SEE_OTHER},
-            Attribute::Tvfrr304 => quote::quote! {http::StatusCode::NOT_MODIFIED},
-            Attribute::Tvfrr305 => quote::quote! {http::StatusCode::USE_PROXY},
-            Attribute::Tvfrr307 => quote::quote! {http::StatusCode::TEMPORARY_REDIRECT},
-            Attribute::Tvfrr308 => quote::quote! {http::StatusCode::PERMANENT_REDIRECT},
-            Attribute::Tvfrr400 => quote::quote! {http::StatusCode::BAD_REQUEST},
-            Attribute::Tvfrr401 => quote::quote! {http::StatusCode::UNAUTHORIZED},
-            Attribute::Tvfrr402 => quote::quote! {http::StatusCode::PAYMENT_REQUIRED},
-            Attribute::Tvfrr403 => quote::quote! {http::StatusCode::FORBIDDEN},
-            Attribute::Tvfrr404 => quote::quote! {http::StatusCode::NOT_FOUND},
-            Attribute::Tvfrr405 => quote::quote! {http::StatusCode::METHOD_NOT_ALLOWED},
-            Attribute::Tvfrr406 => quote::quote! {http::StatusCode::NOT_ACCEPTABLE},
-            Attribute::Tvfrr407 => {
+            Attribute::Tvfrr204NoContent => quote::quote! {http::StatusCode::NO_CONTENT},
+            Attribute::Tvfrr205ResetContent => quote::quote! {http::StatusCode::RESET_CONTENT},
+            Attribute::Tvfrr206PartialContent => {
+                quote::quote! {http::StatusCode::PARTIAL_CONTENT}
+            }
+            Attribute::Tvfrr207MultiStatus => quote::quote! {http::StatusCode::MULTI_STATUS},
+            Attribute::Tvfrr208AlreadyReported => {
+                quote::quote! {http::StatusCode::ALREADY_REPORTED}
+            }
+            Attribute::Tvfrr226ImUsed => quote::quote! {http::StatusCode::IM_USED},
+            Attribute::Tvfrr300MultipleChoices => {
+                quote::quote! {http::StatusCode::MULTIPLE_CHOICES}
+            }
+            Attribute::Tvfrr301MovedPermanently => {
+                quote::quote! {http::StatusCode::MOVED_PERMANENTLY}
+            }
+            Attribute::Tvfrr302Found => quote::quote! {http::StatusCode::FOUND},
+            Attribute::Tvfrr303SeeOther => quote::quote! {http::StatusCode::SEE_OTHER},
+            Attribute::Tvfrr304NotModified => quote::quote! {http::StatusCode::NOT_MODIFIED},
+            Attribute::Tvfrr305UseProxy => quote::quote! {http::StatusCode::USE_PROXY},
+            Attribute::Tvfrr307TemporaryRedirect => {
+                quote::quote! {http::StatusCode::TEMPORARY_REDIRECT}
+            }
+            Attribute::Tvfrr308PermanentRedirect => {
+                quote::quote! {http::StatusCode::PERMANENT_REDIRECT}
+            }
+            Attribute::Tvfrr400BadRequest => quote::quote! {http::StatusCode::BAD_REQUEST},
+            Attribute::Tvfrr401Unauthorized => quote::quote! {http::StatusCode::UNAUTHORIZED},
+            Attribute::Tvfrr402PaymentRequired => {
+                quote::quote! {http::StatusCode::PAYMENT_REQUIRED}
+            }
+            Attribute::Tvfrr403Forbidden => quote::quote! {http::StatusCode::FORBIDDEN},
+            Attribute::Tvfrr404NotFound => quote::quote! {http::StatusCode::NOT_FOUND},
+            Attribute::Tvfrr405MethodNotAllowed => {
+                quote::quote! {http::StatusCode::METHOD_NOT_ALLOWED}
+            }
+            Attribute::Tvfrr406NotAcceptable => quote::quote! {http::StatusCode::NOT_ACCEPTABLE},
+            Attribute::Tvfrr407ProxyAuthenticationRequired => {
                 quote::quote! {http::StatusCode::PROXY_AUTHENTICATION_REQUIRED}
             }
-            Attribute::Tvfrr408 => quote::quote! {http::StatusCode::REQUEST_TIMEOUT},
-            Attribute::Tvfrr409 => quote::quote! {http::StatusCode::CONFLICT},
-            Attribute::Tvfrr410 => quote::quote! {http::StatusCode::GONE},
-            Attribute::Tvfrr411 => quote::quote! {http::StatusCode::LENGTH_REQUIRED},
-            Attribute::Tvfrr412 => quote::quote! {http::StatusCode::PRECONDITION_FAILED},
-            Attribute::Tvfrr413 => quote::quote! {http::StatusCode::PAYLOAD_TOO_LARGE},
-            Attribute::Tvfrr414 => quote::quote! {http::StatusCode::URI_TOO_LONG},
-            Attribute::Tvfrr415 => quote::quote! {http::StatusCode::UNSUPPORTED_MEDIA_TYPE},
-            Attribute::Tvfrr416 => quote::quote! {http::StatusCode::RANGE_NOT_SATISFIABLE},
-            Attribute::Tvfrr417 => quote::quote! {http::StatusCode::EXPECTATION_FAILED},
-            Attribute::Tvfrr418 => quote::quote! {http::StatusCode::IM_A_TEAPOT},
-            Attribute::Tvfrr421 => quote::quote! {http::StatusCode::MISDIRECTED_REQUEST},
-            Attribute::Tvfrr422 => quote::quote! {http::StatusCode::UNPROCESSABLE_ENTITY},
-            Attribute::Tvfrr423 => quote::quote! {http::StatusCode::LOCKED},
-            Attribute::Tvfrr424 => quote::quote! {http::StatusCode::FAILED_DEPENDENCY},
-            Attribute::Tvfrr426 => quote::quote! {http::StatusCode::UPGRADE_REQUIRED},
-            Attribute::Tvfrr428 => quote::quote! {http::StatusCode::PRECONDITION_REQUIRED},
-            Attribute::Tvfrr429 => quote::quote! {http::StatusCode::TOO_MANY_REQUESTS},
-            Attribute::Tvfrr431 => {
+            Attribute::Tvfrr408RequestTimeout => {
+                quote::quote! {http::StatusCode::REQUEST_TIMEOUT}
+            }
+            Attribute::Tvfrr409Conflict => quote::quote! {http::StatusCode::CONFLICT},
+            Attribute::Tvfrr410Gone => quote::quote! {http::StatusCode::GONE},
+            Attribute::Tvfrr411LengthRequired => {
+                quote::quote! {http::StatusCode::LENGTH_REQUIRED}
+            }
+            Attribute::Tvfrr412PreconditionFailed => {
+                quote::quote! {http::StatusCode::PRECONDITION_FAILED}
+            }
+            Attribute::Tvfrr413PayloadTooLarge => {
+                quote::quote! {http::StatusCode::PAYLOAD_TOO_LARGE}
+            }
+            Attribute::Tvfrr414UriTooLong => quote::quote! {http::StatusCode::URI_TOO_LONG},
+            Attribute::Tvfrr415UnsupportedMediaType => {
+                quote::quote! {http::StatusCode::UNSUPPORTED_MEDIA_TYPE}
+            }
+            Attribute::Tvfrr416RangeNotSatisfiable => {
+                quote::quote! {http::StatusCode::RANGE_NOT_SATISFIABLE}
+            }
+            Attribute::Tvfrr417ExpectationFailed => {
+                quote::quote! {http::StatusCode::EXPECTATION_FAILED}
+            }
+            Attribute::Tvfrr418ImATeapot => quote::quote! {http::StatusCode::IM_A_TEAPOT},
+            Attribute::Tvfrr421MisdirectedRequest => {
+                quote::quote! {http::StatusCode::MISDIRECTED_REQUEST}
+            }
+            Attribute::Tvfrr422UnprocessableEntity => {
+                quote::quote! {http::StatusCode::UNPROCESSABLE_ENTITY}
+            }
+            Attribute::Tvfrr423Locked => quote::quote! {http::StatusCode::LOCKED},
+            Attribute::Tvfrr424FailedDependency => {
+                quote::quote! {http::StatusCode::FAILED_DEPENDENCY}
+            }
+            Attribute::Tvfrr426UpgradeRequired => {
+                quote::quote! {http::StatusCode::UPGRADE_REQUIRED}
+            }
+            Attribute::Tvfrr428PreconditionRequired => {
+                quote::quote! {http::StatusCode::PRECONDITION_REQUIRED}
+            }
+            Attribute::Tvfrr429TooManyRequests => {
+                quote::quote! {http::StatusCode::TOO_MANY_REQUESTS}
+            }
+            Attribute::Tvfrr431RequestHeaderFieldsTooLarge => {
                 quote::quote! {http::StatusCode::REQUEST_HEADER_FIELDS_TOO_LARGE}
             }
-            Attribute::Tvfrr451 => {
+            Attribute::Tvfrr451UnavailableForLegalReasons => {
                 quote::quote! {http::StatusCode::UNAVAILABLE_FOR_LEGAL_REASONS}
             }
-            Attribute::Tvfrr500 => quote::quote! {http::StatusCode::INTERNAL_SERVER_ERROR},
-            Attribute::Tvfrr501 => quote::quote! {http::StatusCode::NOT_IMPLEMENTED},
-            Attribute::Tvfrr502 => quote::quote! {http::StatusCode::BAD_GATEWAY},
-            Attribute::Tvfrr503 => quote::quote! {http::StatusCode::SERVICE_UNAVAILABLE},
-            Attribute::Tvfrr504 => quote::quote! {http::StatusCode::GATEWAY_TIMEOUT},
-            Attribute::Tvfrr505 => {
+            Attribute::Tvfrr500InternalServerError => {
+                quote::quote! {http::StatusCode::INTERNAL_SERVER_ERROR}
+            }
+            Attribute::Tvfrr501NotImplemented => {
+                quote::quote! {http::StatusCode::NOT_IMPLEMENTED}
+            }
+            Attribute::Tvfrr502BadGateway => quote::quote! {http::StatusCode::BAD_GATEWAY},
+            Attribute::Tvfrr503ServiceUnavailable => {
+                quote::quote! {http::StatusCode::SERVICE_UNAVAILABLE}
+            }
+            Attribute::Tvfrr504GatewayTimeout => {
+                quote::quote! {http::StatusCode::GATEWAY_TIMEOUT}
+            }
+            Attribute::Tvfrr505HttpVersionNotSupported => {
                 quote::quote! {http::StatusCode::HTTP_VERSION_NOT_SUPPORTED}
             }
-            Attribute::Tvfrr506 => quote::quote! {http::StatusCode::VARIANT_ALSO_NEGOTIATES},
-            Attribute::Tvfrr507 => quote::quote! {http::StatusCode::INSUFFICIENT_STORAGE},
-            Attribute::Tvfrr508 => quote::quote! {http::StatusCode::LOOP_DETECTED},
-            Attribute::Tvfrr510 => quote::quote! {http::StatusCode::NOT_EXTENDED},
-            Attribute::Tvfrr511 => {
+            Attribute::Tvfrr506VariantAlsoNegotiates => {
+                quote::quote! {http::StatusCode::VARIANT_ALSO_NEGOTIATES}
+            }
+            Attribute::Tvfrr507InsufficientStorage => {
+                quote::quote! {http::StatusCode::INSUFFICIENT_STORAGE}
+            }
+            Attribute::Tvfrr508LoopDetected => quote::quote! {http::StatusCode::LOOP_DETECTED},
+            Attribute::Tvfrr510NotExtended => quote::quote! {http::StatusCode::NOT_EXTENDED},
+            Attribute::Tvfrr511NetworkAuthenticationRequired => {
                 quote::quote! {http::StatusCode::NETWORK_AUTHENTICATION_REQUIRED}
             }
         }
@@ -482,125 +538,125 @@ impl TryFrom<&syn::Ident> for Attribute {
     type Error = ();
     fn try_from(value: &syn::Ident) -> Result<Self, Self::Error> {
         if value == "tvfrr_100_continue" {
-            Ok(Attribute::Tvfrr100_continue)
+            Ok(Attribute::Tvfrr100Continue)
         } else if value == "tvfrr_101_switching_protocols" {
-            Ok(Attribute::Tvfrr101_switching_protocols)
+            Ok(Attribute::Tvfrr101SwitchingProtocols)
         } else if value == "tvfrr_102_processing" {
-            Ok(Attribute::Tvfrr102_processing)
+            Ok(Attribute::Tvfrr102Processing)
         } else if value == "tvfrr_200_ok" {
-            Ok(Attribute::Tvfrr200_ok)
+            Ok(Attribute::Tvfrr200Ok)
         } else if value == "tvfrr_201_created" {
-            Ok(Attribute::Tvfrr201_created)
+            Ok(Attribute::Tvfrr201Created)
         } else if value == "tvfrr_202_accepted" {
-            Ok(Attribute::Tvfrr202_accepted)
+            Ok(Attribute::Tvfrr202Accepted)
         } else if value == "tvfrr_203_non_authoritative_information" {
-            Ok(Attribute::Tvfrr203_non_authoritative_information)
+            Ok(Attribute::Tvfrr203NonAuthoritativeInformation)
         } else if value == "tvfrr_204_no_content" {
-            Ok(Attribute::Tvfrr204_no_content)
+            Ok(Attribute::Tvfrr204NoContent)
         } else if value == "tvfrr_205_reset_content" {
-            Ok(Attribute::Tvfrr205_reset_content)
+            Ok(Attribute::Tvfrr205ResetContent)
         } else if value == "tvfrr_206_partial_content" {
-            Ok(Attribute::Tvfrr206_partial_content)
+            Ok(Attribute::Tvfrr206PartialContent)
         } else if value == "tvfrr_207_multi_status" {
-            Ok(Attribute::Tvfrr207_multi_status)
+            Ok(Attribute::Tvfrr207MultiStatus)
         } else if value == "tvfrr_208_already_reported" {
-            Ok(Attribute::Tvfrr208_already_reported)
+            Ok(Attribute::Tvfrr208AlreadyReported)
         } else if value == "tvfrr_226_im_used" {
-            Ok(Attribute::Tvfrr226_im_used)
+            Ok(Attribute::Tvfrr226ImUsed)
         } else if value == "tvfrr_300_multiple_choices" {
-            Ok(Attribute::Tvfrr300_multiple_choices)
+            Ok(Attribute::Tvfrr300MultipleChoices)
         } else if value == "tvfrr_301_moved_permanently" {
-            Ok(Attribute::Tvfrr301_moved_permanently)
+            Ok(Attribute::Tvfrr301MovedPermanently)
         } else if value == "tvfrr_302_found" {
-            Ok(Attribute::Tvfrr302_found)
+            Ok(Attribute::Tvfrr302Found)
         } else if value == "tvfrr_303_see_other" {
-            Ok(Attribute::Tvfrr303_see_other)
+            Ok(Attribute::Tvfrr303SeeOther)
         } else if value == "tvfrr_304_not_modified" {
-            Ok(Attribute::Tvfrr304_not_modified)
+            Ok(Attribute::Tvfrr304NotModified)
         } else if value == "tvfrr_305_use_proxy" {
-            Ok(Attribute::Tvfrr305_use_proxy)
+            Ok(Attribute::Tvfrr305UseProxy)
         } else if value == "tvfrr_307_temporary_redirect" {
-            Ok(Attribute::Tvfrr307_temporary_redirect)
+            Ok(Attribute::Tvfrr307TemporaryRedirect)
         } else if value == "tvfrr_308_permanent_redirect" {
-            Ok(Attribute::Tvfrr308_permanent_redirect)
+            Ok(Attribute::Tvfrr308PermanentRedirect)
         } else if value == "tvfrr_400_bad_request" {
-            Ok(Attribute::Tvfrr400_bad_request)
+            Ok(Attribute::Tvfrr400BadRequest)
         } else if value == "tvfrr_401_unauthorized" {
-            Ok(Attribute::Tvfrr401_unauthorized)
+            Ok(Attribute::Tvfrr401Unauthorized)
         } else if value == "tvfrr_402_payment_required" {
-            Ok(Attribute::Tvfrr402_payment_required)
+            Ok(Attribute::Tvfrr402PaymentRequired)
         } else if value == "tvfrr_403_forbidden" {
-            Ok(Attribute::Tvfrr403_forbidden)
+            Ok(Attribute::Tvfrr403Forbidden)
         } else if value == "tvfrr_404_not_found" {
-            Ok(Attribute::Tvfrr404_not_found)
+            Ok(Attribute::Tvfrr404NotFound)
         } else if value == "tvfrr_405_method_not_allowed" {
-            Ok(Attribute::Tvfrr405_method_not_allowed)
+            Ok(Attribute::Tvfrr405MethodNotAllowed)
         } else if value == "tvfrr_406_not_acceptable" {
-            Ok(Attribute::Tvfrr406_not_acceptable)
+            Ok(Attribute::Tvfrr406NotAcceptable)
         } else if value == "tvfrr_407_proxy_authentication_required" {
-            Ok(Attribute::Tvfrr407_proxy_authentication_required)
+            Ok(Attribute::Tvfrr407ProxyAuthenticationRequired)
         } else if value == "tvfrr_408_request_timeout" {
-            Ok(Attribute::Tvfrr408_request_timeout)
+            Ok(Attribute::Tvfrr408RequestTimeout)
         } else if value == "tvfrr_409_conflict" {
-            Ok(Attribute::Tvfrr409_conflict)
+            Ok(Attribute::Tvfrr409Conflict)
         } else if value == "tvfrr_410_gone" {
-            Ok(Attribute::Tvfrr410_gone)
+            Ok(Attribute::Tvfrr410Gone)
         } else if value == "tvfrr_411_length_required" {
-            Ok(Attribute::Tvfrr411_length_required)
+            Ok(Attribute::Tvfrr411LengthRequired)
         } else if value == "tvfrr_412_precondition_failed" {
-            Ok(Attribute::Tvfrr412_precondition_failed)
+            Ok(Attribute::Tvfrr412PreconditionFailed)
         } else if value == "tvfrr_413_payload_too_large" {
-            Ok(Attribute::Tvfrr413_payload_too_large)
+            Ok(Attribute::Tvfrr413PayloadTooLarge)
         } else if value == "tvfrr_414_uri_too_long" {
-            Ok(Attribute::Tvfrr414_uri_too_long)
+            Ok(Attribute::Tvfrr414UriTooLong)
         } else if value == "tvfrr_415_unsupported_media_type" {
-            Ok(Attribute::Tvfrr415_unsupported_media_type)
+            Ok(Attribute::Tvfrr415UnsupportedMediaType)
         } else if value == "tvfrr_416_range_not_satisfiable" {
-            Ok(Attribute::Tvfrr416_range_not_satisfiable)
+            Ok(Attribute::Tvfrr416RangeNotSatisfiable)
         } else if value == "tvfrr_417_expectation_failed" {
-            Ok(Attribute::Tvfrr417_expectation_failed)
+            Ok(Attribute::Tvfrr417ExpectationFailed)
         } else if value == "tvfrr_418_im_a_teapot" {
-            Ok(Attribute::Tvfrr418_im_a_teapot)
+            Ok(Attribute::Tvfrr418ImATeapot)
         } else if value == "tvfrr_421_misdirected_request" {
-            Ok(Attribute::Tvfrr421_misdirected_request)
+            Ok(Attribute::Tvfrr421MisdirectedRequest)
         } else if value == "tvfrr_422_unprocessable_entity" {
-            Ok(Attribute::Tvfrr422_unprocessable_entity)
+            Ok(Attribute::Tvfrr422UnprocessableEntity)
         } else if value == "tvfrr_423_locked" {
-            Ok(Attribute::Tvfrr423_locked)
+            Ok(Attribute::Tvfrr423Locked)
         } else if value == "tvfrr_424_failed_dependency" {
-            Ok(Attribute::Tvfrr424_failed_dependency)
+            Ok(Attribute::Tvfrr424FailedDependency)
         } else if value == "tvfrr_426_upgrade_required" {
-            Ok(Attribute::Tvfrr426_upgrade_required)
+            Ok(Attribute::Tvfrr426UpgradeRequired)
         } else if value == "tvfrr_428_precondition_required" {
-            Ok(Attribute::Tvfrr428_precondition_required)
+            Ok(Attribute::Tvfrr428PreconditionRequired)
         } else if value == "tvfrr_429_too_many_requests" {
-            Ok(Attribute::Tvfrr429_too_many_requests)
+            Ok(Attribute::Tvfrr429TooManyRequests)
         } else if value == "tvfrr_431_request_header_fields_too_large" {
-            Ok(Attribute::Tvfrr431_request_header_fields_too_large)
+            Ok(Attribute::Tvfrr431RequestHeaderFieldsTooLarge)
         } else if value == "tvfrr_451_unavailable_for_legal_reasons" {
-            Ok(Attribute::Tvfrr451_unavailable_for_legal_reasons)
+            Ok(Attribute::Tvfrr451UnavailableForLegalReasons)
         } else if value == "tvfrr_500_internal_server_error" {
-            Ok(Attribute::Tvfrr500_internal_server_error)
+            Ok(Attribute::Tvfrr500InternalServerError)
         } else if value == "tvfrr_501_not_implemented" {
-            Ok(Attribute::Tvfrr501_not_implemented)
+            Ok(Attribute::Tvfrr501NotImplemented)
         } else if value == "tvfrr_502_bad_gateway" {
-            Ok(Attribute::Tvfrr502_bad_gateway)
+            Ok(Attribute::Tvfrr502BadGateway)
         } else if value == "tvfrr_503_service_unavailable" {
-            Ok(Attribute::Tvfrr503_service_unavailable)
+            Ok(Attribute::Tvfrr503ServiceUnavailable)
         } else if value == "tvfrr_504_gateway_timeout" {
-            Ok(Attribute::Tvfrr504_gateway_timeout)
+            Ok(Attribute::Tvfrr504GatewayTimeout)
         } else if value == "tvfrr_505_http_version_not_supported" {
-            Ok(Attribute::Tvfrr505_http_version_not_supported)
+            Ok(Attribute::Tvfrr505HttpVersionNotSupported)
         } else if value == "tvfrr_506_variant_also_negotiates" {
-            Ok(Attribute::Tvfrr506_variant_also_negotiates)
+            Ok(Attribute::Tvfrr506VariantAlsoNegotiates)
         } else if value == "tvfrr_507_insufficient_storage" {
-            Ok(Attribute::Tvfrr507_insufficient_storage)
+            Ok(Attribute::Tvfrr507InsufficientStorage)
         } else if value == "tvfrr_508_loop_detected" {
-            Ok(Attribute::Tvfrr508_loop_detected)
+            Ok(Attribute::Tvfrr508LoopDetected)
         } else if value == "tvfrr_510_not_extended" {
-            Ok(Attribute::Tvfrr510_not_extended)
+            Ok(Attribute::Tvfrr510NotExtended)
         } else if value == "tvfrr_511_network_authentication_required" {
-            Ok(Attribute::Tvfrr511_network_authentication_required)
+            Ok(Attribute::Tvfrr511NetworkAuthenticationRequired)
         } else {
             Err(())
         }
