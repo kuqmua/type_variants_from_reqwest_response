@@ -139,36 +139,83 @@ pub fn type_variants_from_reqwest_response(
         panic!("{macro_name} {ident} syn::Data is not a syn::Data::Enum");
     };
     let variants_len = data_enum.variants.len();
-    let (unique_status_codes, variants_with_status_code) = data_enum.variants.into_iter().fold(
-        (
-            Vec::with_capacity(variants_len),
-            Vec::with_capacity(variants_len),
-        ),
-        |mut acc, variant| {
-            let mut option_attribute = None;
-            variant.attrs.iter().for_each(|attr| {
-                if let true = attr.path.segments.len() == 1 {
-                    if let Ok(named_attribute) = Attribute::try_from(&attr.path.segments[0].ident) {
-                        if let true = option_attribute.is_some() {
-                            panic!("{macro_name} {ident} duplicated attributes are not supported");
-                        } else {
-                            option_attribute = Some(named_attribute);
+    let (unique_status_codes, variants_with_status_code, variants_from_status_code) =
+        data_enum.variants.into_iter().fold(
+            (
+                Vec::with_capacity(variants_len),
+                Vec::with_capacity(variants_len),
+                Vec::with_capacity(variants_len),
+            ),
+            |mut acc, variant| {
+                let mut option_attribute = None;
+                variant.attrs.iter().for_each(|attr| {
+                    if let true = attr.path.segments.len() == 1 {
+                        if let Ok(named_attribute) =
+                            Attribute::try_from(&attr.path.segments[0].ident)
+                        {
+                            if let true = option_attribute.is_some() {
+                                panic!(
+                                    "{macro_name} {ident} duplicated attributes are not supported"
+                                );
+                            } else {
+                                option_attribute = Some(named_attribute);
+                            }
                         }
                     }
+                });
+                let attr = if let Some(attr) = option_attribute {
+                    attr
+                } else {
+                    panic!("{macro_name} {ident} no supported attribute");
+                };
+                if !acc.0.contains(&attr) {
+                    acc.0.push(attr.clone())
                 }
-            });
-            let attr = if let Some(attr) = option_attribute {
-                attr
-            } else {
-                panic!("{macro_name} {ident} no supported attribute");
-            };
-            if !acc.0.contains(&attr) {
-                acc.0.push(attr.clone())
-            }
-            acc.1.push((attr, variant));
-            acc
-        },
-    );
+                let http_status_code_variant_match = {
+                    let variant_ident = &variant.ident;
+                    let http_status_code_token_stream = attr.to_http_status_code_quote();
+                    match &variant.fields {
+                        syn::Fields::Named(fields_named) => {
+                            let fields_token_stream = fields_named
+                                .named
+                                .iter()
+                                .map(|field| {
+                                    let field_ident = field.ident.clone().unwrap_or_else(|| {
+                                        panic!("{macro_name} {ident} named field ident is None");
+                                    });
+                                    quote::quote! { #field_ident: _ }
+                                })
+                                .collect::<Vec<proc_macro2::TokenStream>>();
+                            quote::quote! {
+                                #ident::#variant_ident {
+                                     #(#fields_token_stream),*
+                                } => #http_status_code_token_stream
+                            }
+                        }
+                        syn::Fields::Unnamed(fields_unnamed) => {
+                            let fields_token_stream = fields_unnamed
+                                .unnamed
+                                .iter()
+                                .map(|_field| {
+                                    quote::quote! { _ }
+                                })
+                                .collect::<Vec<proc_macro2::TokenStream>>();
+                            quote::quote! {
+                                #ident::#variant_ident(
+                                    #(#fields_token_stream),*
+                                ) => #http_status_code_token_stream
+                            }
+                        }
+                        syn::Fields::Unit => {
+                            panic!("{macro_name} {ident} syn::Data is not a syn::Data::Enum")
+                        }
+                    }
+                };
+                acc.2.push(http_status_code_variant_match);
+                acc.1.push((attr, variant));
+                acc
+            },
+        );
     // println!("unique_status_codes {unique_status_codes:#?}");
     unique_status_codes
         .iter()
@@ -185,6 +232,7 @@ pub fn type_variants_from_reqwest_response(
                 },
             );
             println!("{}", status_code_variants_vec.len());
+            // status_code_variants_vec.f
             // (
             //     quote::quote! {
             //         // #[derive(Debug, serde :: Serialize, serde :: Deserialize)]
@@ -216,7 +264,13 @@ pub fn type_variants_from_reqwest_response(
             // )
         });
     let gen = quote::quote! {
-
+    impl std::convert::From<&#ident> for http::StatusCode {
+        fn from(value: &#ident) -> Self {
+            match value {
+                #(#variants_from_status_code),*
+            }
+        }
+    }
 
     // impl std::convert::TryFrom<reqwest::Response> for GetHttpResponseVariants {
     //     type Error = GetHttpResponseVariantsTryFromReqwestResponseVariant;
@@ -224,39 +278,6 @@ pub fn type_variants_from_reqwest_response(
     //         let status_code = response.status();
     //         if status_code == http::StatusCode::OK {
     //             match futures::executor::block_on(response.json::<GetHttpResponseVariantsOk>()) {
-    //                 Ok(value) => Ok(GetHttpResponseVariants::from(value)),
-    //                 Err(e) => Err(
-    //                     GetHttpResponseVariantsTryFromReqwestResponseVariant::DeserializeResponse {
-    //                         reqwest: e,
-    //                         status_code,
-    //                     },
-    //                 ),
-    //             }
-    //         } else if status_code == http::StatusCode::BAD_REQUEST {
-    //             match futures::executor::block_on(response.json::<GetHttpResponseVariantsBadRequest>())
-    //             {
-    //                 Ok(value) => Ok(GetHttpResponseVariants::from(value)),
-    //                 Err(e) => Err(
-    //                     GetHttpResponseVariantsTryFromReqwestResponseVariant::DeserializeResponse {
-    //                         reqwest: e,
-    //                         status_code,
-    //                     },
-    //                 ),
-    //             }
-    //         } else if status_code == http::StatusCode::INTERNAL_SERVER_ERROR {
-    //             match futures::executor::block_on(
-    //                 response.json::<GetHttpResponseVariantsInternalServerError>(),
-    //             ) {
-    //                 Ok(value) => Ok(GetHttpResponseVariants::from(value)),
-    //                 Err(e) => Err(
-    //                     GetHttpResponseVariantsTryFromReqwestResponseVariant::DeserializeResponse {
-    //                         reqwest: e,
-    //                         status_code,
-    //                     },
-    //                 ),
-    //             }
-    //         } else if status_code == http::StatusCode::NOT_FOUND {
-    //             match futures::executor::block_on(response.json::<GetHttpResponseVariantsNotFound>()) {
     //                 Ok(value) => Ok(GetHttpResponseVariants::from(value)),
     //                 Err(e) => Err(
     //                     GetHttpResponseVariantsTryFromReqwestResponseVariant::DeserializeResponse {
@@ -365,7 +386,7 @@ enum Attribute {
 }
 
 impl Attribute {
-    fn to_http_status_code_quote<'a>(&self) -> proc_macro2::TokenStream {
+    fn to_http_status_code_quote(&self) -> proc_macro2::TokenStream {
         match self {
             Attribute::Tvfrr100Continue => quote::quote! {http::StatusCode::CONTINUE},
             Attribute::Tvfrr101SwitchingProtocols => {
