@@ -138,62 +138,65 @@ pub fn type_variants_from_reqwest_response(
     } else {
         panic!("{macro_name} {ident} syn::Data is not a syn::Data::Enum");
     };
-    data_enum.variants.into_iter().for_each(|variant| {
-        println!("-----------");
-        let mut option_attribute = None;
-        variant.attrs.iter().for_each(|attr| {
-            if let true = attr.path.segments.len() == 1 {
-                if let Ok(named_attribute) = Attribute::try_from(&attr.path.segments[0].ident) {
-                    if let true = option_attribute.is_some() {
-                        panic!("{macro_name} {ident} duplicated attributes are not supported");
-                    } else {
-                        option_attribute = Some(named_attribute);
+    let unique_status_codes = data_enum.variants.iter().fold(
+        Vec::with_capacity(data_enum.variants.len()),
+        |mut acc, variant| {
+            let mut option_attribute = None;
+            variant.attrs.iter().for_each(|attr| {
+                if let true = attr.path.segments.len() == 1 {
+                    if let Ok(named_attribute) = Attribute::try_from(&attr.path.segments[0].ident) {
+                        if let true = option_attribute.is_some() {
+                            panic!("{macro_name} {ident} duplicated attributes are not supported");
+                        } else {
+                            option_attribute = Some(named_attribute);
+                        }
                     }
                 }
+            });
+            let attr = if let Some(attr) = option_attribute {
+                attr
+            } else {
+                panic!("{macro_name} {ident} no supported attribute");
+            };
+            if !acc.contains(&attr) {
+                acc.push(attr)
             }
-        });
-        let attr = if let Some(attr) = option_attribute {
-            attr
-        } else {
-            panic!("{macro_name} {ident} no supported attribute");
-        };
-        println!("{attr:?}");
-        // match variant.fields {
-        //     syn::Fields::Named(fields_named) => {}
-        //     syn::Fields::Unnamed(fields_unnamed) => {}
-        //     syn::Fields::Unit => panic!("{macro_name} does not support syn::Fields::Unit"),
-        // };
-        // (
-        //     quote::quote! {
-        //         // #[derive(Debug, serde :: Serialize, serde :: Deserialize)]
-        //         // enum GetHttpResponseVariantsInternalServerError {
-        //         //     Configuration {
-        //         //         configuration_box_dyn_error: std::string::String,
-        //         //         code_occurence: crate::common::code_occurence::CodeOccurenceWithSerializeDeserialize,
-        //         //     },
-        //         //     Database {
-        //         //         box_dyn_database_error: std::string::String,
-        //         //         code_occurence: crate::common::code_occurence::CodeOccurenceWithSerializeDeserialize,
-        //         //     },
-        //         // }
-        //         // impl std::convert::From<GetHttpResponseVariantsInternalServerError> for GetHttpResponseVariants {
-        //         //     fn from(val: GetHttpResponseVariantsInternalServerError) -> Self {
-        //         //         match val {
-        //         //             GetHttpResponseVariantsInternalServerError::Configuration {
-        //         //                 configuration_box_dyn_error,
-        //         //                 code_occurence,
-        //         //             } => Self::Configuration {
-        //         //                 configuration_box_dyn_error,
-        //         //                 code_occurence,
-        //         //             },
-        //         //         }
-        //         //     }
-        //         // }
-        //     },
-        //     quote::quote! {},
-        // )
-    });
+            acc
+        },
+    );
+    println!("unique_status_codes {unique_status_codes:#?}");
+    // unique_status_codes.iter().for_each(||)
     let gen = quote::quote! {
+            // (
+            //     quote::quote! {
+            //         // #[derive(Debug, serde :: Serialize, serde :: Deserialize)]
+            //         // enum GetHttpResponseVariantsInternalServerError {
+            //         //     Configuration {
+            //         //         configuration_box_dyn_error: std::string::String,
+            //         //         code_occurence: crate::common::code_occurence::CodeOccurenceWithSerializeDeserialize,
+            //         //     },
+            //         //     Database {
+            //         //         box_dyn_database_error: std::string::String,
+            //         //         code_occurence: crate::common::code_occurence::CodeOccurenceWithSerializeDeserialize,
+            //         //     },
+            //         // }
+            //         // impl std::convert::From<GetHttpResponseVariantsInternalServerError> for GetHttpResponseVariants {
+            //         //     fn from(val: GetHttpResponseVariantsInternalServerError) -> Self {
+            //         //         match val {
+            //         //             GetHttpResponseVariantsInternalServerError::Configuration {
+            //         //                 configuration_box_dyn_error,
+            //         //                 code_occurence,
+            //         //             } => Self::Configuration {
+            //         //                 configuration_box_dyn_error,
+            //         //                 code_occurence,
+            //         //             },
+            //         //         }
+            //         //     }
+            //         // }
+            //     },
+            //     quote::quote! {},
+            // )
+
     // impl std::convert::TryFrom<reqwest::Response> for GetHttpResponseVariants {
     //     type Error = GetHttpResponseVariantsTryFromReqwestResponseVariant;
     //     fn try_from(response: reqwest::Response) -> Result<Self, Self::Error> {
@@ -268,7 +271,14 @@ pub fn type_variants_from_reqwest_response(
     gen.into()
 }
 
-#[derive(Debug)]
+#[derive(
+    Debug,
+    strum_macros::EnumIter,
+    strum_macros::Display,
+    enum_extension::EnumExtension,
+    PartialEq,
+    Eq,
+)]
 enum Attribute {
     Tvfrr100Continue,
     Tvfrr101SwitchingProtocols,
