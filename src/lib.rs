@@ -428,7 +428,7 @@ pub fn type_variants_from_reqwest_response(
             type Error = #try_error_ident_token_stream;
             fn try_from(
                 value: #ident,
-            ) -> Result<Self, #try_error_ident_token_stream> {
+            ) -> Result<Self, Self::Error> {
                 match value {
                     #(#desirable_type_try_from_ident),*
                 }
