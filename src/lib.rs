@@ -1,7 +1,7 @@
 #[proc_macro_derive(
     TypeVariantsFromReqwestResponse,
     attributes(
-        tvtrr_desirable_type,
+        tvfrr_desirable_type,
 
         tvfrr_100_continue,
         tvfrr_101_switching_protocols,
@@ -80,7 +80,7 @@ pub fn type_variants_from_reqwest_response(
         panic!("{macro_name} {ident} syn::Data is not a syn::Data::Enum");
     };
     let variants_len = data_enum.variants.len();
-    let tvtrr_desirable_type_stringified = "tvtrr_desirable_type";
+    let tvfrr_desirable_type_stringified = "tvfrr_desirable_type";
     let mut option_desirable_type  = None;
     let try_error_ident_stringified = format!("Try{ident}WithSerializeDeserialize");
     let try_error_ident_token_stream = try_error_ident_stringified
@@ -134,8 +134,8 @@ pub fn type_variants_from_reqwest_response(
                 match &variant.fields {
                     syn::Fields::Named(fields_named) => {
                         variant.attrs.iter().for_each(|attr| {
-                            if let true = attr.path.segments[0].ident == tvtrr_desirable_type_stringified {
-                                panic!("{macro_name} {ident} attribute {tvtrr_desirable_type_stringified} are not allowed in syn::Fields::Named variants");
+                            if let true = attr.path.segments[0].ident == tvfrr_desirable_type_stringified {
+                                panic!("{macro_name} {ident} attribute {tvfrr_desirable_type_stringified} are not allowed in syn::Fields::Named variants");
                             }
                         });
                         acc.3.push(variant.clone());
@@ -172,7 +172,7 @@ pub fn type_variants_from_reqwest_response(
                     syn::Fields::Unnamed(fields_unnamed) => {
                         let mut is_try_error_type = true;
                         variant.attrs.iter().for_each(|attr| {
-                            if let true = attr.path.segments[0].ident == tvtrr_desirable_type_stringified {
+                            if let true = attr.path.segments[0].ident == tvfrr_desirable_type_stringified {
                                 if option_desirable_type.is_none() {
                                     let unnamed = &fields_unnamed.unnamed;
                                     if let true = unnamed.len() == 1  {
@@ -184,7 +184,7 @@ pub fn type_variants_from_reqwest_response(
                                     }
                                 }
                                 else {
-                                    panic!("{macro_name} {ident} only one {tvtrr_desirable_type_stringified} attribute supported");
+                                    panic!("{macro_name} {ident} only one {tvfrr_desirable_type_stringified} attribute supported");
                                 }
                             }
                         });
@@ -436,7 +436,7 @@ pub fn type_variants_from_reqwest_response(
         }
     };
     // if ident == "" {
-    //     println!("{gen}");
+    //    println!("{gen}");
     // }
     gen.into()
 }
