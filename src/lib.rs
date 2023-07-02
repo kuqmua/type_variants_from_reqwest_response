@@ -2,7 +2,7 @@
     TypeVariantsFromReqwestResponse,
     attributes(
         tvtrr_desirable_type,
-        
+
         tvfrr_100_continue,
         tvfrr_101_switching_protocols,
         tvfrr_102_processing,
@@ -92,131 +92,132 @@ pub fn type_variants_from_reqwest_response(
         variants_from_status_code,
         try_error_variants,
         desirable_type_try_from_ident,
-    ) =
-        data_enum.variants.into_iter().fold(
-            (
-                Vec::with_capacity(variants_len),
-                Vec::with_capacity(variants_len),
-                Vec::with_capacity(variants_len),
-                Vec::with_capacity(variants_len),
-                Vec::with_capacity(variants_len),
-            ),
-            |mut acc, variant| {
-                let mut option_attribute = None;
-                variant.attrs.iter().for_each(|attr| {
-                    if let true = attr.path.segments.len() == 1 {
-                        if let Ok(named_attribute) =
-                            Attribute::try_from(&attr.path.segments[0].ident)
-                        {
-                            if let true = option_attribute.is_some() {
-                                panic!(
-                                    "{macro_name} {ident} duplicated attributes are not supported"
-                                );
-                            } else {
-                                option_attribute = Some(named_attribute);
-                            }
+    ) = data_enum.variants.into_iter().fold(
+        (
+            Vec::with_capacity(variants_len),
+            Vec::with_capacity(variants_len),
+            Vec::with_capacity(variants_len),
+            Vec::with_capacity(variants_len),
+            Vec::with_capacity(variants_len),
+        ),
+        |mut acc, variant| {
+            let mut option_attribute = None;
+            variant.attrs.iter().for_each(|attr| {
+                if let true = attr.path.segments.len() == 1 {
+                    if let Ok(named_attribute) =
+                        Attribute::try_from(&attr.path.segments[0].ident)
+                    {
+                        if let true = option_attribute.is_some() {
+                            panic!(
+                                "{macro_name} {ident} duplicated attributes are not supported"
+                            );
+                        } else {
+                            option_attribute = Some(named_attribute);
                         }
                     }
-                });
-                let attr = if let Some(attr) = option_attribute {
-                    attr
-                } else {
-                    panic!("{macro_name} {ident} no supported attribute");
-                };
-                if !acc.0.contains(&attr) {
-                    acc.0.push(attr.clone())
                 }
-                acc.2.push({
-                    let variant_ident = &variant.ident;
-                    let http_status_code_token_stream = attr.to_http_status_code_quote();
-                    match &variant.fields {
-                        syn::Fields::Named(fields_named) => {
-                            variant.attrs.iter().for_each(|attr| {
-                                if let true = attr.path.segments[0].ident == tvtrr_desirable_type_stringified {
-                                    panic!("{macro_name} {ident} attribute {tvtrr_desirable_type_stringified} are not allowed in syn::Fields::Named variants");
-                                }
-                            });
-                            acc.3.push(variant.clone());
-                            let fields_token_stream = fields_named.named.iter().map(|field| {
+            });
+            let attr = if let Some(attr) = option_attribute {
+                attr
+            } else {
+                panic!("{macro_name} {ident} no supported attribute");
+            };
+            if !acc.0.contains(&attr) {
+                acc.0.push(attr.clone())
+            }
+            let (
+                variants_from_status_code,
+                desirable_type_try_from_ident,
+            ) = {
+                let variant_ident = &variant.ident;
+                let http_status_code_token_stream = attr.to_http_status_code_quote();
+                match &variant.fields {
+                    syn::Fields::Named(fields_named) => {
+                        variant.attrs.iter().for_each(|attr| {
+                            if let true = attr.path.segments[0].ident == tvtrr_desirable_type_stringified {
+                                panic!("{macro_name} {ident} attribute {tvtrr_desirable_type_stringified} are not allowed in syn::Fields::Named variants");
+                            }
+                        });
+                        acc.3.push(variant.clone());
+                        let fields_named_named_len = fields_named.named.len();
+                        let (
+                            fields_token_stream_variants_from_status_code,
+                            fields_token_stream_desirable_type_try_from_ident,
+                        ) = fields_named.named.iter().fold(
+                            (
+                                Vec::with_capacity(fields_named_named_len),
+                                Vec::with_capacity(fields_named_named_len),
+                            ),
+                            |mut acc, field| {
                                 let field_ident = field.ident.clone().unwrap_or_else(|| {
                                     panic!("{macro_name} {ident} named field ident is None");
                                 });
-                                quote::quote! { #field_ident: _ }
-                            });
+                                acc.0.push(quote::quote! { #field_ident: _ });
+                                acc.1.push(field_ident);
+                                acc
+                        });
+                        (
                             quote::quote! {
                                 #ident::#variant_ident {
-                                     #(#fields_token_stream),*
+                                     #(#fields_token_stream_variants_from_status_code),*
                                 } => #http_status_code_token_stream
+                            },
+                            quote::quote! {
+                                #ident::#variant_ident {
+                                     #(#fields_token_stream_desirable_type_try_from_ident),*
+                                } => Err(#try_error_ident_token_stream::#variant_ident { #(#fields_token_stream_desirable_type_try_from_ident),* })
                             }
-                        }
-                        syn::Fields::Unnamed(fields_unnamed) => {
-                            let mut is_try_error_type = true;
-                            variant.attrs.iter().for_each(|attr| {
-                                if let true = attr.path.segments[0].ident == tvtrr_desirable_type_stringified {
-                                    if option_desirable_type.is_none() {
-                                        let unnamed = &fields_unnamed.unnamed;
-                                        if let true = unnamed.len() == 1  {
-                                            option_desirable_type = Some(unnamed[0].ty.clone());
-                                            is_try_error_type = false;
-                                        }
-                                        else {
-                                            panic!("{macro_name} {ident} variant fields_unnamed.len() != 1");
-                                        }
+                        )
+                    }
+                    syn::Fields::Unnamed(fields_unnamed) => {
+                        let mut is_try_error_type = true;
+                        variant.attrs.iter().for_each(|attr| {
+                            if let true = attr.path.segments[0].ident == tvtrr_desirable_type_stringified {
+                                if option_desirable_type.is_none() {
+                                    let unnamed = &fields_unnamed.unnamed;
+                                    if let true = unnamed.len() == 1  {
+                                        option_desirable_type = Some(unnamed[0].ty.clone());
+                                        is_try_error_type = false;
                                     }
                                     else {
-                                        panic!("{macro_name} {ident} only one {tvtrr_desirable_type_stringified} attribute supported");
+                                        panic!("{macro_name} {ident} variant fields_unnamed.len() != 1");
                                     }
                                 }
-                            });
-                            if is_try_error_type {
-                                acc.3.push(variant.clone());
+                                else {
+                                    panic!("{macro_name} {ident} only one {tvtrr_desirable_type_stringified} attribute supported");
+                                }
                             }
-                            let fields_token_stream = if let true = fields_unnamed.unnamed.len() == 1 {
-                                quote::quote! { _ }
-                            }
-                            else {
-                                panic!("{macro_name} {ident} fields_unnamed.unnamed.len() != 1");                                
-                            };
+                        });
+                        if is_try_error_type {
+                            acc.3.push(variant.clone());
+                        }
+                        let fields_token_stream = if let true = fields_unnamed.unnamed.len() == 1 {
+                            quote::quote! { _ }
+                        }
+                        else {
+                            panic!("{macro_name} {ident} fields_unnamed.unnamed.len() != 1");                           
+                        };
+                        (
                             quote::quote! {
                                 #ident::#variant_ident(#fields_token_stream) => #http_status_code_token_stream
-                            }
-                        }
-                        syn::Fields::Unit => {
-                            panic!("{macro_name} {ident} syn::Data is not a syn::Data::Enum")
-                        }
-                    }
-                });
-                acc.4.push({
-                    let variant_ident = &variant.ident;
-                    match &variant.fields {
-                        syn::Fields::Named(fields_named) => {
-                            let fields_token_stream = fields_named.named.iter().map(|field| {
-                                field.ident.clone().unwrap_or_else(|| {
-                                    panic!("{macro_name} {ident} named field ident is None");
-                                })
-                            });
-                            let fields_token_stream_cloned = fields_token_stream.clone();
-                            quote::quote! {
-                                #ident::#variant_ident {
-                                     #(#fields_token_stream),*
-                                } => Err(#try_error_ident_token_stream::#variant_ident { #(#fields_token_stream_cloned),* })
-                            }
-                        },
-                        syn::Fields::Unnamed(fields_unnamed) => {
-                            if let false = fields_unnamed.unnamed.len() == 1 {
-                                panic!("{macro_name} {ident} fields_unnamed.unnamed.len() != 1");     
-                            };
+                            },
                             quote::quote! {
                                 #ident::#variant_ident(i) => Ok(i)
                             }
-                        },
-                        syn::Fields::Unit => panic!("{macro_name} {ident} syn::Data is not a syn::Data::Enum"),
+                        )
+
                     }
-                });
-                acc.1.push((attr, variant));
-                acc
-            },
-        );
+                    syn::Fields::Unit => {
+                        panic!("{macro_name} {ident} syn::Data is not a syn::Data::Enum")
+                    }
+                }
+            };
+            acc.2.push(variants_from_status_code);
+            acc.4.push(desirable_type_try_from_ident);
+            acc.1.push((attr, variant));
+            acc
+        },
+    );
     let desirable_type = if let Some(desirable_type) = option_desirable_type {
         desirable_type
     }
