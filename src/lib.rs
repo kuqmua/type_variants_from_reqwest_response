@@ -2,6 +2,7 @@
     TypeVariantsFromReqwestResponse,
     attributes(
         tvtrr_desirable_type,
+        
         tvfrr_100_continue,
         tvfrr_101_switching_protocols,
         tvfrr_102_processing,
@@ -81,45 +82,21 @@ pub fn type_variants_from_reqwest_response(
     let variants_len = data_enum.variants.len();
     let tvtrr_desirable_type_stringified = "tvtrr_desirable_type";
     let mut option_desirable_type  = None;
-    data_enum.variants.iter().for_each(|variant|{
-        match &variant.fields {
-            syn::Fields::Named(_) => {
-                variant.attrs.iter().for_each(|attr| {
-                    if let true = attr.path.segments[0].ident == tvtrr_desirable_type_stringified {
-                        panic!("{macro_name} {ident} attribute {tvtrr_desirable_type_stringified} are not allowed in syn::Fields::Named variants");
-                    }
-                });
-            },
-            syn::Fields::Unnamed(fields_unnamed) => {
-                variant.attrs.iter().for_each(|attr| {
-                    if let true = attr.path.segments[0].ident == tvtrr_desirable_type_stringified {
-                        match option_desirable_type {
-                            Some(_) => panic!("{macro_name} {ident} only one {tvtrr_desirable_type_stringified} attribute supported"),
-                            None => {
-                                let unnamed = &fields_unnamed.unnamed;
-                                if let true = unnamed.len() == 1  {
-                                    option_desirable_type = Some(unnamed[0].ty.clone());
-                                }
-                                else {
-                                    panic!("{macro_name} {ident} variant fields_unnamed.len() != 1");
-                                }
-                            },
-                        }
-                    }
-                });
-            },
-            syn::Fields::Unit => panic!("{macro_name} {ident} syn::Data is not a syn::Data::Enum"),
-        }
-    });
-    let desirable_type = if let Some(desirable_type) = option_desirable_type {
-        desirable_type
-    }
-    else {
-        panic!("{macro_name} {ident} option_desirable_type is None");
-    };
-    let (unique_status_codes, variants_with_status_code, variants_from_status_code) =
+    let try_error_ident_stringified = format!("Try{ident}WithSerializeDeserialize");
+    let try_error_ident_token_stream = try_error_ident_stringified
+    .parse::<proc_macro2::TokenStream>()
+    .unwrap_or_else(|_| panic!("{macro_name} {ident} {try_error_ident_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
+    let (
+        unique_status_codes, 
+        variants_with_status_code, 
+        variants_from_status_code,
+        try_error_variants,
+        desirable_type_try_from_ident,
+    ) =
         data_enum.variants.into_iter().fold(
             (
+                Vec::with_capacity(variants_len),
+                Vec::with_capacity(variants_len),
                 Vec::with_capacity(variants_len),
                 Vec::with_capacity(variants_len),
                 Vec::with_capacity(variants_len),
@@ -154,6 +131,12 @@ pub fn type_variants_from_reqwest_response(
                     let http_status_code_token_stream = attr.to_http_status_code_quote();
                     match &variant.fields {
                         syn::Fields::Named(fields_named) => {
+                            variant.attrs.iter().for_each(|attr| {
+                                if let true = attr.path.segments[0].ident == tvtrr_desirable_type_stringified {
+                                    panic!("{macro_name} {ident} attribute {tvtrr_desirable_type_stringified} are not allowed in syn::Fields::Named variants");
+                                }
+                            });
+                            acc.3.push(variant.clone());
                             let fields_token_stream = fields_named.named.iter().map(|field| {
                                 let field_ident = field.ident.clone().unwrap_or_else(|| {
                                     panic!("{macro_name} {ident} named field ident is None");
@@ -167,6 +150,27 @@ pub fn type_variants_from_reqwest_response(
                             }
                         }
                         syn::Fields::Unnamed(fields_unnamed) => {
+                            let mut is_try_error_type = true;
+                            variant.attrs.iter().for_each(|attr| {
+                                if let true = attr.path.segments[0].ident == tvtrr_desirable_type_stringified {
+                                    if option_desirable_type.is_none() {
+                                        let unnamed = &fields_unnamed.unnamed;
+                                        if let true = unnamed.len() == 1  {
+                                            option_desirable_type = Some(unnamed[0].ty.clone());
+                                            is_try_error_type = false;
+                                        }
+                                        else {
+                                            panic!("{macro_name} {ident} variant fields_unnamed.len() != 1");
+                                        }
+                                    }
+                                    else {
+                                        panic!("{macro_name} {ident} only one {tvtrr_desirable_type_stringified} attribute supported");
+                                    }
+                                }
+                            });
+                            if is_try_error_type {
+                                acc.3.push(variant.clone());
+                            }
                             let fields_token_stream = if let true = fields_unnamed.unnamed.len() == 1 {
                                 quote::quote! { _ }
                             }
@@ -182,10 +186,63 @@ pub fn type_variants_from_reqwest_response(
                         }
                     }
                 });
+                acc.4.push({
+                    let variant_ident = &variant.ident;
+                    match &variant.fields {
+                        syn::Fields::Named(fields_named) => {
+                            let fields_token_stream = fields_named.named.iter().map(|field| {
+                                field.ident.clone().unwrap_or_else(|| {
+                                    panic!("{macro_name} {ident} named field ident is None");
+                                })
+                            });
+                            let fields_token_stream_cloned = fields_token_stream.clone();
+                            quote::quote! {
+                                #ident::#variant_ident {
+                                     #(#fields_token_stream),*
+                                } => Err(#try_error_ident_token_stream::#variant_ident { #(#fields_token_stream_cloned),* })
+                            }
+                        },
+                        syn::Fields::Unnamed(fields_unnamed) => {
+                            if let false = fields_unnamed.unnamed.len() == 1 {
+                                panic!("{macro_name} {ident} fields_unnamed.unnamed.len() != 1");     
+                            };
+                            quote::quote! {
+                                #ident::#variant_ident(i) => Ok(i)
+                            }
+                        },
+                        syn::Fields::Unit => panic!("{macro_name} {ident} syn::Data is not a syn::Data::Enum"),
+                    }
+                });
                 acc.1.push((attr, variant));
                 acc
             },
         );
+    let desirable_type = if let Some(desirable_type) = option_desirable_type {
+        desirable_type
+    }
+    else {
+        panic!("{macro_name} {ident} option_desirable_type is None");
+    };
+
+    // let try_error_variants = try_error_variants.iter().map(|variant|{
+    //     if let syn::Fields::Named(fields_named) = &variant.fields {
+    //         let fields_token_stream = fields_named.named.iter().map(|field| {
+    //             let field_ident = field.ident.clone().unwrap_or_else(|| {
+    //                 panic!("{macro_name} {ident} named field ident is None");
+    //             });
+    //             quote::quote! { #field_ident: _ }
+    //         });
+    //         quote::quote! {
+    //             #ident::#variant_ident {
+    //                  #(#fields_token_stream),*
+    //             } => #http_status_code_token_stream
+    //         }
+    //     }
+    //     else {
+    //         panic!("{macro_name} {ident} try_error_variant is not a syn::Fields::Named");
+    //     }
+    // });
+
     let unique_status_codes_len = unique_status_codes.len();
     if let true = unique_status_codes.is_empty() {
         panic!("{macro_name} {ident} true = unique_status_codes.is_empty()");
@@ -344,10 +401,6 @@ pub fn type_variants_from_reqwest_response(
     if let false = is_last_element_found {
         panic!("{macro_name} {ident} false = is_last_element_found");
     }
-    let try_error_ident_stringified = format!("Try{ident}WithSerializeDeserialize");
-    let try_error_ident_token_stream = try_error_ident_stringified
-    .parse::<proc_macro2::TokenStream>()
-    .unwrap_or_else(|_| panic!("{macro_name} {ident} {try_error_ident_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
     let gen = quote::quote! {
         impl std::convert::From<&#ident> for http::StatusCode {
             fn from(value: &#ident) -> Self {
@@ -364,24 +417,17 @@ pub fn type_variants_from_reqwest_response(
                 #(#status_code_enums_try_from)*
             }
         }
-        //
-        // impl TryFrom<#ident> for #desirable_type 
-        // {
-        //     type Error = #try_error_ident_token_stream;
-        //     fn try_from(
-        //         value: #ident,
-        //     ) -> Result<Self, #try_error_ident_token_stream> {
-        //         match value {
-        //             GetHttpResponseVariants::Cats(cats) => Ok(cats),
-        //             //
-        //             GetHttpResponseVariants::ProjectCommitExtractorNotEqual {
-        //                 project_commit_not_equal,
-        //                 project_commit_to_use,
-        //                 code_occurence,
-        //             } => Err(#try_error_ident_token_stream::ProjectCommitExtractorNotEqual { project_commit_not_equal, project_commit_to_use, code_occurence }),
-        //         }
-        //     }
-        // }
+        impl TryFrom<#ident> for #desirable_type 
+        {
+            type Error = #try_error_ident_token_stream;
+            fn try_from(
+                value: #ident,
+            ) -> Result<Self, #try_error_ident_token_stream> {
+                match value {
+                    #(#desirable_type_try_from_ident),*
+                }
+            }
+        }
     };
     // if ident == "" {
     //     println!("{gen}");
