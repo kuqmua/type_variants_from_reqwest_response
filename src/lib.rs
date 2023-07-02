@@ -70,7 +70,7 @@ pub fn type_variants_from_reqwest_response(
     proc_macro_helpers::panic_location::panic_location(); //panic_location function from https://github.com/kuqmua/proc_macro_helpers
     let macro_name = "TypeVariantsFromReqwestResponse";
     let ast: syn::DeriveInput = syn::parse(input).unwrap_or_else(|_| {
-        panic!("{macro_name} let ast: syn::DeriveInput = syn::parse(input) failed")
+        panic!("{macro_name} {}", proc_macro_helpers::global_variables::hardcode::AST_PARSE_FAILED)
     });
     let ident = &ast.ident;
     let data_enum = if let syn::Data::Enum(data_enum) = ast.data {
