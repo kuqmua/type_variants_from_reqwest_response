@@ -1,6 +1,7 @@
 #[proc_macro_derive(
     TypeVariantsFromReqwestResponse,
     attributes(
+        tvtrr_desirable_type,
         tvfrr_100_continue,
         tvfrr_101_switching_protocols,
         tvfrr_102_processing,
@@ -68,8 +69,6 @@ pub fn type_variants_from_reqwest_response(
 ) -> proc_macro::TokenStream {
     proc_macro_helpers::panic_location::panic_location(); //panic_location function from https://github.com/kuqmua/proc_macro_helpers
     let macro_name = "TypeVariantsFromReqwestResponse";
-    let parse_proc_macro2_token_stream_failed_message =
-        ".parse::<proc_macro2::TokenStream>() failed";
     let ast: syn::DeriveInput = syn::parse(input).unwrap_or_else(|_| {
         panic!("{macro_name} let ast: syn::DeriveInput = syn::parse(input) failed")
     });
@@ -80,6 +79,42 @@ pub fn type_variants_from_reqwest_response(
         panic!("{macro_name} {ident} syn::Data is not a syn::Data::Enum");
     };
     let variants_len = data_enum.variants.len();
+    let tvtrr_desirable_type_stringified = "tvtrr_desirable_type";
+    let mut option_desirable_type  = None;
+    data_enum.variants.iter().for_each(|variant|{
+        match &variant.fields {
+            syn::Fields::Named(_) => {
+                variant.attrs.iter().for_each(|attr| {
+                    if let true = attr.path.segments[0].ident == tvtrr_desirable_type_stringified {
+                        panic!("{macro_name} {ident} attribute {tvtrr_desirable_type_stringified} are not allowed in syn::Fields::Named variants");
+                    }
+                });
+            },
+            syn::Fields::Unnamed(fields_unnamed) => {
+                variant.attrs.iter().for_each(|attr| {
+                    if let true = attr.path.segments[0].ident == tvtrr_desirable_type_stringified {
+                        match option_desirable_type {
+                            Some(_) => panic!("{macro_name} {ident} only one {tvtrr_desirable_type_stringified} attribute supported"),
+                            None => {
+                                let unnamed = &fields_unnamed.unnamed;
+                                if let true = unnamed.len() == 1  {
+                                    option_desirable_type = Some(unnamed[0].ty.clone());
+                                }
+                                else {
+                                    panic!("{macro_name} {ident} variant fields_unnamed.len() != 1");
+                                }
+                            },
+                        }
+                    }
+                });
+            },
+            syn::Fields::Unit => panic!("{macro_name} {ident} syn::Data is not a syn::Data::Enum"),
+        }
+    });
+    // println!("{option_desirable_type}");
+
+    
+    //
     let (unique_status_codes, variants_with_status_code, variants_from_status_code) =
         data_enum.variants.into_iter().fold(
             (
@@ -168,7 +203,7 @@ pub fn type_variants_from_reqwest_response(
             let status_code_enum_name_stringified = format!("{ident}{status_code_attribute}");
             let status_code_enum_name_token_stream = status_code_enum_name_stringified
             .parse::<proc_macro2::TokenStream>()
-            .unwrap_or_else(|_| panic!("{macro_name} {ident} {status_code_enum_name_stringified} {parse_proc_macro2_token_stream_failed_message}"));
+            .unwrap_or_else(|_| panic!("{macro_name} {ident} {status_code_enum_name_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
             let status_code_variants_vec = variants_with_status_code.iter().fold(
                 Vec::with_capacity(variants_len),
                 |mut acc, (attribute, variant)| {
