@@ -244,14 +244,22 @@ pub fn type_variants_from_reqwest_response(
     //     }
     // });
 
-    let unique_status_codes_len = unique_status_codes.len();
-    if let true = unique_status_codes.is_empty() {
-        panic!("{macro_name} {ident} true = unique_status_codes.is_empty()");
-    }
-    let unique_status_codes_len_minus_one = unique_status_codes_len - 1;
+    let (
+        unique_status_codes_len,
+        unique_status_codes_len_minus_one
+     ) = {
+        let unique_status_codes_len = unique_status_codes.len();
+        if let true = unique_status_codes.is_empty() {
+            panic!("{macro_name} {ident} true = unique_status_codes.is_empty()");
+        }
+        (
+            unique_status_codes_len,
+            unique_status_codes_len - 1
+        )
+    };
     let mut is_last_element_found = false;
     let (status_codes_enums_with_from_impl, status_code_enums_try_from) = unique_status_codes
-        .iter()
+        .into_iter()
         .enumerate()
         .fold(
             (
@@ -264,18 +272,15 @@ pub fn type_variants_from_reqwest_response(
             let status_code_enum_name_token_stream = status_code_enum_name_stringified
             .parse::<proc_macro2::TokenStream>()
             .unwrap_or_else(|_| panic!("{macro_name} {ident} {status_code_enum_name_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
-            let status_code_variants_vec = variants_with_status_code.iter().fold(
-                Vec::with_capacity(variants_len),
-                |mut acc, (attribute, variant)| {
-                    if let true = status_code_attribute == attribute {
-                        acc.push(variant);
-                    }
-                    acc
+            let status_code_variants_vec = variants_with_status_code.iter().filter_map(
+                |(attribute, variant)| match status_code_attribute == *attribute {
+                    true => Some(variant),
+                    false => None,
                 },
-            );
+            ).collect::<Vec<&syn::Variant>>();
             let status_code_variants_vec_len = status_code_variants_vec.len();
             let (status_code_variants_vec_token_stream, status_code_variants_vec_from_token_stream)  = status_code_variants_vec
-                .iter()
+                .into_iter()
                 .fold(
                     (
                         Vec::with_capacity(status_code_variants_vec_len),
