@@ -111,10 +111,12 @@ pub fn type_variants_from_reqwest_response(
             syn::Fields::Unit => panic!("{macro_name} {ident} syn::Data is not a syn::Data::Enum"),
         }
     });
-    // println!("{option_desirable_type}");
-
-    
-    //
+    let desirable_type = if let Some(desirable_type) = option_desirable_type {
+        desirable_type
+    }
+    else {
+        panic!("{macro_name} {ident} option_desirable_type is None");
+    };
     let (unique_status_codes, variants_with_status_code, variants_from_status_code) =
         data_enum.variants.into_iter().fold(
             (
@@ -342,6 +344,10 @@ pub fn type_variants_from_reqwest_response(
     if let false = is_last_element_found {
         panic!("{macro_name} {ident} false = is_last_element_found");
     }
+    let try_error_ident_stringified = format!("Try{ident}WithSerializeDeserialize");
+    let try_error_ident_token_stream = try_error_ident_stringified
+    .parse::<proc_macro2::TokenStream>()
+    .unwrap_or_else(|_| panic!("{macro_name} {ident} {try_error_ident_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
     let gen = quote::quote! {
         impl std::convert::From<&#ident> for http::StatusCode {
             fn from(value: &#ident) -> Self {
@@ -358,6 +364,24 @@ pub fn type_variants_from_reqwest_response(
                 #(#status_code_enums_try_from)*
             }
         }
+        //
+        // impl TryFrom<#ident> for #desirable_type 
+        // {
+        //     type Error = #try_error_ident_token_stream;
+        //     fn try_from(
+        //         value: #ident,
+        //     ) -> Result<Self, #try_error_ident_token_stream> {
+        //         match value {
+        //             GetHttpResponseVariants::Cats(cats) => Ok(cats),
+        //             //
+        //             GetHttpResponseVariants::ProjectCommitExtractorNotEqual {
+        //                 project_commit_not_equal,
+        //                 project_commit_to_use,
+        //                 code_occurence,
+        //             } => Err(#try_error_ident_token_stream::ProjectCommitExtractorNotEqual { project_commit_not_equal, project_commit_to_use, code_occurence }),
+        //         }
+        //     }
+        // }
     };
     // if ident == "" {
     //     println!("{gen}");
