@@ -778,6 +778,13 @@ impl TryFrom<&syn::Ident> for Attribute {
 }
 
 ////////////////////////////////////////////////////
+#[proc_macro_attribute]
+pub fn type_variants_from_reqwest_response_handle_attribute(
+    _attr: proc_macro::TokenStream,
+    item: proc_macro::TokenStream,
+) -> proc_macro::TokenStream {
+    item
+}
 #[proc_macro_derive(
     TypeVariantsFromReqwestResponseHandle,
     attributes(
@@ -852,17 +859,115 @@ pub fn type_variants_from_reqwest_response_handle(
         panic!("{macro_name} {}", proc_macro_helpers::global_variables::hardcode::AST_PARSE_FAILED)
     });
     let ident = &ast.ident;
+    //TODO WITH SERIALIZE DESERIALIZE STRUCT GEN AS FUNCTION IN PROC_MACRO_HELPERS
+    let ident_response_variants_stringified = format!("{ident}ResponseVariants");
+    let ident_response_variants_token_stream = ident_response_variants_stringified
+    .parse::<proc_macro2::TokenStream>()
+    .unwrap_or_else(|_| panic!("{macro_name} {ident} {ident_response_variants_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
+
+    //
+    let attribute_path = "type_variants_from_reqwest_response::type_variants_from_reqwest_response_handle_attribute";
+    let option_attribute = ast.attrs.into_iter().find(|attr| {
+        let possible_path = {
+            let mut stringified_path = quote::ToTokens::to_token_stream(&attr.path).to_string();
+            stringified_path.retain(|c| !c.is_whitespace());
+            stringified_path
+        };
+        attribute_path == possible_path
+    });
+    let (
+        desirable_type_token_stream,
+        desirable_type_status_code_token_stream
+    ) = if let Some(attribute) = option_attribute {
+        let mut stringified_tokens =
+            quote::ToTokens::to_token_stream(&attribute.tokens).to_string();
+        stringified_tokens.retain(|c| !c.is_whitespace());
+        match stringified_tokens.len() > 3 {
+            true => {
+                let mut chars = stringified_tokens.chars();
+                match (chars.next(), chars.last()) {
+                        (None, None) => panic!("FromEnum {ident} no first and last token attribute"),
+                        (None, Some(_)) => panic!("FromEnum {ident} no first token attribute"),
+                        (Some(_), None) => panic!("FromEnum {ident} no last token attribute"),
+                        (Some(first), Some(last)) => match (first == '(', last == ')') {
+                            (true, true) => {
+                                match stringified_tokens.get(1..(stringified_tokens.len()-1)) {
+                                    Some(inner_tokens_str) => {
+                                        let vec_attr_params = inner_tokens_str.split(',').map(|str|{str.to_string()}).collect::<Vec<std::string::String>>();
+                                        if let false = vec_attr_params.len() == 2 {
+                                            panic!("{macro_name} {ident} vec_attr_params.len() != 2");
+                                        }
+                                        match (
+                                            vec_attr_params.get(0),
+                                            vec_attr_params.get(1)
+                                        ) {
+                                            (None, None) => panic!("{macro_name} {ident} failed to get vec_attr_params.get(0) or vec_attr_params.get(1)"),
+                                            (None, Some(_)) => panic!("{macro_name} {ident} failed to get vec_attr_params.get(0)"),
+                                            (Some(_), None) => panic!("{macro_name} {ident} failed to get vec_attr_params.get(1)"),
+                                            (Some(first_param), Some(second_param)) => (
+                                                first_param
+                                                .parse::<proc_macro2::TokenStream>()
+                                                .unwrap_or_else(|_| panic!("{macro_name} {ident} {first_param} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE)),
+                                                second_param
+                                                .parse::<proc_macro2::TokenStream>()
+                                                .unwrap_or_else(|_| panic!("{macro_name} {ident} {second_param} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE))
+                                            ),
+                                        }
+                                    },
+                                    None => panic!("FromEnum {ident} cannot get inner_token"),
+                                }
+                            },
+                            (true, false) => panic!("FromEnum {ident} last token attribute is not )"),
+                            (false, true) => panic!("FromEnum {ident} first token attribute is not ("),
+                            (false, false) => panic!("FromEnum {ident} first token attribute is not ( and last token attribute is not )"),
+                        },
+                    }
+            }
+            false => panic!("FromEnum {ident} stringified_tokens.len() > 3 == false"),
+        }
+    } else {
+        panic!("{ident} FromEnum has no {attribute_path}");
+    };
+    println!("{desirable_type_token_stream}");
+    println!("{desirable_type_status_code_token_stream}");
     let data_enum = if let syn::Data::Enum(data_enum) = ast.data {
         data_enum
     } else {
         panic!("{macro_name} {ident} syn::Data is not a syn::Data::Enum");
     };
     let variants_len = data_enum.variants.len();
-    // let mut option_desirable_type  = None;
     let try_error_ident_stringified = format!("Try{ident}WithSerializeDeserialize");
     let try_error_ident_token_stream = try_error_ident_stringified
     .parse::<proc_macro2::TokenStream>()
     .unwrap_or_else(|_| panic!("{macro_name} {ident} {try_error_ident_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
+    let response_variants_token_stream_vec = {
+        let mut response_variants_token_stream_vec = vec![
+            quote::quote!{
+                DesirableType(#desirable_type_token_stream),
+            }
+        ];
+        data_enum.variants.iter().for_each(|variant| {
+            if let syn::Fields::Named(fields_named) = &variant.fields {
+                let fields_token_stream = fields_named.named.iter().map(|field| {
+                    let field_ident = field.ident.clone().unwrap_or_else(|| {
+                        panic!("{macro_name} {ident} named field ident is None");
+                    });
+                    let field_ty = &field.ty;
+                    quote::quote! { #field_ident: #field_ty }
+                });
+                let variant_ident = &variant.ident;
+                response_variants_token_stream_vec.push(quote::quote! {
+                    #variant_ident {
+                        #(#fields_token_stream),*
+                    }
+                });
+            }
+            else {
+                panic!("{macro_name} {ident} variant.fields is not syn::Fields::Named");
+            }
+        });
+        response_variants_token_stream_vec
+    };
     let (
         unique_status_codes, 
         variants_with_status_code, 
@@ -1148,6 +1253,20 @@ pub fn type_variants_from_reqwest_response_handle(
         panic!("{macro_name} {ident} false = is_last_element_found");
     }
     let gen = quote::quote! {
+        #[derive(Debug, serde::Deserialize)]//serde::Serialize, 
+        pub enum 
+            #ident_response_variants_token_stream 
+        {
+            #(#response_variants_token_stream_vec),*
+
+
+            // Cats(Vec<crate::repositories_types::tufa_server::routes::api::cats::Cat>),
+            // ProjectCommitExtractorNotEqual {
+            //     project_commit_not_equal: std::string::String,
+            //     project_commit_to_use: std::string::String,
+            //     code_occurence: crate::common::code_occurence::CodeOccurenceWithSerializeDeserialize,
+            // },
+        }
         // impl std::convert::From<&#ident> for http::StatusCode {
         //     fn from(value: &#ident) -> Self {
         //         match value {
@@ -1176,7 +1295,7 @@ pub fn type_variants_from_reqwest_response_handle(
         // }
     };
     // if ident == "" {
-    //    println!("{gen}");
+       println!("{gen}");
     // }
     gen.into()
 }
