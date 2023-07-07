@@ -943,38 +943,71 @@ pub fn type_variants_from_reqwest_response_handle(
         proc_macro_name_ident_stringified.clone(),
         unnamed_camel_case.clone(),
     );
-    // let enum_with_serialize_deserialize_logic = proc_macro_helpers::error_occurence::generate_with_serialize_deserialize_version::generate_with_serialize_deserialize_version(
-    //     supported_enum_variant.clone(),
-    //     &data_enum,
-    //     occurence_camel_case,
-    //     with_serialize_deserialize_lower_case.clone(),
-    //     error_occurence_lower_case.clone(),
-    //     vec_lower_case.clone(),
-    //     hashmap_lower_case.clone(),
-    //     key_lower_case.clone(),
-    //     value_lower_case.clone(),
-    //     proc_macro_name_ident_stringified.clone(),
-    //     is_none_stringified,
-    //     proc_macro_helpers::error_occurence::hardcode::SUPPORTS_ONLY_STRINGIFIED,
-    //     syn_generic_argument_type_stringified,
-    //     syn_type_path_stringified.clone(),
-    //     reference_camel_case,
-    //     vec_camel_case,
-    //     hashmap_camel_case,
-    //     generics_len,
-    //     string_camel_case,
-    //     path_camel_case,
-    //     key_camel_case,
-    //     value_camel_case,
-    //     supported_container_double_dot_double_dot,
-    //     supports_only_supported_container_stringified.clone(),
-    //     with_serialize_deserialize_camel_case.clone(),
-    //     suported_enum_variant_stringified,
-    //     unnamed_camel_case.clone(),
-    //     syn_fields,
-    //     ident_with_serialize_deserialize_token_stream.clone(),
-    //     None
-    // );
+    let serialize_deserialize_camel_case = "SerializeDeserialize";
+    let with_camel_case = "With";
+    let with_serialize_deserialize_camel_case = format!("{with_camel_case}{serialize_deserialize_camel_case}");
+    let with_serialize_deserialize_lower_case = with_serialize_deserialize_camel_case.to_case(convert_case::Case::Snake).to_lowercase();
+    let error_occurence_camel_case = format!("{}{}", proc_macro_helpers::error_occurence::hardcode::ERROR_OCCURENCE_CASE, proc_macro_helpers::error_occurence::hardcode::OCCURENCE_CAMEL_CASE);
+    let error_occurence_lower_case = error_occurence_camel_case.to_case(convert_case::Case::Snake).to_lowercase();
+    let vec_camel_case = "Vec";
+    let vec_lower_case = vec_camel_case.to_lowercase(); 
+    let hashmap_camel_case = "HashMap";
+    let hashmap_lower_case = hashmap_camel_case.to_case(convert_case::Case::Flat);
+    let key_camel_case = "Key";
+    let key_lower_case = key_camel_case.to_lowercase();
+    let value_camel_case = "Value";
+    let value_lower_case = value_camel_case.to_lowercase();
+    let is_none_stringified = "is None";
+    let syn_generic_argument_type_stringified = "syn::GenericArgument::Type";
+    let path_camel_case = "Path";
+    let syn_type_path_stringified = format!("syn::Type::{path_camel_case}");
+    let reference_camel_case = "Reference";
+    let vec_camel_case = "Vec";
+    let generics_len = ast.generics.params.len();
+    let string_camel_case = "String";
+    let supported_container_double_dot_double_dot = "proc_macro_helpers::error_occurence::supported_container::SupportedContainer::";
+    let supports_only_supported_container_stringified = format!("{} {supported_container_double_dot_double_dot}", proc_macro_helpers::error_occurence::hardcode::SUPPORTS_ONLY_STRINGIFIED);
+    let serialize_deserialize_camel_case = "SerializeDeserialize";
+    let with_camel_case = "With";
+    let with_serialize_deserialize_camel_case = format!("{with_camel_case}{serialize_deserialize_camel_case}");
+    let suported_enum_variant_stringified = "proc_macro_helpers::error_occurence::supported_enum_variant::SuportedEnumVariant";
+    let with_serialize_deserialize_camel_case = format!("{with_camel_case}{serialize_deserialize_camel_case}");
+    let ident_with_serialize_deserialize_stringified = format!("{ident}{with_serialize_deserialize_camel_case}");
+    let ident_with_serialize_deserialize_token_stream = ident_with_serialize_deserialize_stringified
+        .parse::<proc_macro2::TokenStream>()
+        .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {ident_with_serialize_deserialize_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
+    let enum_with_serialize_deserialize_logic = proc_macro_helpers::error_occurence::generate_with_serialize_deserialize_version::generate_with_serialize_deserialize_version(
+        supported_enum_variant.clone(),
+        &data_enum,
+        proc_macro_helpers::error_occurence::hardcode::OCCURENCE_CAMEL_CASE,
+        with_serialize_deserialize_lower_case.clone(),
+        error_occurence_lower_case.clone(),
+        vec_lower_case.clone(),
+        hashmap_lower_case.clone(),
+        key_lower_case.clone(),
+        value_lower_case.clone(),
+        proc_macro_name_ident_stringified.clone(),
+        is_none_stringified,
+        proc_macro_helpers::error_occurence::hardcode::SUPPORTS_ONLY_STRINGIFIED,
+        syn_generic_argument_type_stringified,
+        syn_type_path_stringified.clone(),
+        reference_camel_case,
+        vec_camel_case,
+        hashmap_camel_case,
+        generics_len,
+        string_camel_case,
+        path_camel_case,
+        key_camel_case,
+        value_camel_case,
+        supported_container_double_dot_double_dot,
+        supports_only_supported_container_stringified.clone(),
+        with_serialize_deserialize_camel_case.clone(),
+        suported_enum_variant_stringified,
+        unnamed_camel_case.clone(),
+        proc_macro_helpers::error_occurence::hardcode::SYN_FIELDS,
+        ident_with_serialize_deserialize_token_stream.clone(),
+        None
+    );
     //
     let variants_len = data_enum.variants.len();
     let try_error_ident_stringified = format!("Try{ident}WithSerializeDeserialize");
