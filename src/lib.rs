@@ -1005,9 +1005,11 @@ pub fn type_variants_from_reqwest_response_handle(
         suported_enum_variant_stringified,
         unnamed_camel_case.clone(),
         proc_macro_helpers::error_occurence::hardcode::SYN_FIELDS,
-        ident_with_serialize_deserialize_token_stream.clone(),
-        None
+        ident_response_variants_token_stream,
+        None,
+        false,
     );
+    println!("{enum_with_serialize_deserialize_logic}");
     //
     let variants_len = data_enum.variants.len();
     let try_error_ident_stringified = format!("Try{ident}WithSerializeDeserialize");
