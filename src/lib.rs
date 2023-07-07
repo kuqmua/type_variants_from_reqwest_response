@@ -864,8 +864,6 @@ pub fn type_variants_from_reqwest_response_handle(
     let ident_response_variants_token_stream = ident_response_variants_stringified
     .parse::<proc_macro2::TokenStream>()
     .unwrap_or_else(|_| panic!("{macro_name} {ident} {ident_response_variants_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
-
-    //
     let attribute_path = "type_variants_from_reqwest_response::type_variants_from_reqwest_response_handle_attribute";
     let option_attribute = ast.attrs.into_iter().find(|attr| {
         let possible_path = {
@@ -935,6 +933,49 @@ pub fn type_variants_from_reqwest_response_handle(
     } else {
         panic!("{macro_name} {ident} syn::Data is not a syn::Data::Enum");
     };
+    //
+    use convert_case::Casing;
+    let named_lower_case = proc_macro_helpers::error_occurence::hardcode::NAMED_CAMEL_CASE.to_case(convert_case::Case::Snake).to_lowercase();
+    let unnamed_camel_case = format!("Un{named_lower_case}");
+    let proc_macro_name_ident_stringified = format!("{macro_name} {ident}");
+    let supported_enum_variant = proc_macro_helpers::error_occurence::supported_enum_variant::create_supported_enum_variant(
+        &data_enum,
+        proc_macro_name_ident_stringified.clone(),
+        unnamed_camel_case.clone(),
+    );
+    // let enum_with_serialize_deserialize_logic = proc_macro_helpers::error_occurence::generate_with_serialize_deserialize_version::generate_with_serialize_deserialize_version(
+    //     supported_enum_variant.clone(),
+    //     &data_enum,
+    //     occurence_camel_case,
+    //     with_serialize_deserialize_lower_case.clone(),
+    //     error_occurence_lower_case.clone(),
+    //     vec_lower_case.clone(),
+    //     hashmap_lower_case.clone(),
+    //     key_lower_case.clone(),
+    //     value_lower_case.clone(),
+    //     proc_macro_name_ident_stringified.clone(),
+    //     is_none_stringified,
+    //     proc_macro_helpers::error_occurence::hardcode::SUPPORTS_ONLY_STRINGIFIED,
+    //     syn_generic_argument_type_stringified,
+    //     syn_type_path_stringified.clone(),
+    //     reference_camel_case,
+    //     vec_camel_case,
+    //     hashmap_camel_case,
+    //     generics_len,
+    //     string_camel_case,
+    //     path_camel_case,
+    //     key_camel_case,
+    //     value_camel_case,
+    //     supported_container_double_dot_double_dot,
+    //     supports_only_supported_container_stringified.clone(),
+    //     with_serialize_deserialize_camel_case.clone(),
+    //     suported_enum_variant_stringified,
+    //     unnamed_camel_case.clone(),
+    //     syn_fields,
+    //     ident_with_serialize_deserialize_token_stream.clone(),
+    //     None
+    // );
+    //
     let variants_len = data_enum.variants.len();
     let try_error_ident_stringified = format!("Try{ident}WithSerializeDeserialize");
     let try_error_ident_token_stream = try_error_ident_stringified
@@ -1048,7 +1089,7 @@ pub fn type_variants_from_reqwest_response_handle(
                         )
                     }
                     syn::Fields::Unnamed(fields_unnamed) => {
-                        let mut is_try_error_type = true;
+                        let is_try_error_type = true;
                         variant.attrs.iter().for_each(|attr| {
                             
                         });
@@ -1253,20 +1294,12 @@ pub fn type_variants_from_reqwest_response_handle(
         panic!("{macro_name} {ident} false = is_last_element_found");
     }
     let gen = quote::quote! {
-        #[derive(Debug, serde::Deserialize)]//serde::Serialize, 
-        pub enum 
-            #ident_response_variants_token_stream 
-        {
-            #(#response_variants_token_stream_vec),*
-
-
-            // Cats(Vec<crate::repositories_types::tufa_server::routes::api::cats::Cat>),
-            // ProjectCommitExtractorNotEqual {
-            //     project_commit_not_equal: std::string::String,
-            //     project_commit_to_use: std::string::String,
-            //     code_occurence: crate::common::code_occurence::CodeOccurenceWithSerializeDeserialize,
-            // },
-        }
+        // #[derive(Debug, serde::Deserialize)]//serde::Serialize, 
+        // pub enum 
+        //     #ident_response_variants_token_stream 
+        // {
+        //     #(#response_variants_token_stream_vec),*
+        // }
         // impl std::convert::From<&#ident> for http::StatusCode {
         //     fn from(value: &#ident) -> Self {
         //         match value {
@@ -1295,7 +1328,7 @@ pub fn type_variants_from_reqwest_response_handle(
         // }
     };
     // if ident == "" {
-       println!("{gen}");
+    //   println!("{gen}");
     // }
     gen.into()
 }
