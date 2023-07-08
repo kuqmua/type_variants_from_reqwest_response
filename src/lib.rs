@@ -991,7 +991,7 @@ pub fn type_variants_from_reqwest_response_handle(
         generated_status_code_enums_with_from_impls
     };
     let mut is_last_element_found = false;
-    let (status_codes_enums_with_from_impl, status_code_enums_try_from) = unique_status_codes
+    let (status_codes_enums_with_from_impl, mut status_code_enums_try_from_handle) = unique_status_codes
         .into_iter()
         .enumerate()
         .fold(
@@ -1087,23 +1087,24 @@ pub fn type_variants_from_reqwest_response_handle(
                 }
             });
             let http_status_code_token_stream = status_code_attribute.to_http_status_code_quote();
-            match index {
-                0 => {
-                    acc.1.push(quote::quote! {
-                        if status_code == #http_status_code_token_stream {
-                            match futures::executor::block_on(response.json::<#status_code_enum_name_token_stream>()) {
-                                Ok(value) => Ok(#ident_response_variants_token_stream::from(value)),
-                                Err(e) => Err(
-                                    crate::common::api_request_unexpected_error::ApiRequestUnexpectedError::DeserializeBody {
-                                        reqwest: e,
-                                        status_code,
-                                    },
-                                ),
-                            }
-                        }
-                    });
-                },
-                _ => match index == unique_status_codes_len_minus_one{
+            // match index {
+            //     0 => {
+            //         acc.1.push(quote::quote! {
+            //             if status_code == #http_status_code_token_stream {
+            //                 match futures::executor::block_on(response.json::<#status_code_enum_name_token_stream>()) {
+            //                     Ok(value) => Ok(#ident_response_variants_token_stream::from(value)),
+            //                     Err(e) => Err(
+            //                         crate::common::api_request_unexpected_error::ApiRequestUnexpectedError::DeserializeBody {
+            //                             reqwest: e,
+            //                             status_code,
+            //                         },
+            //                     ),
+            //                 }
+            //             }
+            //         });
+            //     },
+            //     _ => 
+            match index == unique_status_codes_len_minus_one{
                     true => {
                         is_last_element_found = true;
                         acc.1.push(quote::quote! {
@@ -1134,19 +1135,30 @@ pub fn type_variants_from_reqwest_response_handle(
                         });
                     },
                 }
-            }
+            // }
             acc
         });
+        //todo check if len > 0 - otherwise diffrerent syntax
+        //todo - check if desirable_type_status_code contains or not in attributes - different logic
+    let mut status_code_enums_try_from = vec![quote::quote! {
+        if status_code == #desirable_type_status_code_token_stream {
+            match futures::executor::block_on(response.json::<#desirable_type_enum_name>()) {
+                Ok(value) => Ok(#ident_response_variants_token_stream::from(value)),
+                Err(e) => Err(
+                    crate::common::api_request_unexpected_error::ApiRequestUnexpectedError::DeserializeBody {
+                        reqwest: e,
+                        status_code,
+                    },
+                ),
+            }
+        }
+    }];
+    status_code_enums_try_from_handle.into_iter().for_each(|s|{
+        status_code_enums_try_from.push(s);
+    });
     if let false = is_last_element_found {
         panic!("{macro_name} {ident} false = is_last_element_found");
     }
-    let f = quote::quote! {
-
-
-
-
-    };
-    println!("{f}");
     let gen = quote::quote! {
         #enum_with_serialize_deserialize_logic
         impl std::convert::From<&#ident_response_variants_token_stream> for http::StatusCode {
@@ -1179,7 +1191,7 @@ pub fn type_variants_from_reqwest_response_handle(
         }
     };
     // if ident == "" {
-    //   println!("{gen}");
+      println!("{gen}");
     // }
     gen.into()
 }
