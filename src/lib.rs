@@ -708,7 +708,7 @@ pub fn type_variants_from_reqwest_response_handle(
         false,
     );
     let variants_len = data_enum.variants.len();
-    let try_error_ident_stringified = format!("Try{ident}WithSerializeDeserialize");
+    let try_error_ident_stringified = format!("{ident}WithSerializeDeserialize");
     let try_error_ident_token_stream = try_error_ident_stringified
     .parse::<proc_macro2::TokenStream>()
     .unwrap_or_else(|_| panic!("{macro_name} {ident} {try_error_ident_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
@@ -812,7 +812,7 @@ pub fn type_variants_from_reqwest_response_handle(
                                 } => #http_status_code_token_stream
                             },
                             quote::quote! {
-                                #ident::#variant_ident {
+                                #ident_response_variants_token_stream::#variant_ident {
                                      #(#fields_token_stream_desirable_type_try_from_ident),*
                                 } => Err(#try_error_ident_token_stream::#variant_ident { #(#fields_token_stream_desirable_type_try_from_ident),* })
                             }
@@ -837,7 +837,7 @@ pub fn type_variants_from_reqwest_response_handle(
                                 #ident::#variant_ident(#fields_token_stream) => #http_status_code_token_stream
                             },
                             quote::quote! {
-                                #ident::#variant_ident(i) => Ok(i)
+                                #ident_response_variants_token_stream::#variant_ident(i) => Ok(i)
                             }
                         )
 
@@ -1141,9 +1141,12 @@ pub fn type_variants_from_reqwest_response_handle(
         panic!("{macro_name} {ident} false = is_last_element_found");
     }
     let f = quote::quote! {
-        #(#status_codes_enums_with_from_impl)*
+
+
+
+
     };
-    // println!("{f}");
+    println!("{f}");
     let gen = quote::quote! {
         #enum_with_serialize_deserialize_logic
         impl std::convert::From<&#ident_response_variants_token_stream> for http::StatusCode {
@@ -1162,17 +1165,18 @@ pub fn type_variants_from_reqwest_response_handle(
                 #(#status_code_enums_try_from)*
             }
         }
-        // impl TryFrom<#ident> for #desirable_type 
-        // {
-        //     type Error = #try_error_ident_token_stream;
-        //     fn try_from(
-        //         value: #ident,
-        //     ) -> Result<Self, Self::Error> {
-        //         match value {
-        //             #(#desirable_type_try_from_ident),*
-        //         }
-        //     }
-        // }
+        impl TryFrom<#ident_response_variants_token_stream> for #desirable_type_token_stream
+        {
+            type Error = #try_error_ident_token_stream;
+            fn try_from(
+                value: #ident_response_variants_token_stream,
+            ) -> Result<Self, Self::Error> {
+                match value {
+                    #ident_response_variants_token_stream :: DesirableType(i) => Ok(i),
+                    #(#desirable_type_try_from_ident),*
+                }
+            }
+        }
     };
     // if ident == "" {
     //   println!("{gen}");
