@@ -1159,6 +1159,10 @@ pub fn type_variants_from_reqwest_response_handle(
     if let false = is_last_element_found {
         panic!("{macro_name} {ident} false = is_last_element_found");
     }
+    let ident_error_named  = format!("{ident}ErrorNamed");
+    let ident_error_named_token_stream = ident_error_named
+    .parse::<proc_macro2::TokenStream>()
+    .unwrap_or_else(|_| panic!("{macro_name} {ident} {ident_error_named} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
     let gen = quote::quote! {
         #enum_with_serialize_deserialize_logic
         impl std::convert::From<&#ident_response_variants_token_stream> for http::StatusCode {
@@ -1189,6 +1193,33 @@ pub fn type_variants_from_reqwest_response_handle(
                 }
             }
         }
+        //
+        #[derive(Debug, thiserror::Error, error_occurence::ErrorOccurence)]
+        pub enum #ident_error_named_token_stream<'a> {//todo
+            ExpectedType {
+                #[eo_display_with_serialize_deserialize]
+                get: #try_error_ident_token_stream,
+                code_occurence: crate::common::code_occurence::CodeOccurence<'a>,
+            },
+            UnexpectedStatusCode { 
+                #[eo_display]
+                status_code: http::StatusCode,
+                code_occurence: crate::common::code_occurence::CodeOccurence<'a>,
+            },
+            DeserializeResponse {
+                #[eo_display_foreign_type]
+                reqwest: reqwest::Error,
+                #[eo_display]
+                status_code: http::StatusCode,
+                code_occurence: crate::common::code_occurence::CodeOccurence<'a>,
+            },
+            Reqwest {
+                #[eo_display_foreign_type]
+                reqwest: reqwest::Error,
+                code_occurence: crate::common::code_occurence::CodeOccurence<'a>,
+            },
+        }
+        //
     };
     // if ident == "" {
       println!("{gen}");
