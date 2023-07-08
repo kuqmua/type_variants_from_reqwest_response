@@ -335,6 +335,136 @@ impl TryFrom<&syn::Ident> for Attribute {
     }
 }
 
+impl TryFrom<&std::string::String> for Attribute {
+    type Error = ();
+    fn try_from(value: &std::string::String) -> Result<Self, Self::Error> {
+        if value == "tvfrr_100_continue" {
+            Ok(Attribute::Tvfrr100Continue)
+        } else if value == "tvfrr_101_switching_protocols" {
+            Ok(Attribute::Tvfrr101SwitchingProtocols)
+        } else if value == "tvfrr_102_processing" {
+            Ok(Attribute::Tvfrr102Processing)
+        } else if value == "tvfrr_200_ok" {
+            Ok(Attribute::Tvfrr200Ok)
+        } else if value == "tvfrr_201_created" {
+            Ok(Attribute::Tvfrr201Created)
+        } else if value == "tvfrr_202_accepted" {
+            Ok(Attribute::Tvfrr202Accepted)
+        } else if value == "tvfrr_203_non_authoritative_information" {
+            Ok(Attribute::Tvfrr203NonAuthoritativeInformation)
+        } else if value == "tvfrr_204_no_content" {
+            Ok(Attribute::Tvfrr204NoContent)
+        } else if value == "tvfrr_205_reset_content" {
+            Ok(Attribute::Tvfrr205ResetContent)
+        } else if value == "tvfrr_206_partial_content" {
+            Ok(Attribute::Tvfrr206PartialContent)
+        } else if value == "tvfrr_207_multi_status" {
+            Ok(Attribute::Tvfrr207MultiStatus)
+        } else if value == "tvfrr_208_already_reported" {
+            Ok(Attribute::Tvfrr208AlreadyReported)
+        } else if value == "tvfrr_226_im_used" {
+            Ok(Attribute::Tvfrr226ImUsed)
+        } else if value == "tvfrr_300_multiple_choices" {
+            Ok(Attribute::Tvfrr300MultipleChoices)
+        } else if value == "tvfrr_301_moved_permanently" {
+            Ok(Attribute::Tvfrr301MovedPermanently)
+        } else if value == "tvfrr_302_found" {
+            Ok(Attribute::Tvfrr302Found)
+        } else if value == "tvfrr_303_see_other" {
+            Ok(Attribute::Tvfrr303SeeOther)
+        } else if value == "tvfrr_304_not_modified" {
+            Ok(Attribute::Tvfrr304NotModified)
+        } else if value == "tvfrr_305_use_proxy" {
+            Ok(Attribute::Tvfrr305UseProxy)
+        } else if value == "tvfrr_307_temporary_redirect" {
+            Ok(Attribute::Tvfrr307TemporaryRedirect)
+        } else if value == "tvfrr_308_permanent_redirect" {
+            Ok(Attribute::Tvfrr308PermanentRedirect)
+        } else if value == "tvfrr_400_bad_request" {
+            Ok(Attribute::Tvfrr400BadRequest)
+        } else if value == "tvfrr_401_unauthorized" {
+            Ok(Attribute::Tvfrr401Unauthorized)
+        } else if value == "tvfrr_402_payment_required" {
+            Ok(Attribute::Tvfrr402PaymentRequired)
+        } else if value == "tvfrr_403_forbidden" {
+            Ok(Attribute::Tvfrr403Forbidden)
+        } else if value == "tvfrr_404_not_found" {
+            Ok(Attribute::Tvfrr404NotFound)
+        } else if value == "tvfrr_405_method_not_allowed" {
+            Ok(Attribute::Tvfrr405MethodNotAllowed)
+        } else if value == "tvfrr_406_not_acceptable" {
+            Ok(Attribute::Tvfrr406NotAcceptable)
+        } else if value == "tvfrr_407_proxy_authentication_required" {
+            Ok(Attribute::Tvfrr407ProxyAuthenticationRequired)
+        } else if value == "tvfrr_408_request_timeout" {
+            Ok(Attribute::Tvfrr408RequestTimeout)
+        } else if value == "tvfrr_409_conflict" {
+            Ok(Attribute::Tvfrr409Conflict)
+        } else if value == "tvfrr_410_gone" {
+            Ok(Attribute::Tvfrr410Gone)
+        } else if value == "tvfrr_411_length_required" {
+            Ok(Attribute::Tvfrr411LengthRequired)
+        } else if value == "tvfrr_412_precondition_failed" {
+            Ok(Attribute::Tvfrr412PreconditionFailed)
+        } else if value == "tvfrr_413_payload_too_large" {
+            Ok(Attribute::Tvfrr413PayloadTooLarge)
+        } else if value == "tvfrr_414_uri_too_long" {
+            Ok(Attribute::Tvfrr414UriTooLong)
+        } else if value == "tvfrr_415_unsupported_media_type" {
+            Ok(Attribute::Tvfrr415UnsupportedMediaType)
+        } else if value == "tvfrr_416_range_not_satisfiable" {
+            Ok(Attribute::Tvfrr416RangeNotSatisfiable)
+        } else if value == "tvfrr_417_expectation_failed" {
+            Ok(Attribute::Tvfrr417ExpectationFailed)
+        } else if value == "tvfrr_418_im_a_teapot" {
+            Ok(Attribute::Tvfrr418ImATeapot)
+        } else if value == "tvfrr_421_misdirected_request" {
+            Ok(Attribute::Tvfrr421MisdirectedRequest)
+        } else if value == "tvfrr_422_unprocessable_entity" {
+            Ok(Attribute::Tvfrr422UnprocessableEntity)
+        } else if value == "tvfrr_423_locked" {
+            Ok(Attribute::Tvfrr423Locked)
+        } else if value == "tvfrr_424_failed_dependency" {
+            Ok(Attribute::Tvfrr424FailedDependency)
+        } else if value == "tvfrr_426_upgrade_required" {
+            Ok(Attribute::Tvfrr426UpgradeRequired)
+        } else if value == "tvfrr_428_precondition_required" {
+            Ok(Attribute::Tvfrr428PreconditionRequired)
+        } else if value == "tvfrr_429_too_many_requests" {
+            Ok(Attribute::Tvfrr429TooManyRequests)
+        } else if value == "tvfrr_431_request_header_fields_too_large" {
+            Ok(Attribute::Tvfrr431RequestHeaderFieldsTooLarge)
+        } else if value == "tvfrr_451_unavailable_for_legal_reasons" {
+            Ok(Attribute::Tvfrr451UnavailableForLegalReasons)
+        } else if value == "tvfrr_500_internal_server_error" {
+            Ok(Attribute::Tvfrr500InternalServerError)
+        } else if value == "tvfrr_501_not_implemented" {
+            Ok(Attribute::Tvfrr501NotImplemented)
+        } else if value == "tvfrr_502_bad_gateway" {
+            Ok(Attribute::Tvfrr502BadGateway)
+        } else if value == "tvfrr_503_service_unavailable" {
+            Ok(Attribute::Tvfrr503ServiceUnavailable)
+        } else if value == "tvfrr_504_gateway_timeout" {
+            Ok(Attribute::Tvfrr504GatewayTimeout)
+        } else if value == "tvfrr_505_http_version_not_supported" {
+            Ok(Attribute::Tvfrr505HttpVersionNotSupported)
+        } else if value == "tvfrr_506_variant_also_negotiates" {
+            Ok(Attribute::Tvfrr506VariantAlsoNegotiates)
+        } else if value == "tvfrr_507_insufficient_storage" {
+            Ok(Attribute::Tvfrr507InsufficientStorage)
+        } else if value == "tvfrr_508_loop_detected" {
+            Ok(Attribute::Tvfrr508LoopDetected)
+        } else if value == "tvfrr_510_not_extended" {
+            Ok(Attribute::Tvfrr510NotExtended)
+        } else if value == "tvfrr_511_network_authentication_required" {
+            Ok(Attribute::Tvfrr511NetworkAuthenticationRequired)
+        } else {
+            Err(())
+        }
+    }
+}
+
+
 ////////////////////////////////////////////////////
 #[proc_macro_attribute]
 pub fn type_variants_from_reqwest_response_handle_attribute(
@@ -433,7 +563,8 @@ pub fn type_variants_from_reqwest_response_handle(
     });
     let (
         desirable_type_token_stream,
-        desirable_type_status_code_token_stream
+        desirable_type_status_code_token_stream,
+        desirable_type_enum_name,
     ) = if let Some(attribute) = option_attribute {
         let mut stringified_tokens =
             quote::ToTokens::to_token_stream(&attribute.tokens).to_string();
@@ -460,14 +591,21 @@ pub fn type_variants_from_reqwest_response_handle(
                                             (None, None) => panic!("{macro_name} {ident} failed to get vec_attr_params.get(0) or vec_attr_params.get(1)"),
                                             (None, Some(_)) => panic!("{macro_name} {ident} failed to get vec_attr_params.get(0)"),
                                             (Some(_), None) => panic!("{macro_name} {ident} failed to get vec_attr_params.get(1)"),
-                                            (Some(first_param), Some(second_param)) => (
-                                                first_param
-                                                .parse::<proc_macro2::TokenStream>()
-                                                .unwrap_or_else(|_| panic!("{macro_name} {ident} {first_param} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE)),
-                                                second_param
-                                                .parse::<proc_macro2::TokenStream>()
-                                                .unwrap_or_else(|_| panic!("{macro_name} {ident} {second_param} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE))
-                                            ),
+                                            (Some(first_param), Some(second_param)) => {
+                                                let attribute = Attribute::try_from(second_param).unwrap_or_else(|_| panic!("{macro_name} {ident} second_param failed to Attribute::try_from"));
+                                                (
+                                                    first_param
+                                                    .parse::<proc_macro2::TokenStream>()
+                                                    .unwrap_or_else(|_| panic!("{macro_name} {ident} {first_param} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE)),
+                                                    attribute.to_http_status_code_quote(),
+                                                    {
+                                                        let status_code_enum_name_stingified = format!("{ident_response_variants_token_stream}{attribute}");
+                                                        status_code_enum_name_stingified
+                                                        .parse::<proc_macro2::TokenStream>()
+                                                        .unwrap_or_else(|_| panic!("{macro_name} {ident} {status_code_enum_name_stingified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE))
+                                                    }
+                                                )
+                                            },
                                         }
                                     },
                                     None => panic!("FromEnum {ident} cannot get inner_token"),
@@ -762,89 +900,96 @@ pub fn type_variants_from_reqwest_response_handle(
             }
             acc
     });
-    // println!("{}", hashmap_attribute_variants.len());
-    let generated_status_code_enums_with_from_impls = hashmap_attribute_variants.iter().map(|(attribute, vec_variants)|{
-        // println!("{attribute}{}", vec_variants.len());
-        let status_code_enum_name_stingified = format!("{ident_response_variants_token_stream}{attribute}");
-        let status_code_enum_name_token_stream = status_code_enum_name_stingified
-        .parse::<proc_macro2::TokenStream>()
-        .unwrap_or_else(|_| panic!("{macro_name} {ident} {status_code_enum_name_stingified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
-        let status_enum = proc_macro_helpers::error_occurence::generate_with_serialize_deserialize_version::generate_with_serialize_deserialize_version(
-            supported_enum_variant.clone(),
-            vec_variants.iter().map(|variant|variant.clone()).collect(),
-            proc_macro_helpers::error_occurence::hardcode::OCCURENCE_CAMEL_CASE,
-            with_serialize_deserialize_lower_case.clone(),
-            error_occurence_lower_case.clone(),
-            vec_lower_case.clone(),
-            hashmap_lower_case.clone(),
-            key_lower_case.clone(),
-            value_lower_case.clone(),
-            proc_macro_name_ident_stringified.clone(),
-            is_none_stringified,
-            proc_macro_helpers::error_occurence::hardcode::SUPPORTS_ONLY_STRINGIFIED,
-            syn_generic_argument_type_stringified,
-            syn_type_path_stringified.clone(),
-            reference_camel_case,
-            vec_camel_case,
-            hashmap_camel_case,
-            generics_len,
-            string_camel_case,
-            path_camel_case,
-            key_camel_case,
-            value_camel_case,
-            supported_container_double_dot_double_dot,
-            supports_only_supported_container_stringified.clone(),
-            with_serialize_deserialize_camel_case.clone(),
-            suported_enum_variant_stringified,
-            unnamed_camel_case.clone(),
-            proc_macro_helpers::error_occurence::hardcode::SYN_FIELDS,
-            status_code_enum_name_token_stream.clone(),
-            None,
-            false,
-        );
-        let status_enum_from = {
-            let variants = vec_variants.iter().map(|variant|{
-                let fields = if let syn::Fields::Named(fields_named) = &variant.fields {
-                    fields_named.named.iter().map(|field| {
-                        let field_ident = &field.ident.clone().unwrap_or_else(|| panic!("{macro_name} {ident} field_ident is None {}",proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
-                        quote::quote! { #field_ident }
-                    })
-                }
-                else {
-                    panic!("{macro_name} {ident} variant.fields is not a if let syn::Fields::Named");
-                };
-                let fields_cloned =  fields.clone();
-                let variant_ident = &variant.ident;
-                quote::quote! {
-                    #status_code_enum_name_token_stream::#variant_ident{ 
-                        #(#fields_cloned),*
-                    } => Self::#variant_ident{ 
-                        #(#fields),*
+    let generated_status_code_enums_with_from_impls = {
+        let mut generated_status_code_enums_with_from_impls = hashmap_attribute_variants.iter().map(|(attribute, vec_variants)|{
+            let status_code_enum_name_stingified = format!("{ident_response_variants_token_stream}{attribute}");
+            let status_code_enum_name_token_stream = status_code_enum_name_stingified
+            .parse::<proc_macro2::TokenStream>()
+            .unwrap_or_else(|_| panic!("{macro_name} {ident} {status_code_enum_name_stingified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
+            let status_enum = proc_macro_helpers::error_occurence::generate_with_serialize_deserialize_version::generate_with_serialize_deserialize_version(
+                supported_enum_variant.clone(),
+                vec_variants.iter().map(|variant|variant.clone()).collect(),
+                proc_macro_helpers::error_occurence::hardcode::OCCURENCE_CAMEL_CASE,
+                with_serialize_deserialize_lower_case.clone(),
+                error_occurence_lower_case.clone(),
+                vec_lower_case.clone(),
+                hashmap_lower_case.clone(),
+                key_lower_case.clone(),
+                value_lower_case.clone(),
+                proc_macro_name_ident_stringified.clone(),
+                is_none_stringified,
+                proc_macro_helpers::error_occurence::hardcode::SUPPORTS_ONLY_STRINGIFIED,
+                syn_generic_argument_type_stringified,
+                syn_type_path_stringified.clone(),
+                reference_camel_case,
+                vec_camel_case,
+                hashmap_camel_case,
+                generics_len,
+                string_camel_case,
+                path_camel_case,
+                key_camel_case,
+                value_camel_case,
+                supported_container_double_dot_double_dot,
+                supports_only_supported_container_stringified.clone(),
+                with_serialize_deserialize_camel_case.clone(),
+                suported_enum_variant_stringified,
+                unnamed_camel_case.clone(),
+                proc_macro_helpers::error_occurence::hardcode::SYN_FIELDS,
+                status_code_enum_name_token_stream.clone(),
+                None,
+                false,
+            );
+            let status_enum_from = {
+                let variants = vec_variants.iter().map(|variant|{
+                    let fields = if let syn::Fields::Named(fields_named) = &variant.fields {
+                        fields_named.named.iter().map(|field| {
+                            let field_ident = &field.ident.clone().unwrap_or_else(|| panic!("{macro_name} {ident} field_ident is None {}",     proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
+                            quote::quote! { #field_ident }
+                        })
                     }
-                }
-            });
-            quote::quote!{
-                impl std::convert::From<#status_code_enum_name_token_stream> for #ident_response_variants_token_stream {
-                    fn from(value : #status_code_enum_name_token_stream) -> Self {
-                        match value {
-                            #(#variants),*
+                    else {
+                        panic!("{macro_name} {ident} variant.fields is not a if let syn::Fields::Named");
+                    };
+                    let fields_cloned =  fields.clone();
+                    let variant_ident = &variant.ident;
+                    quote::quote! {
+                        #status_code_enum_name_token_stream::#variant_ident{ 
+                            #(#fields_cloned),*
+                        } => Self::#variant_ident{ 
+                            #(#fields),*
                         }
                     }
-                } 
+                });
+                quote::quote!{
+                    impl std::convert::From<#status_code_enum_name_token_stream> for #ident_response_variants_token_stream {
+                        fn from(value : #status_code_enum_name_token_stream) -> Self {
+                            match value {
+                                #(#variants),*
+                            }
+                        }
+                    } 
+                }
+            };
+            quote::quote!{
+                #status_enum
+                #status_enum_from
             }
-        };
-        quote::quote!{
-            #status_enum
-            #status_enum_from
-        }
-    });
-    
-    // let h = quote::quote!{
-    //    #(#generated_status_code_enums_with_from_impls)*
-    // };
-    // println!("{h}");
-    
-
+        }).collect::<Vec<proc_macro2::TokenStream>>();
+        generated_status_code_enums_with_from_impls.push(quote::quote!{
+            #[derive(Debug, serde::Serialize, serde::Deserialize)] 
+            enum #desirable_type_enum_name {
+                DesirableType(#desirable_type_token_stream)
+            } 
+            impl std::convert::From<#desirable_type_enum_name> for #ident_response_variants_token_stream {
+                fn from(value: #desirable_type_enum_name) -> Self {
+                    match value { 
+                        #desirable_type_enum_name::DesirableType(i) => Self::DesirableType(i) 
+                    }
+                }
+            } 
+        });
+        generated_status_code_enums_with_from_impls
+    };
     let mut is_last_element_found = false;
     let (status_codes_enums_with_from_impl, status_code_enums_try_from) = unique_status_codes
         .into_iter()
