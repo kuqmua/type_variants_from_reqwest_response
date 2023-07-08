@@ -1219,10 +1219,49 @@ pub fn type_variants_from_reqwest_response_handle(
                 code_occurence: crate::common::code_occurence::CodeOccurence<'a>,
             },
         }
+        async fn get_extraction_logic<'a>(
+            future: impl std::future::Future<Output = Result<reqwest::Response, reqwest::Error>>,
+        ) -> Result<#desirable_type_token_stream, #ident_error_named_token_stream<'a>>
+        {
+            match future.await {
+                Ok(response) => match TryGetResponseVariants::try_from(response) {
+                    Ok(variants) => match #desirable_type_token_stream::try_from(variants)
+                    {
+                        Ok(value) => Ok(value),
+                        Err(e) => Err(#ident_error_named_token_stream::ExpectedType {
+                            get: e,
+                            code_occurence: crate::code_occurence_tufa_common!(),
+                        }),
+                    },
+                    Err(e) => match e {//todo impl from?
+                        crate::common::api_request_unexpected_error::ApiRequestUnexpectedError::StatusCode { status_code } => Err(
+                            #ident_error_named_token_stream::UnexpectedStatusCode {
+                                status_code,
+                                code_occurence: crate::code_occurence_tufa_common!()
+                            }
+                        ),
+                        crate::common::api_request_unexpected_error::ApiRequestUnexpectedError::DeserializeBody {
+                            reqwest,
+                            status_code
+                        } => Err(
+                            #ident_error_named_token_stream::DeserializeResponse {
+                                reqwest,
+                                status_code,
+                                code_occurence: crate::code_occurence_tufa_common!()
+                            }
+                        ),
+                    },
+                },
+                Err(e) => Err(#ident_error_named_token_stream::Reqwest {
+                    reqwest: e,
+                    code_occurence: crate::code_occurence_tufa_common!(),
+                }),
+            }
+        }
         //
     };
     // if ident == "" {
-      println!("{gen}");
+    //   println!("{gen}");
     // }
     gen.into()
 }
