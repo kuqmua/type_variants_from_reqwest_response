@@ -715,9 +715,22 @@ pub fn type_variants_from_reqwest_response_handle(
             acc
         },
     );
-   let mut hashmap_attribute_variants: std::collections::HashMap<Attribute, Vec<syn::Variant>> = std::collections::HashMap::new();
-    let something = data_enum.variants.iter().for_each(
-        |variant|{
+    let (
+        unique_status_codes_len,
+        unique_status_codes_len_minus_one
+     ) = {
+        let unique_status_codes_len = unique_status_codes.len();
+        if let true = unique_status_codes.is_empty() {
+            panic!("{macro_name} {ident} true = unique_status_codes.is_empty()");
+        }
+        (
+            unique_status_codes_len,
+            unique_status_codes_len - 1
+        )
+    };
+    let hashmap_attribute_variants = data_enum.variants.iter().fold(
+        std::collections::HashMap::<Attribute, Vec<syn::Variant>>::with_capacity(unique_status_codes_len),
+        |mut acc, variant|{
             let mut option_attribute = None;
             variant.attrs.iter().for_each(|attr| {
                 if let true = attr.path.segments.len() == 1 {
@@ -739,30 +752,18 @@ pub fn type_variants_from_reqwest_response_handle(
             } else {
                 panic!("{macro_name} {ident} no supported attribute");
             };
-            match hashmap_attribute_variants.get_mut(&attr) {
+            match acc.get_mut(&attr) {
                 Some(i) => {
                     i.push(variant.clone());
                 },
                 None => {
-                    hashmap_attribute_variants.insert(attr, vec![variant.clone()]);
+                    acc.insert(attr, vec![variant.clone()]);
                 },
             }
+            acc
     });
     println!("{}", hashmap_attribute_variants.len());
 
-    let (
-        unique_status_codes_len,
-        unique_status_codes_len_minus_one
-     ) = {
-        let unique_status_codes_len = unique_status_codes.len();
-        if let true = unique_status_codes.is_empty() {
-            panic!("{macro_name} {ident} true = unique_status_codes.is_empty()");
-        }
-        (
-            unique_status_codes_len,
-            unique_status_codes_len - 1
-        )
-    };
     let mut is_last_element_found = false;
     let (status_codes_enums_with_from_impl, status_code_enums_try_from) = unique_status_codes
         .into_iter()
