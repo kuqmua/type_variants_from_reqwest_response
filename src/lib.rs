@@ -406,7 +406,7 @@ pub fn type_variants_from_reqwest_response_attribute(
         tvfrr_511_network_authentication_required,
     )
 )]
-pub fn type_variants_from_reqwest_response_handle(
+pub fn type_variants_from_reqwest_response(
     input: proc_macro::TokenStream,
 ) -> proc_macro::TokenStream {
     proc_macro_helpers::panic_location::panic_location(); //panic_location function from https://github.com/kuqmua/proc_macro_helpers
