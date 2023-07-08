@@ -1092,7 +1092,7 @@ pub fn type_variants_from_reqwest_response_handle(
                     acc.1.push(quote::quote! {
                         if status_code == #http_status_code_token_stream {
                             match futures::executor::block_on(response.json::<#status_code_enum_name_token_stream>()) {
-                                Ok(value) => Ok(#ident::from(value)),
+                                Ok(value) => Ok(#ident_response_variants_token_stream::from(value)),
                                 Err(e) => Err(
                                     crate::common::api_request_unexpected_error::ApiRequestUnexpectedError::DeserializeBody {
                                         reqwest: e,
@@ -1122,7 +1122,7 @@ pub fn type_variants_from_reqwest_response_handle(
                                 match futures::executor::block_on(
                                     response.json::<#status_code_enum_name_token_stream>(),
                                 ) {
-                                    Ok(value) => Ok(#ident::from(value)),
+                                    Ok(value) => Ok(#ident_response_variants_token_stream::from(value)),
                                     Err(e) => Err(
                                         crate::common::api_request_unexpected_error::ApiRequestUnexpectedError::DeserializeBody{
                                             reqwest: e,
@@ -1155,13 +1155,13 @@ pub fn type_variants_from_reqwest_response_handle(
             }
         }
         #(#generated_status_code_enums_with_from_impls)*
-        // impl std::convert::TryFrom<reqwest::Response> for #ident {
-        //     type Error = crate::common::api_request_unexpected_error::ApiRequestUnexpectedError;
-        //     fn try_from(response: reqwest::Response) -> Result<Self, Self::Error> {
-        //         let status_code = response.status();
-        //         #(#status_code_enums_try_from)*
-        //     }
-        // }
+        impl std::convert::TryFrom<reqwest::Response> for #ident_response_variants_token_stream {
+            type Error = crate::common::api_request_unexpected_error::ApiRequestUnexpectedError;
+            fn try_from(response: reqwest::Response) -> Result<Self, Self::Error> {
+                let status_code = response.status();
+                #(#status_code_enums_try_from)*
+            }
+        }
         // impl TryFrom<#ident> for #desirable_type 
         // {
         //     type Error = #try_error_ident_token_stream;
