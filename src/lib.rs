@@ -763,54 +763,84 @@ pub fn type_variants_from_reqwest_response_handle(
             acc
     });
     // println!("{}", hashmap_attribute_variants.len());
-    let generated_froms = hashmap_attribute_variants.iter().for_each(|(attribute, vec_variants)|{
+    let generated_status_code_enums_with_from_impls = hashmap_attribute_variants.iter().map(|(attribute, vec_variants)|{
         // println!("{attribute}{}", vec_variants.len());
         let status_code_enum_name_stingified = format!("{ident_response_variants_token_stream}{attribute}");
         let status_code_enum_name_token_stream = status_code_enum_name_stingified
         .parse::<proc_macro2::TokenStream>()
         .unwrap_or_else(|_| panic!("{macro_name} {ident} {status_code_enum_name_stingified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
-        (
-            {
-                let d = proc_macro_helpers::error_occurence::generate_with_serialize_deserialize_version::generate_with_serialize_deserialize_version(
-                    supported_enum_variant.clone(),
-                    vec_variants.iter().map(|variant|variant.clone()).collect(),
-                    proc_macro_helpers::error_occurence::hardcode::OCCURENCE_CAMEL_CASE,
-                    with_serialize_deserialize_lower_case.clone(),
-                    error_occurence_lower_case.clone(),
-                    vec_lower_case.clone(),
-                    hashmap_lower_case.clone(),
-                    key_lower_case.clone(),
-                    value_lower_case.clone(),
-                    proc_macro_name_ident_stringified.clone(),
-                    is_none_stringified,
-                    proc_macro_helpers::error_occurence::hardcode::SUPPORTS_ONLY_STRINGIFIED,
-                    syn_generic_argument_type_stringified,
-                    syn_type_path_stringified.clone(),
-                    reference_camel_case,
-                    vec_camel_case,
-                    hashmap_camel_case,
-                    generics_len,
-                    string_camel_case,
-                    path_camel_case,
-                    key_camel_case,
-                    value_camel_case,
-                    supported_container_double_dot_double_dot,
-                    supports_only_supported_container_stringified.clone(),
-                    with_serialize_deserialize_camel_case.clone(),
-                    suported_enum_variant_stringified,
-                    unnamed_camel_case.clone(),
-                    proc_macro_helpers::error_occurence::hardcode::SYN_FIELDS,
-                    status_code_enum_name_token_stream.clone(),
-                    None,
-                    false,
-                );
-                println!("{d}");
-                d
-            }
+        let status_enum = proc_macro_helpers::error_occurence::generate_with_serialize_deserialize_version::generate_with_serialize_deserialize_version(
+            supported_enum_variant.clone(),
+            vec_variants.iter().map(|variant|variant.clone()).collect(),
+            proc_macro_helpers::error_occurence::hardcode::OCCURENCE_CAMEL_CASE,
+            with_serialize_deserialize_lower_case.clone(),
+            error_occurence_lower_case.clone(),
+            vec_lower_case.clone(),
+            hashmap_lower_case.clone(),
+            key_lower_case.clone(),
+            value_lower_case.clone(),
+            proc_macro_name_ident_stringified.clone(),
+            is_none_stringified,
+            proc_macro_helpers::error_occurence::hardcode::SUPPORTS_ONLY_STRINGIFIED,
+            syn_generic_argument_type_stringified,
+            syn_type_path_stringified.clone(),
+            reference_camel_case,
+            vec_camel_case,
+            hashmap_camel_case,
+            generics_len,
+            string_camel_case,
+            path_camel_case,
+            key_camel_case,
+            value_camel_case,
+            supported_container_double_dot_double_dot,
+            supports_only_supported_container_stringified.clone(),
+            with_serialize_deserialize_camel_case.clone(),
+            suported_enum_variant_stringified,
+            unnamed_camel_case.clone(),
+            proc_macro_helpers::error_occurence::hardcode::SYN_FIELDS,
+            status_code_enum_name_token_stream.clone(),
+            None,
+            false,
         );
+        let status_enum_from = {
+            let variants = vec_variants.iter().map(|variant|{
+                let fields = if let syn::Fields::Named(fields_named) = &variant.fields {
+                    fields_named.named.iter().map(|field| {
+                        let field_ident = &field.ident.clone().unwrap_or_else(|| panic!("{macro_name} {ident} field_ident is None {}",proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
+                        quote::quote! { #field_ident }
+                    })
+                }
+                else {
+                    panic!("{macro_name} {ident} variant.fields is not a if let syn::Fields::Named");
+                };
+                let fields_cloned =  fields.clone();
+                let variant_ident = &variant.ident;
+                quote::quote! {
+                    #status_code_enum_name_token_stream::#variant_ident{ 
+                        #(#fields_cloned),*
+                    } => Self::#variant_ident{ 
+                        #(#fields),*
+                    }
+                }
+            });
+            quote::quote!{
+                impl std::convert::From<#status_code_enum_name_token_stream> for #ident_response_variants_token_stream {
+                    fn from(value : #status_code_enum_name_token_stream) -> Self {
+                        match value {
+                            #(#variants),*
+                        }
+                    }
+                } 
+            }
+        };
+        quote::quote!{
+            #status_enum
+            #status_enum_from
+        }
     });
-    // let h =         quote::quote!{
-    //    #(#generated_froms)*
+    
+    // let h = quote::quote!{
+    //    #(#generated_status_code_enums_with_from_impls)*
     // };
     // println!("{h}");
     
@@ -979,7 +1009,7 @@ pub fn type_variants_from_reqwest_response_handle(
                 }
             }
         }
-        
+        #(#generated_status_code_enums_with_from_impls)*
         // impl std::convert::TryFrom<reqwest::Response> for #ident {
         //     type Error = crate::common::api_request_unexpected_error::ApiRequestUnexpectedError;
         //     fn try_from(response: reqwest::Response) -> Result<Self, Self::Error> {
