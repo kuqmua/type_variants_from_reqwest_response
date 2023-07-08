@@ -484,8 +484,8 @@ pub fn type_variants_from_reqwest_response_handle(
     } else {
         panic!("{ident} FromEnum has no {attribute_path}");
     };
-    println!("{desirable_type_token_stream}");
-    println!("{desirable_type_status_code_token_stream}");
+    // println!("{desirable_type_token_stream}");
+    // println!("{desirable_type_status_code_token_stream}");
     let data_enum = if let syn::Data::Enum(data_enum) = ast.data {
         data_enum
     } else {
@@ -536,7 +536,7 @@ pub fn type_variants_from_reqwest_response_handle(
         .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {ident_with_serialize_deserialize_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
     let enum_with_serialize_deserialize_logic = proc_macro_helpers::error_occurence::generate_with_serialize_deserialize_version::generate_with_serialize_deserialize_version(
         supported_enum_variant.clone(),
-        &data_enum,
+        data_enum.variants.iter().map(|variant|{variant.clone()}).collect(),
         proc_macro_helpers::error_occurence::hardcode::OCCURENCE_CAMEL_CASE,
         with_serialize_deserialize_lower_case.clone(),
         error_occurence_lower_case.clone(),
@@ -762,7 +762,58 @@ pub fn type_variants_from_reqwest_response_handle(
             }
             acc
     });
-    println!("{}", hashmap_attribute_variants.len());
+    // println!("{}", hashmap_attribute_variants.len());
+    let generated_froms = hashmap_attribute_variants.iter().for_each(|(attribute, vec_variants)|{
+        // println!("{attribute}{}", vec_variants.len());
+        let status_code_enum_name_stingified = format!("{ident_response_variants_token_stream}{attribute}");
+        let status_code_enum_name_token_stream = status_code_enum_name_stingified
+        .parse::<proc_macro2::TokenStream>()
+        .unwrap_or_else(|_| panic!("{macro_name} {ident} {status_code_enum_name_stingified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
+        (
+            {
+                let d = proc_macro_helpers::error_occurence::generate_with_serialize_deserialize_version::generate_with_serialize_deserialize_version(
+                    supported_enum_variant.clone(),
+                    vec_variants.iter().map(|variant|variant.clone()).collect(),
+                    proc_macro_helpers::error_occurence::hardcode::OCCURENCE_CAMEL_CASE,
+                    with_serialize_deserialize_lower_case.clone(),
+                    error_occurence_lower_case.clone(),
+                    vec_lower_case.clone(),
+                    hashmap_lower_case.clone(),
+                    key_lower_case.clone(),
+                    value_lower_case.clone(),
+                    proc_macro_name_ident_stringified.clone(),
+                    is_none_stringified,
+                    proc_macro_helpers::error_occurence::hardcode::SUPPORTS_ONLY_STRINGIFIED,
+                    syn_generic_argument_type_stringified,
+                    syn_type_path_stringified.clone(),
+                    reference_camel_case,
+                    vec_camel_case,
+                    hashmap_camel_case,
+                    generics_len,
+                    string_camel_case,
+                    path_camel_case,
+                    key_camel_case,
+                    value_camel_case,
+                    supported_container_double_dot_double_dot,
+                    supports_only_supported_container_stringified.clone(),
+                    with_serialize_deserialize_camel_case.clone(),
+                    suported_enum_variant_stringified,
+                    unnamed_camel_case.clone(),
+                    proc_macro_helpers::error_occurence::hardcode::SYN_FIELDS,
+                    status_code_enum_name_token_stream.clone(),
+                    None,
+                    false,
+                );
+                println!("{d}");
+                d
+            }
+        );
+    });
+    // let h =         quote::quote!{
+    //    #(#generated_froms)*
+    // };
+    // println!("{h}");
+    
 
     let mut is_last_element_found = false;
     let (status_codes_enums_with_from_impl, status_code_enums_try_from) = unique_status_codes
