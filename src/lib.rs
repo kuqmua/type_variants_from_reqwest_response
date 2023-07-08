@@ -1006,7 +1006,9 @@ pub fn type_variants_from_reqwest_response_handle(
         unnamed_camel_case.clone(),
         proc_macro_helpers::error_occurence::hardcode::SYN_FIELDS,
         ident_response_variants_token_stream,
-        None,
+        Some(quote::quote!{
+            DesirableType(#desirable_type_token_stream)
+        }),
         false,
     );
     println!("{enum_with_serialize_deserialize_logic}");
