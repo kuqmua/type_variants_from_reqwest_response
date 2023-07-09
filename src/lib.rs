@@ -518,16 +518,22 @@ pub fn type_variants_from_reqwest_response(
         "syn::Type::{}",
         proc_macro_helpers::error_occurence::hardcode::PATH_CAMEL_CASE
     );
-    let vec_camel_case = "Vec";
     let generics_len = ast.generics.params.len();
-    let string_camel_case = "String";
-    let supported_container_double_dot_double_dot = "proc_macro_helpers::error_occurence::supported_container::SupportedContainer::";
-    let supports_only_supported_container_stringified = format!("{} {supported_container_double_dot_double_dot}", proc_macro_helpers::error_occurence::hardcode::SUPPORTS_ONLY_STRINGIFIED);
-    let serialize_deserialize_camel_case = "SerializeDeserialize";
-    let with_camel_case = "With";
-    let with_serialize_deserialize_camel_case = format!("{with_camel_case}{serialize_deserialize_camel_case}");
-    let suported_enum_variant_stringified = "proc_macro_helpers::error_occurence::supported_enum_variant::SuportedEnumVariant";
-    let with_serialize_deserialize_camel_case = format!("{with_camel_case}{serialize_deserialize_camel_case}");
+    let supports_only_supported_container_stringified = format!(
+        "{} {}", 
+        proc_macro_helpers::error_occurence::hardcode::SUPPORTS_ONLY_STRINGIFIED,
+        proc_macro_helpers::error_occurence::hardcode::SUPPORTED_CONTAINER_DOUBLE_DOT_DOUBLE_DOT
+    );
+    let with_serialize_deserialize_camel_case = format!(
+        "{}{}",
+        proc_macro_helpers::error_occurence::hardcode::WITH_CAMEL_CASE,
+        proc_macro_helpers::error_occurence::hardcode::SERIALIZE_DESERIALIZE_CAMEL_CASE
+    );
+    let with_serialize_deserialize_camel_case = format!(
+        "{}{}",
+        proc_macro_helpers::error_occurence::hardcode::WITH_CAMEL_CASE,
+        proc_macro_helpers::error_occurence::hardcode::SERIALIZE_DESERIALIZE_CAMEL_CASE
+    );
     let ident_with_serialize_deserialize_stringified = format!("{ident}{with_serialize_deserialize_camel_case}");
     let ident_with_serialize_deserialize_token_stream = ident_with_serialize_deserialize_stringified
         .parse::<proc_macro2::TokenStream>()
@@ -548,17 +554,17 @@ pub fn type_variants_from_reqwest_response(
         proc_macro_helpers::error_occurence::hardcode::GENERIC_ARGUMENT_TYPE_STRINGIFIED,
         syn_type_path_stringified.clone(),
         proc_macro_helpers::error_occurence::hardcode::REFERENCE_CAMEL_CASE,
-        vec_camel_case,
+        proc_macro_helpers::error_occurence::hardcode::VEC_CAMEL_CASE,
         proc_macro_helpers::error_occurence::hardcode::HASHMAP_CAMEL_CASE,
         generics_len,
-        string_camel_case,
+        proc_macro_helpers::error_occurence::hardcode::STRING_CAMEL_CASE,
         proc_macro_helpers::error_occurence::hardcode::PATH_CAMEL_CASE,
         proc_macro_helpers::error_occurence::hardcode::KEY_CAMEL_CASE,
         proc_macro_helpers::error_occurence::hardcode::VALUE_CAMEL_CASE,
-        supported_container_double_dot_double_dot,
+        proc_macro_helpers::error_occurence::hardcode::SUPPORTED_CONTAINER_DOUBLE_DOT_DOUBLE_DOT,
         supports_only_supported_container_stringified.clone(),
         with_serialize_deserialize_camel_case.clone(),
-        suported_enum_variant_stringified,
+        proc_macro_helpers::error_occurence::hardcode::SUPPORTED_ENUM_VARIANT_STRINGIFIED,
         unnamed_camel_case.clone(),
         proc_macro_helpers::error_occurence::hardcode::SYN_FIELDS,
         ident_response_variants_token_stream.clone(),
@@ -782,17 +788,17 @@ pub fn type_variants_from_reqwest_response(
                 proc_macro_helpers::error_occurence::hardcode::GENERIC_ARGUMENT_TYPE_STRINGIFIED,
                 syn_type_path_stringified.clone(),
                 proc_macro_helpers::error_occurence::hardcode::REFERENCE_CAMEL_CASE,
-                vec_camel_case,
+                proc_macro_helpers::error_occurence::hardcode::VEC_CAMEL_CASE,
                 proc_macro_helpers::error_occurence::hardcode::HASHMAP_CAMEL_CASE,
                 generics_len,
-                string_camel_case,
+                proc_macro_helpers::error_occurence::hardcode::STRING_CAMEL_CASE,
                 proc_macro_helpers::error_occurence::hardcode::PATH_CAMEL_CASE,
                 proc_macro_helpers::error_occurence::hardcode::KEY_CAMEL_CASE,
                 proc_macro_helpers::error_occurence::hardcode::VALUE_CAMEL_CASE,
-                supported_container_double_dot_double_dot,
+                proc_macro_helpers::error_occurence::hardcode::SUPPORTED_CONTAINER_DOUBLE_DOT_DOUBLE_DOT,
                 supports_only_supported_container_stringified.clone(),
                 with_serialize_deserialize_camel_case.clone(),
-                suported_enum_variant_stringified,
+                proc_macro_helpers::error_occurence::hardcode::SUPPORTED_ENUM_VARIANT_STRINGIFIED,
                 unnamed_camel_case.clone(),
                 proc_macro_helpers::error_occurence::hardcode::SYN_FIELDS,
                 status_code_enum_name_token_stream.clone(),
