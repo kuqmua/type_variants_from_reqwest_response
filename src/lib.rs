@@ -512,8 +512,7 @@ pub fn type_variants_from_reqwest_response(
     let error_occurence_lower_case = error_occurence_camel_case.to_case(convert_case::Case::Snake).to_lowercase();
     let vec_lower_case = proc_macro_helpers::error_occurence::hardcode::VEC_CAMEL_CASE.to_lowercase(); 
     let hashmap_lower_case = proc_macro_helpers::error_occurence::hardcode::HASHMAP_CAMEL_CASE.to_case(convert_case::Case::Flat);
-    let key_camel_case = "Key";
-    let key_lower_case = key_camel_case.to_lowercase();
+    let key_lower_case = proc_macro_helpers::error_occurence::hardcode::KEY_CAMEL_CASE.to_lowercase();
     let value_camel_case = "Value";
     let value_lower_case = value_camel_case.to_lowercase();
     let is_none_stringified = "is None";
@@ -556,7 +555,7 @@ pub fn type_variants_from_reqwest_response(
         generics_len,
         string_camel_case,
         path_camel_case,
-        key_camel_case,
+        proc_macro_helpers::error_occurence::hardcode::KEY_CAMEL_CASE,
         value_camel_case,
         supported_container_double_dot_double_dot,
         supports_only_supported_container_stringified.clone(),
@@ -790,7 +789,7 @@ pub fn type_variants_from_reqwest_response(
                 generics_len,
                 string_camel_case,
                 path_camel_case,
-                key_camel_case,
+                proc_macro_helpers::error_occurence::hardcode::KEY_CAMEL_CASE,
                 value_camel_case,
                 supported_container_double_dot_double_dot,
                 supports_only_supported_container_stringified.clone(),
