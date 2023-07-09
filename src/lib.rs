@@ -502,9 +502,9 @@ pub fn type_variants_from_reqwest_response(
         proc_macro_name_ident_stringified.clone(),
         unnamed_camel_case.clone(),
     );
-    let with_camel_case = "With";
     let with_serialize_deserialize_camel_case = format!(
-        "{with_camel_case}{}",
+        "{}{}",
+        proc_macro_helpers::error_occurence::hardcode::WITH_CAMEL_CASE,
         proc_macro_helpers::error_occurence::hardcode::SERIALIZE_DESERIALIZE_CAMEL_CASE
     );
     let with_serialize_deserialize_lower_case = with_serialize_deserialize_camel_case.to_case(convert_case::Case::Snake).to_lowercase();
