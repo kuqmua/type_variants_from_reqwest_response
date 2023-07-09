@@ -415,19 +415,17 @@ pub fn type_variants_from_reqwest_response(
         panic!("{macro_name} {}", proc_macro_helpers::global_variables::hardcode::AST_PARSE_FAILED)
     });
     let ident = &ast.ident;
-    //TODO WITH SERIALIZE DESERIALIZE STRUCT GEN AS FUNCTION IN PROC_MACRO_HELPERS
     let ident_response_variants_stringified = format!("{ident}ResponseVariants");
     let ident_response_variants_token_stream = ident_response_variants_stringified
     .parse::<proc_macro2::TokenStream>()
     .unwrap_or_else(|_| panic!("{macro_name} {ident} {ident_response_variants_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
     let attribute_path = "type_variants_from_reqwest_response::type_variants_from_reqwest_response_attribute";
     let option_attribute = ast.attrs.into_iter().find(|attr| {
-        let possible_path = {
+        attribute_path == {
             let mut stringified_path = quote::ToTokens::to_token_stream(&attr.path).to_string();
             stringified_path.retain(|c| !c.is_whitespace());
             stringified_path
-        };
-        attribute_path == possible_path
+        }
     });
     let (
         desirable_type_token_stream,
@@ -485,19 +483,16 @@ pub fn type_variants_from_reqwest_response(
                         },
                     }
             }
-            false => panic!("FromEnum {ident} stringified_tokens.len() > 3 == false"),
+            false => panic!("FromEnum {ident} {stringified_tokens}.len() > 3 == false"),
         }
     } else {
         panic!("{ident} FromEnum has no {attribute_path}");
     };
-    // println!("{desirable_type_token_stream}");
-    // println!("{desirable_type_status_code_token_stream}");
     let data_enum = if let syn::Data::Enum(data_enum) = ast.data {
         data_enum
     } else {
         panic!("{macro_name} {ident} syn::Data is not a syn::Data::Enum");
     };
-    //
     use convert_case::Casing;
     let named_lower_case = proc_macro_helpers::error_occurence::hardcode::NAMED_CAMEL_CASE.to_case(convert_case::Case::Snake).to_lowercase();
     let unnamed_camel_case = format!("Un{named_lower_case}");
@@ -513,8 +508,7 @@ pub fn type_variants_from_reqwest_response(
     let with_serialize_deserialize_lower_case = with_serialize_deserialize_camel_case.to_case(convert_case::Case::Snake).to_lowercase();
     let error_occurence_camel_case = format!("{}{}", proc_macro_helpers::error_occurence::hardcode::ERROR_OCCURENCE_CASE, proc_macro_helpers::error_occurence::hardcode::OCCURENCE_CAMEL_CASE);
     let error_occurence_lower_case = error_occurence_camel_case.to_case(convert_case::Case::Snake).to_lowercase();
-    let vec_camel_case = "Vec";
-    let vec_lower_case = vec_camel_case.to_lowercase(); 
+    let vec_lower_case = proc_macro_helpers::error_occurence::hardcode::VEC_CAMEL_CASE.to_lowercase(); 
     let hashmap_camel_case = "HashMap";
     let hashmap_lower_case = hashmap_camel_case.to_case(convert_case::Case::Flat);
     let key_camel_case = "Key";
