@@ -514,7 +514,6 @@ pub fn type_variants_from_reqwest_response(
     let hashmap_lower_case = proc_macro_helpers::error_occurence::hardcode::HASHMAP_CAMEL_CASE.to_case(convert_case::Case::Flat);
     let key_lower_case = proc_macro_helpers::error_occurence::hardcode::KEY_CAMEL_CASE.to_lowercase();
     let value_lower_case = proc_macro_helpers::error_occurence::hardcode::VALUE_CAMEL_CASE.to_lowercase();
-    let is_none_stringified = "is None";
     let syn_generic_argument_type_stringified = "syn::GenericArgument::Type";
     let path_camel_case = "Path";
     let syn_type_path_stringified = format!("syn::Type::{path_camel_case}");
@@ -544,7 +543,7 @@ pub fn type_variants_from_reqwest_response(
         key_lower_case.clone(),
         value_lower_case.clone(),
         proc_macro_name_ident_stringified.clone(),
-        is_none_stringified,
+        proc_macro_helpers::error_occurence::hardcode::IS_NONE_STRINGIFIED,
         proc_macro_helpers::error_occurence::hardcode::SUPPORTS_ONLY_STRINGIFIED,
         syn_generic_argument_type_stringified,
         syn_type_path_stringified.clone(),
@@ -778,7 +777,7 @@ pub fn type_variants_from_reqwest_response(
                 key_lower_case.clone(),
                 value_lower_case.clone(),
                 proc_macro_name_ident_stringified.clone(),
-                is_none_stringified,
+                proc_macro_helpers::error_occurence::hardcode::IS_NONE_STRINGIFIED,
                 proc_macro_helpers::error_occurence::hardcode::SUPPORTS_ONLY_STRINGIFIED,
                 syn_generic_argument_type_stringified,
                 syn_type_path_stringified.clone(),
