@@ -511,8 +511,7 @@ pub fn type_variants_from_reqwest_response(
     let error_occurence_camel_case = format!("{}{}", proc_macro_helpers::error_occurence::hardcode::ERROR_OCCURENCE_CASE, proc_macro_helpers::error_occurence::hardcode::OCCURENCE_CAMEL_CASE);
     let error_occurence_lower_case = error_occurence_camel_case.to_case(convert_case::Case::Snake).to_lowercase();
     let vec_lower_case = proc_macro_helpers::error_occurence::hardcode::VEC_CAMEL_CASE.to_lowercase(); 
-    let hashmap_camel_case = "HashMap";
-    let hashmap_lower_case = hashmap_camel_case.to_case(convert_case::Case::Flat);
+    let hashmap_lower_case = proc_macro_helpers::error_occurence::hardcode::HASHMAP_CAMEL_CASE.to_case(convert_case::Case::Flat);
     let key_camel_case = "Key";
     let key_lower_case = key_camel_case.to_lowercase();
     let value_camel_case = "Value";
@@ -553,7 +552,7 @@ pub fn type_variants_from_reqwest_response(
         syn_type_path_stringified.clone(),
         reference_camel_case,
         vec_camel_case,
-        hashmap_camel_case,
+        proc_macro_helpers::error_occurence::hardcode::HASHMAP_CAMEL_CASE,
         generics_len,
         string_camel_case,
         path_camel_case,
@@ -787,7 +786,7 @@ pub fn type_variants_from_reqwest_response(
                 syn_type_path_stringified.clone(),
                 reference_camel_case,
                 vec_camel_case,
-                hashmap_camel_case,
+                proc_macro_helpers::error_occurence::hardcode::HASHMAP_CAMEL_CASE,
                 generics_len,
                 string_camel_case,
                 path_camel_case,
