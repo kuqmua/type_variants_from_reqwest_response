@@ -514,7 +514,6 @@ pub fn type_variants_from_reqwest_response(
     let hashmap_lower_case = proc_macro_helpers::error_occurence::hardcode::HASHMAP_CAMEL_CASE.to_case(convert_case::Case::Flat);
     let key_lower_case = proc_macro_helpers::error_occurence::hardcode::KEY_CAMEL_CASE.to_lowercase();
     let value_lower_case = proc_macro_helpers::error_occurence::hardcode::VALUE_CAMEL_CASE.to_lowercase();
-    let syn_generic_argument_type_stringified = "syn::GenericArgument::Type";
     let path_camel_case = "Path";
     let syn_type_path_stringified = format!("syn::Type::{path_camel_case}");
     let reference_camel_case = "Reference";
@@ -545,7 +544,7 @@ pub fn type_variants_from_reqwest_response(
         proc_macro_name_ident_stringified.clone(),
         proc_macro_helpers::error_occurence::hardcode::IS_NONE_STRINGIFIED,
         proc_macro_helpers::error_occurence::hardcode::SUPPORTS_ONLY_STRINGIFIED,
-        syn_generic_argument_type_stringified,
+        proc_macro_helpers::error_occurence::hardcode::GENERIC_ARGUMENT_TYPE_STRINGIFIED,
         syn_type_path_stringified.clone(),
         reference_camel_case,
         vec_camel_case,
@@ -779,7 +778,7 @@ pub fn type_variants_from_reqwest_response(
                 proc_macro_name_ident_stringified.clone(),
                 proc_macro_helpers::error_occurence::hardcode::IS_NONE_STRINGIFIED,
                 proc_macro_helpers::error_occurence::hardcode::SUPPORTS_ONLY_STRINGIFIED,
-                syn_generic_argument_type_stringified,
+                proc_macro_helpers::error_occurence::hardcode::GENERIC_ARGUMENT_TYPE_STRINGIFIED,
                 syn_type_path_stringified.clone(),
                 reference_camel_case,
                 vec_camel_case,
