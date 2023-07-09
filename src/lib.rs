@@ -518,7 +518,6 @@ pub fn type_variants_from_reqwest_response(
         "syn::Type::{}",
         proc_macro_helpers::error_occurence::hardcode::PATH_CAMEL_CASE
     );
-    let reference_camel_case = "Reference";
     let vec_camel_case = "Vec";
     let generics_len = ast.generics.params.len();
     let string_camel_case = "String";
@@ -548,7 +547,7 @@ pub fn type_variants_from_reqwest_response(
         proc_macro_helpers::error_occurence::hardcode::SUPPORTS_ONLY_STRINGIFIED,
         proc_macro_helpers::error_occurence::hardcode::GENERIC_ARGUMENT_TYPE_STRINGIFIED,
         syn_type_path_stringified.clone(),
-        reference_camel_case,
+        proc_macro_helpers::error_occurence::hardcode::REFERENCE_CAMEL_CASE,
         vec_camel_case,
         proc_macro_helpers::error_occurence::hardcode::HASHMAP_CAMEL_CASE,
         generics_len,
@@ -782,7 +781,7 @@ pub fn type_variants_from_reqwest_response(
                 proc_macro_helpers::error_occurence::hardcode::SUPPORTS_ONLY_STRINGIFIED,
                 proc_macro_helpers::error_occurence::hardcode::GENERIC_ARGUMENT_TYPE_STRINGIFIED,
                 syn_type_path_stringified.clone(),
-                reference_camel_case,
+                proc_macro_helpers::error_occurence::hardcode::REFERENCE_CAMEL_CASE,
                 vec_camel_case,
                 proc_macro_helpers::error_occurence::hardcode::HASHMAP_CAMEL_CASE,
                 generics_len,
