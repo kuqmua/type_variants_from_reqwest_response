@@ -513,8 +513,7 @@ pub fn type_variants_from_reqwest_response(
     let vec_lower_case = proc_macro_helpers::error_occurence::hardcode::VEC_CAMEL_CASE.to_lowercase(); 
     let hashmap_lower_case = proc_macro_helpers::error_occurence::hardcode::HASHMAP_CAMEL_CASE.to_case(convert_case::Case::Flat);
     let key_lower_case = proc_macro_helpers::error_occurence::hardcode::KEY_CAMEL_CASE.to_lowercase();
-    let value_camel_case = "Value";
-    let value_lower_case = value_camel_case.to_lowercase();
+    let value_lower_case = proc_macro_helpers::error_occurence::hardcode::VALUE_CAMEL_CASE.to_lowercase();
     let is_none_stringified = "is None";
     let syn_generic_argument_type_stringified = "syn::GenericArgument::Type";
     let path_camel_case = "Path";
@@ -556,7 +555,7 @@ pub fn type_variants_from_reqwest_response(
         string_camel_case,
         path_camel_case,
         proc_macro_helpers::error_occurence::hardcode::KEY_CAMEL_CASE,
-        value_camel_case,
+        proc_macro_helpers::error_occurence::hardcode::VALUE_CAMEL_CASE,
         supported_container_double_dot_double_dot,
         supports_only_supported_container_stringified.clone(),
         with_serialize_deserialize_camel_case.clone(),
@@ -790,7 +789,7 @@ pub fn type_variants_from_reqwest_response(
                 string_camel_case,
                 path_camel_case,
                 proc_macro_helpers::error_occurence::hardcode::KEY_CAMEL_CASE,
-                value_camel_case,
+                proc_macro_helpers::error_occurence::hardcode::VALUE_CAMEL_CASE,
                 supported_container_double_dot_double_dot,
                 supports_only_supported_container_stringified.clone(),
                 with_serialize_deserialize_camel_case.clone(),
