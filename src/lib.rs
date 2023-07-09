@@ -514,8 +514,10 @@ pub fn type_variants_from_reqwest_response(
     let hashmap_lower_case = proc_macro_helpers::error_occurence::hardcode::HASHMAP_CAMEL_CASE.to_case(convert_case::Case::Flat);
     let key_lower_case = proc_macro_helpers::error_occurence::hardcode::KEY_CAMEL_CASE.to_lowercase();
     let value_lower_case = proc_macro_helpers::error_occurence::hardcode::VALUE_CAMEL_CASE.to_lowercase();
-    let path_camel_case = "Path";
-    let syn_type_path_stringified = format!("syn::Type::{path_camel_case}");
+    let syn_type_path_stringified = format!(
+        "syn::Type::{}",
+        proc_macro_helpers::error_occurence::hardcode::PATH_CAMEL_CASE
+    );
     let reference_camel_case = "Reference";
     let vec_camel_case = "Vec";
     let generics_len = ast.generics.params.len();
@@ -551,7 +553,7 @@ pub fn type_variants_from_reqwest_response(
         proc_macro_helpers::error_occurence::hardcode::HASHMAP_CAMEL_CASE,
         generics_len,
         string_camel_case,
-        path_camel_case,
+        proc_macro_helpers::error_occurence::hardcode::PATH_CAMEL_CASE,
         proc_macro_helpers::error_occurence::hardcode::KEY_CAMEL_CASE,
         proc_macro_helpers::error_occurence::hardcode::VALUE_CAMEL_CASE,
         supported_container_double_dot_double_dot,
@@ -785,7 +787,7 @@ pub fn type_variants_from_reqwest_response(
                 proc_macro_helpers::error_occurence::hardcode::HASHMAP_CAMEL_CASE,
                 generics_len,
                 string_camel_case,
-                path_camel_case,
+                proc_macro_helpers::error_occurence::hardcode::PATH_CAMEL_CASE,
                 proc_macro_helpers::error_occurence::hardcode::KEY_CAMEL_CASE,
                 proc_macro_helpers::error_occurence::hardcode::VALUE_CAMEL_CASE,
                 supported_container_double_dot_double_dot,
