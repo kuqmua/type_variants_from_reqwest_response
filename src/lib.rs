@@ -513,7 +513,6 @@ pub fn type_variants_from_reqwest_response(
     let enum_with_serialize_deserialize_logic = proc_macro_helpers::error_occurence::generate_with_serialize_deserialize_version::generate_with_serialize_deserialize_version(
         supported_enum_variant.clone(),
         data_enum.variants.iter().map(|variant|{variant.clone()}).collect(),
-        proc_macro_helpers::error_occurence::hardcode::OCCURENCE_CAMEL_CASE,
         with_serialize_deserialize_lower_case.clone(),
         error_occurence_lower_case.clone(),
         vec_lower_case.clone(),
@@ -521,7 +520,6 @@ pub fn type_variants_from_reqwest_response(
         key_lower_case.clone(),
         value_lower_case.clone(),
         proc_macro_name_ident_stringified.clone(),
-        proc_macro_helpers::error_occurence::hardcode::SYN_GENERIC_ARGUMENT_TYPE_STRINGIFIED,
         syn_type_path_stringified.clone(),
         proc_macro_helpers::error_occurence::hardcode::REFERENCE_CAMEL_CASE,
         proc_macro_helpers::error_occurence::hardcode::VEC_CAMEL_CASE,
@@ -704,7 +702,6 @@ pub fn type_variants_from_reqwest_response(
             let status_enum = proc_macro_helpers::error_occurence::generate_with_serialize_deserialize_version::generate_with_serialize_deserialize_version(
                 supported_enum_variant.clone(),
                 vec_variants.iter().map(|variant|variant.clone()).collect(),
-                proc_macro_helpers::error_occurence::hardcode::OCCURENCE_CAMEL_CASE,
                 with_serialize_deserialize_lower_case.clone(),
                 error_occurence_lower_case.clone(),
                 vec_lower_case.clone(),
@@ -712,7 +709,6 @@ pub fn type_variants_from_reqwest_response(
                 key_lower_case.clone(),
                 value_lower_case.clone(),
                 proc_macro_name_ident_stringified.clone(),
-                proc_macro_helpers::error_occurence::hardcode::SYN_GENERIC_ARGUMENT_TYPE_STRINGIFIED,
                 syn_type_path_stringified.clone(),
                 proc_macro_helpers::error_occurence::hardcode::REFERENCE_CAMEL_CASE,
                 proc_macro_helpers::error_occurence::hardcode::VEC_CAMEL_CASE,
