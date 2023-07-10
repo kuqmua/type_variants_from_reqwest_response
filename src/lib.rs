@@ -497,8 +497,8 @@ pub fn type_variants_from_reqwest_response(
     let unnamed_camel_case = proc_macro_helpers::error_occurence::hardcode::unnamed_camel_case();
     let supported_enum_variant = proc_macro_helpers::error_occurence::supported_enum_variant::create_supported_enum_variant(
         &data_enum,
-        proc_macro_name_ident_stringified.clone(),
-        unnamed_camel_case.clone(),
+        &proc_macro_name_ident_stringified,
+        &unnamed_camel_case,
     );
     let with_serialize_deserialize_camel_case = proc_macro_helpers::error_occurence::hardcode::with_serialize_deserialize_camel_case();
     let with_serialize_deserialize_lower_case = proc_macro_helpers::error_occurence::hardcode::with_serialize_deserialize_lower_case();
