@@ -568,28 +568,25 @@ pub fn type_variants_from_reqwest_response(
             } else {
                 panic!("{proc_macro_name_ident_stringified} no supported attribute");
             };
-            if !acc.0.contains(&attr) {
-                acc.0.push(attr.clone())
-            }
             let (
                 variants_from_status_code,
                 desirable_type_try_from_ident,
             ) = {
                 let variant_ident = &variant.ident;
                 let http_status_code_token_stream = attr.to_http_status_code_quote();
-                match &variant.fields {
+                match variant.fields {
                     syn::Fields::Named(fields_named) => {
                         let fields_named_named_len = fields_named.named.len();
                         let (
                             fields_token_stream_variants_from_status_code,
                             fields_token_stream_desirable_type_try_from_ident,
-                        ) = fields_named.named.iter().fold(
+                        ) = fields_named.named.into_iter().fold(
                             (
                                 Vec::with_capacity(fields_named_named_len),
                                 Vec::with_capacity(fields_named_named_len),
                             ),
                             |mut acc, field| {
-                                let field_ident = field.ident.clone().unwrap_or_else(|| {
+                                let field_ident = field.ident.unwrap_or_else(|| {
                                     panic!("{proc_macro_name_ident_stringified} named field ident is None");
                                 });
                                 acc.0.push(quote::quote! { #field_ident: _ });
@@ -631,6 +628,9 @@ pub fn type_variants_from_reqwest_response(
                     }
                 }
             };
+            if !acc.0.contains(&attr) {
+                acc.0.push(attr)
+            }
             acc.1.push(variants_from_status_code);
             acc.2.push(desirable_type_try_from_ident);
             acc
@@ -691,7 +691,7 @@ pub fn type_variants_from_reqwest_response(
             .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {status_code_enum_name_stingified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
             let status_enum = proc_macro_helpers::error_occurence::generate_with_serialize_deserialize_version::generate_with_serialize_deserialize_version(
                 &supported_enum_variant,
-                vec_variants.iter().map(|variant|variant.clone()).collect(),
+                vec_variants.iter().cloned().collect(),
                 &with_serialize_deserialize_lower_case,
                 &error_occurence_lower_case,
                 &vec_lower_case,
