@@ -66,7 +66,6 @@
 pub fn type_variants_from_reqwest_response(
     input: proc_macro::TokenStream,
 ) -> proc_macro::TokenStream {
-    //todo pub private or scope {}
     proc_macro_helpers::panic_location::panic_location(); //panic_location function from https://github.com/kuqmua/proc_macro_helpers
     let macro_name = "TypeVariantsFromReqwestResponse";
     let ast: syn::DeriveInput = syn::parse(input).unwrap_or_else(|_| {
