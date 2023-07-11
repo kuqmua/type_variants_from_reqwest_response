@@ -577,7 +577,7 @@ pub fn type_variants_from_reqwest_response(
         ) -> Result<#desirable_type_token_stream, #ident_error_named_token_stream<'a>>
         {
             match future.await {
-                Ok(response) => match TryGetResponseVariants::try_from(response) {
+                Ok(response) => match #ident_response_variants_token_stream::try_from(response) {
                     Ok(variants) => match #desirable_type_token_stream::try_from(variants)
                     {
                         Ok(value) => Ok(value),
