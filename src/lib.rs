@@ -445,6 +445,7 @@ pub fn type_variants_from_reqwest_response(
         generated_status_code_enums_with_from_impls
     };
     let mut is_last_element_found = false;
+    let api_request_unexpected_error_path_token_stream = quote::quote! { crate::common::api_request_unexpected_error::ApiRequestUnexpectedError };
     let status_code_enums_try_from_variants = unique_status_codes
         .into_iter()
         .enumerate()
@@ -463,7 +464,7 @@ pub fn type_variants_from_reqwest_response(
                         acc.push(quote::quote! {
                             else {
                                 Err(
-                                    crate::common::api_request_unexpected_error::ApiRequestUnexpectedError::StatusCode {
+                                    #api_request_unexpected_error_path_token_stream::StatusCode {
                                         status_code,
                                     },
                                 )
@@ -479,7 +480,7 @@ pub fn type_variants_from_reqwest_response(
                                     ) {
                                         Ok(value) => Ok(#ident_response_variants_token_stream::from(value)),
                                         Err(e) => Err(
-                                            crate::common::api_request_unexpected_error::ApiRequestUnexpectedError::DeserializeBody{
+                                            #api_request_unexpected_error_path_token_stream::DeserializeBody{
                                                 reqwest: e,
                                                 status_code,
                                             },
@@ -498,7 +499,7 @@ pub fn type_variants_from_reqwest_response(
                 match futures::executor::block_on(response.json::<#desirable_type_enum_name>()) {
                     Ok(value) => Ok(#ident_response_variants_token_stream::from(value)),
                     Err(e) => Err(
-                        crate::common::api_request_unexpected_error::ApiRequestUnexpectedError::DeserializeBody {
+                        #api_request_unexpected_error_path_token_stream::DeserializeBody {
                             reqwest: e,
                             status_code,
                         },
@@ -530,7 +531,7 @@ pub fn type_variants_from_reqwest_response(
         }
         #(#generated_status_code_enums_with_from_impls)*
         impl std::convert::TryFrom<reqwest::Response> for #ident_response_variants_token_stream {
-            type Error = crate::common::api_request_unexpected_error::ApiRequestUnexpectedError;
+            type Error = #api_request_unexpected_error_path_token_stream;
             fn try_from(response: reqwest::Response) -> Result<Self, Self::Error> {
                 let status_code = response.status();
                 #(#status_code_enums_try_from)*
@@ -555,7 +556,7 @@ pub fn type_variants_from_reqwest_response(
                 get: #try_error_ident_token_stream,
                 code_occurence: crate::common::code_occurence::CodeOccurence<'a>,
             },
-            UnexpectedStatusCode { 
+            UnexpectedStatusCode { //todo - additional fields
                 #[eo_display]
                 status_code: http::StatusCode,
                 code_occurence: crate::common::code_occurence::CodeOccurence<'a>,
@@ -588,13 +589,13 @@ pub fn type_variants_from_reqwest_response(
                         }),
                     },
                     Err(e) => match e {
-                        crate::common::api_request_unexpected_error::ApiRequestUnexpectedError::StatusCode { status_code } => Err(
+                        #api_request_unexpected_error_path_token_stream::StatusCode { status_code } => Err(
                             #ident_error_named_token_stream::UnexpectedStatusCode {
                                 status_code,
                                 code_occurence: crate::code_occurence_tufa_common!()
                             }
                         ),
-                        crate::common::api_request_unexpected_error::ApiRequestUnexpectedError::DeserializeBody {
+                        #api_request_unexpected_error_path_token_stream::DeserializeBody {
                             reqwest,
                             status_code
                         } => Err(
