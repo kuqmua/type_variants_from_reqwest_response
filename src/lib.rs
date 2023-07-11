@@ -532,7 +532,7 @@ pub fn type_variants_from_reqwest_response(
         false,
     );
     let variants_len = data_enum.variants.len();
-    let try_error_ident_stringified = format!("{ident}WithSerializeDeserialize");
+    let try_error_ident_stringified = format!("{ident}{}", proc_macro_helpers::error_occurence::hardcode::with_serialize_deserialize_camel_case());
     let try_error_ident_token_stream = try_error_ident_stringified
     .parse::<proc_macro2::TokenStream>()
     .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {try_error_ident_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
