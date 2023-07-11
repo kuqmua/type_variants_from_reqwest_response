@@ -190,6 +190,7 @@ pub fn type_variants_from_reqwest_response(
             DesirableType(#desirable_type_token_stream)
         }),
         false,
+        true
     );
     let variants_len = data_enum.variants.len();
     let try_error_ident_stringified = format!("{ident}{}", proc_macro_helpers::error_occurence::hardcode::with_serialize_deserialize_camel_case());
@@ -388,6 +389,7 @@ pub fn type_variants_from_reqwest_response(
                 &status_code_enum_name_token_stream,
                 optional_additional_named_variant,
                 false,
+                false
             );
             let status_enum_from = {
                 let variants = vec_variants.iter().map(|variant|{
