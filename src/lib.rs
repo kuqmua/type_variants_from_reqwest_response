@@ -466,6 +466,8 @@ pub fn type_variants_from_reqwest_response(
                                 Err(
                                     #api_request_unexpected_error_path_token_stream::StatusCode {
                                         status_code,
+                                        headers,
+                                        response_text
                                     },
                                 )
                             }
@@ -475,14 +477,14 @@ pub fn type_variants_from_reqwest_response(
                         if let false = desirable_type_attribute == status_code_attribute {
                             acc.push(quote::quote! {
                                 else if status_code == #http_status_code_token_stream {
-                                    match futures::executor::block_on(
-                                        response.json::<#status_code_enum_name_token_stream>(),
-                                    ) {
-                                        Ok(value) => Ok(#ident_response_variants_token_stream::from(value)),
+                                    match serde_json::from_str::<#status_code_enum_name_token_stream>(&response_text) {
+                                        Ok(value) => Ok(#ident_response_variants_token_stream::from(value)), 
                                         Err(e) => Err(
-                                            #api_request_unexpected_error_path_token_stream::DeserializeBody{
-                                                reqwest: e,
-                                                status_code,
+                                            #api_request_unexpected_error_path_token_stream::DeserializeBody{ 
+                                                serde: e, 
+                                                status_code, 
+                                                headers,
+                                                response_text
                                             },
                                         ),
                                     }
@@ -496,14 +498,14 @@ pub fn type_variants_from_reqwest_response(
     let status_code_enums_try_from = {
         let mut status_code_enums_try_from = vec![quote::quote! {
             if status_code == #desirable_type_status_code_token_stream {
-                match futures::executor::block_on(response.json::<#desirable_type_enum_name>()) {
+                match serde_json::from_str::<#desirable_type_enum_name>(&response_text) {
                     Ok(value) => Ok(#ident_response_variants_token_stream::from(value)),
-                    Err(e) => Err(
-                        #api_request_unexpected_error_path_token_stream::DeserializeBody {
-                            reqwest: e,
-                            status_code,
-                        },
-                    ),
+                    Err(e) => Err(#api_request_unexpected_error_path_token_stream::DeserializeBody { 
+                        serde: e, 
+                        status_code,
+                        headers,
+                        response_text
+                    }),
                 }
             }
         }];
@@ -534,6 +536,8 @@ pub fn type_variants_from_reqwest_response(
             type Error = #api_request_unexpected_error_path_token_stream;
             fn try_from(response: reqwest::Response) -> Result<Self, Self::Error> {
                 let status_code = response.status();
+                let headers = response.headers().clone();
+                let response_text = futures::executor::block_on(response.text()).unwrap_or_else(|_|std::string::String::from(crate::global_variables::hardcode::FAILED_TO_GET_RESPONSE_TEXT));
                 #(#status_code_enums_try_from)*
             }
         }
@@ -556,16 +560,24 @@ pub fn type_variants_from_reqwest_response(
                 get: #try_error_ident_token_stream,
                 code_occurence: crate::common::code_occurence::CodeOccurence<'a>,
             },
-            UnexpectedStatusCode { //todo - additional fields
+            UnexpectedStatusCode {
                 #[eo_display]
                 status_code: http::StatusCode,
+                #[eo_display_foreign_type]
+                headers: reqwest::header::HeaderMap,
+                #[eo_display_with_serialize_deserialize]
+                response_text: std::string::String,
                 code_occurence: crate::common::code_occurence::CodeOccurence<'a>,
             },
             DeserializeResponse {
-                #[eo_display_foreign_type]
-                reqwest: reqwest::Error,
+                #[eo_display]
+                serde: serde_json::Error,
                 #[eo_display]
                 status_code: http::StatusCode,
+                #[eo_display_foreign_type]
+                headers: reqwest::header::HeaderMap,
+                #[eo_display_with_serialize_deserialize]
+                response_text: std::string::String,
                 code_occurence: crate::common::code_occurence::CodeOccurence<'a>,
             },
             Reqwest {
@@ -589,19 +601,29 @@ pub fn type_variants_from_reqwest_response(
                         }),
                     },
                     Err(e) => match e {
-                        #api_request_unexpected_error_path_token_stream::StatusCode { status_code } => Err(
+                        #api_request_unexpected_error_path_token_stream::StatusCode { 
+                            status_code,
+                            headers,
+                            response_text,
+                        } => Err(
                             #ident_error_named_token_stream::UnexpectedStatusCode {
-                                status_code,
+                                status_code ,
+                                headers,
+                                response_text,
                                 code_occurence: crate::code_occurence_tufa_common!()
                             }
                         ),
                         #api_request_unexpected_error_path_token_stream::DeserializeBody {
-                            reqwest,
-                            status_code
+                            serde, 
+                            status_code,
+                            headers,
+                            response_text,
                         } => Err(
                             #ident_error_named_token_stream::DeserializeResponse {
-                                reqwest,
+                                serde, 
                                 status_code,
+                                headers,
+                                response_text,
                                 code_occurence: crate::code_occurence_tufa_common!()
                             }
                         ),
