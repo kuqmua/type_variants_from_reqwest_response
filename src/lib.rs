@@ -192,6 +192,48 @@ pub fn type_variants_from_reqwest_response(
         true
     );
     let variants_len = data_enum.variants.len();
+    //
+    let enum_status_codes_checker_name_stringified = format!("{ident}StatusCodesChecker");
+    let enum_status_codes_checker_name_token_stream = enum_status_codes_checker_name_stringified
+    .parse::<proc_macro2::TokenStream>()
+    .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {enum_status_codes_checker_name_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
+    let enum_status_codes_checker_variants = data_enum.variants.iter().fold(
+        Vec::with_capacity(variants_len),
+        |mut acc, variant| {
+            let mut option_attribute = None;
+            variant.attrs.iter().for_each(|attr| {
+                if let true = attr.path.segments.len() == 1 {
+                    if let Ok(named_attribute) =
+                        Attribute::try_from(&attr.path.segments[0].ident.to_string())
+                    {
+                        if let true = option_attribute.is_some() {
+                            panic!(
+                                "{proc_macro_name_ident_stringified} duplicated attributes are not supported"
+                            );
+                        } else {
+                            option_attribute = Some(named_attribute);
+                        }
+                    }
+                }
+            });
+            let attr = if let Some(attr) = option_attribute {
+                attr
+            } else {
+                panic!("{proc_macro_name_ident_stringified} no supported attribute");
+            };
+            let check_variant_ident_stringified = format!("{}{}", variant.ident, attr);
+            acc.push(
+                check_variant_ident_stringified
+                .parse::<proc_macro2::TokenStream>()
+                .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {check_variant_ident_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE))
+            );
+            acc
+        }
+    );
+    //
+
+
+
     let try_error_ident_stringified = format!("{ident}{}", proc_macro_helpers::error_occurence::hardcode::with_serialize_deserialize_camel_case());
     let try_error_ident_token_stream = try_error_ident_stringified
     .parse::<proc_macro2::TokenStream>()
@@ -521,6 +563,12 @@ pub fn type_variants_from_reqwest_response(
     let ident_error_named_token_stream = ident_error_named
     .parse::<proc_macro2::TokenStream>()
     .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {ident_error_named} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
+    let f = quote::quote! {
+        pub enum #enum_status_codes_checker_name_token_stream {
+            #(#enum_status_codes_checker_variants),*
+        }
+    };
+    println!("{f}");
     let gen = quote::quote! {
         #enum_with_serialize_deserialize_logic
         impl std::convert::From<&#ident_response_variants_token_stream> for http::StatusCode {
@@ -635,6 +683,10 @@ pub fn type_variants_from_reqwest_response(
                 }),
             }
         }
+        #f
+        // pub enum #enum_status_codes_checker_name_token_stream {
+        //     #(#enum_status_codes_checker_variants),*
+        // }
     };
     // if ident == "" {
     //   println!("{gen}");
@@ -979,6 +1031,261 @@ impl TryFrom<&std::string::String> for Attribute {
 
 #[proc_macro_attribute]
 pub fn type_variants_from_reqwest_response_attribute(
+    _attr: proc_macro::TokenStream,
+    item: proc_macro::TokenStream,
+) -> proc_macro::TokenStream {
+    item
+}
+
+#[proc_macro_derive(
+    EnumStatusCodesChecker,
+    attributes(
+        tvfrr_100_continue,
+        tvfrr_101_switching_protocols,
+        tvfrr_102_processing,
+        tvfrr_200_ok,
+        tvfrr_201_created,
+        tvfrr_202_accepted,
+        tvfrr_203_non_authoritative_information,
+        tvfrr_204_no_content,
+        tvfrr_205_reset_content,
+        tvfrr_206_partial_content,
+        tvfrr_207_multi_status,
+        tvfrr_208_already_reported,
+        tvfrr_226_im_used,
+        tvfrr_300_multiple_choices,
+        tvfrr_301_moved_permanently,
+        tvfrr_302_found,
+        tvfrr_303_see_other,
+        tvfrr_304_not_modified,
+        tvfrr_305_use_proxy,
+        tvfrr_307_temporary_redirect,
+        tvfrr_308_permanent_redirect,
+        tvfrr_400_bad_request,
+        tvfrr_401_unauthorized,
+        tvfrr_402_payment_required,
+        tvfrr_403_forbidden,
+        tvfrr_404_not_found,
+        tvfrr_405_method_not_allowed,
+        tvfrr_406_not_acceptable,
+        tvfrr_407_proxy_authentication_required,
+        tvfrr_408_request_timeout,
+        tvfrr_409_conflict,
+        tvfrr_410_gone,
+        tvfrr_411_length_required,
+        tvfrr_412_precondition_failed,
+        tvfrr_413_payload_too_large,
+        tvfrr_414_uri_too_long,
+        tvfrr_415_unsupported_media_type,
+        tvfrr_416_range_not_satisfiable,
+        tvfrr_417_expectation_failed,
+        tvfrr_418_im_a_teapot,
+        tvfrr_421_misdirected_request,
+        tvfrr_422_unprocessable_entity,
+        tvfrr_423_locked,
+        tvfrr_424_failed_dependency,
+        tvfrr_426_upgrade_required,
+        tvfrr_428_precondition_required,
+        tvfrr_429_too_many_requests,
+        tvfrr_431_request_header_fields_too_large,
+        tvfrr_451_unavailable_for_legal_reasons,
+        tvfrr_500_internal_server_error,
+        tvfrr_501_not_implemented,
+        tvfrr_502_bad_gateway,
+        tvfrr_503_service_unavailable,
+        tvfrr_504_gateway_timeout,
+        tvfrr_505_http_version_not_supported,
+        tvfrr_506_variant_also_negotiates,
+        tvfrr_507_insufficient_storage,
+        tvfrr_508_loop_detected,
+        tvfrr_510_not_extended,
+        tvfrr_511_network_authentication_required,
+    )
+)]
+pub fn enum_status_codes_checker(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    proc_macro_helpers::panic_location::panic_location(); //panic_location function from https://github.com/kuqmua/proc_macro_helpers
+    let macro_name = "TypeVariantsFromReqwestResponse";
+    let ast: syn::DeriveInput = syn::parse_macro_input!(input as syn::DeriveInput);
+    let ident = &ast.ident;
+    let proc_macro_name_ident_stringified = format!("{macro_name} {ident}");
+    let enum_status_codes_checker_stringified = format!("{ident}StatusCodesChecker");
+    let enum_status_codes_checker_name_token_stream = enum_status_codes_checker_stringified
+    .parse::<proc_macro2::TokenStream>()
+    .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {enum_status_codes_checker_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
+    let data_enum = if let syn::Data::Enum(data_enum) = &ast.data {
+        data_enum
+    } else {
+        panic!("{proc_macro_name_ident_stringified} syn::Data is not a syn::Data::Enum");
+    };
+    let enum_status_codes_checker_variants = data_enum.variants.iter().map(|variant|{
+            let mut option_attribute = None;
+            variant.attrs.iter().for_each(|attr| {
+                if let true = attr.path.segments.len() == 1 {
+                    if let Ok(named_attribute) =
+                        Attribute::try_from(&attr.path.segments[0].ident.to_string())
+                    {
+                        if let true = option_attribute.is_some() {
+                            panic!(
+                                "{proc_macro_name_ident_stringified} duplicated attributes are not supported"
+                            );
+                        } else {
+                            option_attribute = Some(named_attribute);
+                        }
+                    }
+                }
+            });
+            let attr = if let Some(attr) = option_attribute {
+                attr
+            } else {
+                panic!("{proc_macro_name_ident_stringified} no supported attribute");
+            };
+            let check_variant_ident_stringified = format!("{}{}", variant.ident, attr);
+            check_variant_ident_stringified
+            .parse::<proc_macro2::TokenStream>()
+            .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {check_variant_ident_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE))
+    });
+    let attribute_path = "type_variants_from_reqwest_response::enum_status_codes_checker_from";
+    let option_attribute = &ast.attrs.into_iter().find(|attr| {
+        let possible_path = {
+            let mut stringified_path = quote::ToTokens::to_token_stream(&attr.path).to_string();
+            stringified_path.retain(|c| !c.is_whitespace());
+            stringified_path
+        };
+        attribute_path == possible_path
+    });
+    let vec_enum_paths = if let Some(attribute) = option_attribute {
+        let mut stringified_tokens =
+            quote::ToTokens::to_token_stream(&attribute.tokens).to_string();
+        stringified_tokens.retain(|c| !c.is_whitespace());
+        match stringified_tokens.len() > 3 {
+            true => {
+                let mut chars = stringified_tokens.chars();
+                match (chars.next(), chars.last()) {
+                        (None, None) => panic!("FromEnum {ident} no first and last token attribute"),
+                        (None, Some(_)) => panic!("FromEnum {ident} no first token attribute"),
+                        (Some(_), None) => panic!("FromEnum {ident} no last token attribute"),
+                        (Some(first), Some(last)) => match (first == '(', last == ')') {
+                            (true, true) => {
+                                match stringified_tokens.get(1..(stringified_tokens.len()-1)) {
+                                    Some(inner_tokens_str) => {
+                                        inner_tokens_str.split(',').map(|str|{str.to_string()}).collect::<Vec<std::string::String>>()
+                                    },
+                                    None => panic!("FromEnum {ident} cannot get inner_token"),
+                                }
+                            },
+                            (true, false) => panic!("FromEnum {ident} last token attribute is not )"),
+                            (false, true) => panic!("FromEnum {ident} first token attribute is not ("),
+                            (false, false) => panic!("FromEnum {ident} first token attribute is not ( and last token attribute is not )"),
+                        },
+                    }
+            }
+            false => panic!("FromEnum {ident} stringified_tokens.len() > 3 == false"),
+        }
+    } else {
+        panic!("{ident} FromEnum has no {attribute_path}");
+    };
+    println!("{vec_enum_paths:#?}");
+    let enum_status_codes_checker_from_impls = vec_enum_paths.iter().map(|enum_path| {
+        let enum_path_token_stream = enum_path
+            .parse::<proc_macro2::TokenStream>()
+            .unwrap_or_else(|_| {
+                panic!("FromEnum {ident} {enum_path} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE)
+            });
+        let enum_status_codes_checker_from_impls_variants = if let syn::Data::Enum(data_enum) = &ast.data {
+            data_enum.variants.iter().map(|variant| {
+                let mut option_attribute = None;
+                variant.attrs.iter().for_each(|attr| {
+                    if let true = attr.path.segments.len() == 1 {
+                        if let Ok(named_attribute) =
+                            Attribute::try_from(&attr.path.segments[0].ident.to_string())
+                        {
+                            if let true = option_attribute.is_some() {
+                                panic!(
+                                    "{proc_macro_name_ident_stringified} duplicated attributes are not supported"
+                                );
+                            } else {
+                                option_attribute = Some(named_attribute);
+                            }
+                        }
+                    }
+                });
+                let attr = if let Some(attr) = option_attribute {
+                    attr
+                } else {
+                    panic!("{proc_macro_name_ident_stringified} no supported attribute");
+                };
+                let check_variant_ident_stringified = format!("{}{}", variant.ident, attr);
+                let check_variant_ident_token_stream = check_variant_ident_stringified
+                .parse::<proc_macro2::TokenStream>()
+                .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {check_variant_ident_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
+                match &variant.fields {
+                    syn::Fields::Named(fields_named) => {
+                    let fields_generated = fields_named.named.iter().map(|field|{
+                        field.ident.clone().unwrap_or_else(|| {
+                            panic!("FromEnum {ident} {enum_path} field ident is None")
+                        })
+                    });
+                    quote::quote! {
+                        #enum_status_codes_checker_name_token_stream::#check_variant_ident_token_stream => #enum_path_token_stream::#check_variant_ident_token_stream
+                    }
+                }
+                    syn::Fields::Unnamed(fields_unnamed) => {
+                    if let false = fields_unnamed.unnamed.len() == 1 {
+                        panic!("FromEnum {ident} fields_unnamed.unnamed.len() != 1");
+                    }
+                    quote::quote! {
+                        #enum_status_codes_checker_name_token_stream::#check_variant_ident_token_stream => #enum_path_token_stream::#check_variant_ident_token_stream
+                    }
+                }
+                    syn::Fields::Unit => panic!(
+                        "FromEnum {ident} works only with syn::Fields::Named and syn::Fields::Unnamed"
+                    ),
+                }
+            })
+        } else {
+            panic!("FromEnum does work only on enums!");
+        };
+        let variant_gen = quote::quote! {
+            impl std::convert::From<#enum_status_codes_checker_name_token_stream>
+                for #enum_path_token_stream
+            {
+                fn from(
+                    val: #enum_status_codes_checker_name_token_stream,
+                ) -> Self {
+                    match val {
+                        #(#enum_status_codes_checker_from_impls_variants),*
+                    }
+                }
+            }
+        };
+        // if enum_path == "" {
+        //     println!("{variant_gen}");
+        // }
+        variant_gen
+    });
+    let gen = quote::quote! {
+        impl<'a> From<&#ident<'a>> for http::StatusCode {
+            fn from(val: &#ident<'a>) -> Self {
+                match &val {
+                    #ident::ProjectCommitExtractorNotEqual { project_commit_not_equal: _, project_commit_to_use: _, code_occurence: _ } => http::StatusCode::BAD_REQUEST,
+                    #ident::ProjectCommitExtractorToStrConversion { project_commit_to_str_conversion: _, code_occurence: _ } => http::StatusCode::BAD_REQUEST,
+                    #ident::NoProjectCommitExtractorHeader { no_project_commit_header: _, code_occurence: _ } => http::StatusCode::BAD_REQUEST,
+                }
+            }
+        }
+        enum #enum_status_codes_checker_name_token_stream {
+            #(#enum_status_codes_checker_variants),*
+        }
+        #(#enum_status_codes_checker_from_impls)*
+    };
+    // if ident == "" {
+    //     println!("{gen}");
+    // }
+    gen.into()
+}
+
+#[proc_macro_attribute]
+pub fn enum_status_codes_checker_from(
     _attr: proc_macro::TokenStream,
     item: proc_macro::TokenStream,
 ) -> proc_macro::TokenStream {
