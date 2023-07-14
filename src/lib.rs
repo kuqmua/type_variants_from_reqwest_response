@@ -1,4 +1,5 @@
 static STATUS_CODES_CHECKER: &str = "StatusCodesChecker";
+static PATH: &str = "type_variants_from_reqwest_response";
 
 #[proc_macro_derive(
     TypeVariantsFromReqwestResponse,
@@ -79,7 +80,7 @@ pub fn type_variants_from_reqwest_response(
     let ident_response_variants_token_stream = ident_response_variants_stringified
     .parse::<proc_macro2::TokenStream>()
     .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {ident_response_variants_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
-    let attribute_path = "type_variants_from_reqwest_response::type_variants_from_reqwest_response_attribute";
+    let attribute_path = format!("{PATH}::type_variants_from_reqwest_response_attribute");
     let option_attribute = ast.attrs.into_iter().find(|attr| {
         attribute_path == {
             let mut stringified_path = quote::ToTokens::to_token_stream(&attr.path).to_string();
@@ -1139,7 +1140,7 @@ pub fn enum_status_codes_checker(input: proc_macro::TokenStream) -> proc_macro::
             .parse::<proc_macro2::TokenStream>()
             .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {check_variant_ident_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE))
     });
-    let attribute_path = "type_variants_from_reqwest_response::enum_status_codes_checker_from";
+    let attribute_path = format!("{PATH}::enum_status_codes_checker_from");
     let option_attribute = &ast.attrs.into_iter().find(|attr| {
         let possible_path = {
             let mut stringified_path = quote::ToTokens::to_token_stream(&attr.path).to_string();
@@ -1357,7 +1358,7 @@ pub fn from_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
             .unwrap_or_else(|_| {
                 panic!("FromEnum {ident} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE)
             });
-    let attribute_path = "type_variants_from_reqwest_response::from_enum_paths";
+    let attribute_path = format!("{PATH}::from_enum_paths");
     let option_attribute = ast.attrs.into_iter().find(|attr| {
         let possible_path = {
             let mut stringified_path = quote::ToTokens::to_token_stream(&attr.path).to_string();
@@ -1481,7 +1482,7 @@ pub fn from_enum_with_lifetime(input: proc_macro::TokenStream) -> proc_macro::To
             .unwrap_or_else(|_| {
                 panic!("FromEnum {ident} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE)
             });
-    let attribute_path = "type_variants_from_reqwest_response::from_enum_paths_with_lifetime";
+    let attribute_path = format!("{PATH}::from_enum_paths_with_lifetime");
     let option_attribute = ast.attrs.into_iter().find(|attr| {
         let possible_path = {
             let mut stringified_path = quote::ToTokens::to_token_stream(&attr.path).to_string();
@@ -1601,14 +1602,7 @@ pub fn from_enum_without_serialize_deserialize(
     proc_macro_helpers::panic_location::panic_location(); //panic_location function from https://github.com/kuqmua/proc_macro_helpers
     let ast: syn::DeriveInput = syn::parse_macro_input!(input as syn::DeriveInput);
     let ident = &ast.ident;
-    let ident_with_serialize_deserialize_stringified = format!("{ident}");
-    let ident_with_serialize_deserialize_token_stream =
-        ident_with_serialize_deserialize_stringified
-            .parse::<proc_macro2::TokenStream>()
-            .unwrap_or_else(|_| {
-                panic!("FromEnum {ident} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE)
-            });
-    let attribute_path = "type_variants_from_reqwest_response::from_enum_paths_without_serialize_deserialize";
+    let attribute_path = format!("{PATH}::from_enum_paths_without_serialize_deserialize");
     let option_attribute = ast.attrs.into_iter().find(|attr| {
         let possible_path = {
             let mut stringified_path = quote::ToTokens::to_token_stream(&attr.path).to_string();
@@ -1666,7 +1660,7 @@ pub fn from_enum_without_serialize_deserialize(
                         });
                         let fields_generated_cloned = fields_generated.clone();
                         quote::quote! {
-                            #ident_with_serialize_deserialize_token_stream::#variant_ident { #(#fields_generated),* } => Self::#variant_ident { #(#fields_generated_cloned),* }
+                            #ident::#variant_ident { #(#fields_generated),* } => Self::#variant_ident { #(#fields_generated_cloned),* }
                         }
                     }
                     syn::Fields::Unnamed(fields_unnamed) => {
@@ -1674,7 +1668,7 @@ pub fn from_enum_without_serialize_deserialize(
                             panic!("FromEnum {ident} fields_unnamed.unnamed.len() != 1");
                         }
                         quote::quote! {
-                            #ident_with_serialize_deserialize_token_stream::#variant_ident(i) => Self::#variant_ident(i)
+                            #ident::#variant_ident(i) => Self::#variant_ident(i)
                         }
                     }
                     syn::Fields::Unit => panic!(
@@ -1686,11 +1680,11 @@ pub fn from_enum_without_serialize_deserialize(
             panic!("FromEnum does work only on enums!");
         };
         let variant_gen = quote::quote! {
-            impl std::convert::From<#ident_with_serialize_deserialize_token_stream>
+            impl std::convert::From<#ident>
                 for #enum_path_token_stream
             {
                 fn from(
-                    val: #ident_with_serialize_deserialize_token_stream,
+                    val: #ident,
                 ) -> Self {
                     match val {
                         #(#variants),*
