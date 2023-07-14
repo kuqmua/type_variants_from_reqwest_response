@@ -1,3 +1,5 @@
+static STATUS_CODES_CHECKER: &str = "StatusCodesChecker";
+
 #[proc_macro_derive(
     TypeVariantsFromReqwestResponse,
     attributes(
@@ -193,7 +195,7 @@ pub fn type_variants_from_reqwest_response(
     );
     let variants_len = data_enum.variants.len();
     //
-    let enum_status_codes_checker_name_stringified = format!("{ident}StatusCodesChecker");
+    let enum_status_codes_checker_name_stringified = format!("{ident}{STATUS_CODES_CHECKER}");
     let enum_status_codes_checker_name_token_stream = enum_status_codes_checker_name_stringified
     .parse::<proc_macro2::TokenStream>()
     .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {enum_status_codes_checker_name_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
@@ -1101,7 +1103,7 @@ pub fn enum_status_codes_checker(input: proc_macro::TokenStream) -> proc_macro::
     let ast: syn::DeriveInput = syn::parse_macro_input!(input as syn::DeriveInput);
     let ident = &ast.ident;
     let proc_macro_name_ident_stringified = format!("{macro_name} {ident}");
-    let enum_status_codes_checker_stringified = format!("{ident}StatusCodesChecker");
+    let enum_status_codes_checker_stringified = format!("{ident}{STATUS_CODES_CHECKER}");
     let enum_status_codes_checker_name_token_stream = enum_status_codes_checker_stringified
     .parse::<proc_macro2::TokenStream>()
     .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {enum_status_codes_checker_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
@@ -1241,10 +1243,11 @@ pub fn enum_status_codes_checker(input: proc_macro::TokenStream) -> proc_macro::
         },
     );
     let enum_status_codes_checker_from_impls = vec_enum_paths.iter().map(|enum_path| {
-        let enum_path_token_stream = enum_path
+        let enum_path_stringified = format!("{enum_path}{STATUS_CODES_CHECKER}");
+        let enum_path_token_stream = enum_path_stringified
             .parse::<proc_macro2::TokenStream>()
             .unwrap_or_else(|_| {
-                panic!("FromEnum {ident} {enum_path} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE)
+                panic!("FromEnum {ident} {enum_path_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE)
             });
         let enum_status_codes_checker_from_impls_variants = if let syn::Data::Enum(data_enum) = &ast.data {
             data_enum.variants.iter().map(|variant| {
@@ -1340,3 +1343,12 @@ pub fn enum_status_codes_checker_from(
 ) -> proc_macro::TokenStream {
     item
 }
+
+
+
+
+
+
+
+
+
