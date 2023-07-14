@@ -563,12 +563,6 @@ pub fn type_variants_from_reqwest_response(
     let ident_error_named_token_stream = ident_error_named
     .parse::<proc_macro2::TokenStream>()
     .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {ident_error_named} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
-    let f = quote::quote! {
-        pub enum #enum_status_codes_checker_name_token_stream {
-            #(#enum_status_codes_checker_variants),*
-        }
-    };
-    println!("{f}");
     let gen = quote::quote! {
         #enum_with_serialize_deserialize_logic
         impl std::convert::From<&#ident_response_variants_token_stream> for http::StatusCode {
@@ -683,10 +677,9 @@ pub fn type_variants_from_reqwest_response(
                 }),
             }
         }
-        #f
-        // pub enum #enum_status_codes_checker_name_token_stream {
-        //     #(#enum_status_codes_checker_variants),*
-        // }
+        pub enum #enum_status_codes_checker_name_token_stream {
+            #(#enum_status_codes_checker_variants),*
+        }
     };
     // if ident == "" {
     //   println!("{gen}");
@@ -1184,7 +1177,69 @@ pub fn enum_status_codes_checker(input: proc_macro::TokenStream) -> proc_macro::
     } else {
         panic!("{ident} FromEnum has no {attribute_path}");
     };
-    println!("{vec_enum_paths:#?}");
+    let variants_len = data_enum.variants.len();
+    let variants_from_status_code = data_enum.variants.iter().fold(
+         Vec::with_capacity(variants_len),
+        |mut acc, variant| {
+            let mut option_attribute = None;
+            variant.attrs.iter().for_each(|attr| {
+                if let true = attr.path.segments.len() == 1 {
+                    if let Ok(named_attribute) =
+                        Attribute::try_from(&attr.path.segments[0].ident.to_string())
+                    {
+                        if let true = option_attribute.is_some() {
+                            panic!(
+                                "{proc_macro_name_ident_stringified} duplicated attributes are not supported"
+                            );
+                        } else {
+                            option_attribute = Some(named_attribute);
+                        }
+                    }
+                }
+            });
+            let http_status_code_token_stream = if let Some(attr) = option_attribute {
+                attr.to_http_status_code_quote()
+            } else {
+                panic!("{proc_macro_name_ident_stringified} no supported attribute");
+            };
+            let variant_ident = &variant.ident;
+            acc.push(match &variant.fields {
+                syn::Fields::Named(fields_named) => {
+                    let fields_named_named_len = fields_named.named.len();
+                    let fields_token_stream_variants_from_status_code = fields_named.named.iter().fold(
+                        Vec::with_capacity(fields_named_named_len),
+                        |mut acc, field| {
+                            let field_ident = &field.clone().ident.unwrap_or_else(|| {
+                                panic!("{proc_macro_name_ident_stringified} named field ident is None");
+                            });
+                            acc.push(quote::quote! { #field_ident: _ });
+                            acc
+                        }
+                    );
+                    quote::quote! {
+                        #ident::#variant_ident {
+                            #(#fields_token_stream_variants_from_status_code),*
+                        } => #http_status_code_token_stream,
+                    }
+                }
+                syn::Fields::Unnamed(fields_unnamed) => {
+                    let fields_token_stream = if let true = fields_unnamed.unnamed.len() == 1 {
+                        quote::quote! { _ }
+                    }
+                    else {
+                        panic!("{proc_macro_name_ident_stringified} fields_unnamed.unnamed.len() != 1");                       
+                    };
+                    quote::quote! {
+                        #ident::#variant_ident(#fields_token_stream) => #http_status_code_token_stream
+                    }
+                }
+                syn::Fields::Unit => {
+                    panic!("{proc_macro_name_ident_stringified} syn::Data is not a syn::Data::Enum")
+                }
+            });
+            acc
+        },
+    );
     let enum_status_codes_checker_from_impls = vec_enum_paths.iter().map(|enum_path| {
         let enum_path_token_stream = enum_path
             .parse::<proc_macro2::TokenStream>()
@@ -1219,12 +1274,7 @@ pub fn enum_status_codes_checker(input: proc_macro::TokenStream) -> proc_macro::
                 .parse::<proc_macro2::TokenStream>()
                 .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {check_variant_ident_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
                 match &variant.fields {
-                    syn::Fields::Named(fields_named) => {
-                    let fields_generated = fields_named.named.iter().map(|field|{
-                        field.ident.clone().unwrap_or_else(|| {
-                            panic!("FromEnum {ident} {enum_path} field ident is None")
-                        })
-                    });
+                    syn::Fields::Named(_fields_named) => {
                     quote::quote! {
                         #enum_status_codes_checker_name_token_stream::#check_variant_ident_token_stream => #enum_path_token_stream::#check_variant_ident_token_stream
                     }
@@ -1267,12 +1317,11 @@ pub fn enum_status_codes_checker(input: proc_macro::TokenStream) -> proc_macro::
         impl<'a> From<&#ident<'a>> for http::StatusCode {
             fn from(val: &#ident<'a>) -> Self {
                 match &val {
-                    #ident::ProjectCommitExtractorNotEqual { project_commit_not_equal: _, project_commit_to_use: _, code_occurence: _ } => http::StatusCode::BAD_REQUEST,
-                    #ident::ProjectCommitExtractorToStrConversion { project_commit_to_str_conversion: _, code_occurence: _ } => http::StatusCode::BAD_REQUEST,
-                    #ident::NoProjectCommitExtractorHeader { no_project_commit_header: _, code_occurence: _ } => http::StatusCode::BAD_REQUEST,
+                    #(#variants_from_status_code)*
                 }
             }
         }
+        #[allow(clippy::enum_variant_names)]
         enum #enum_status_codes_checker_name_token_stream {
             #(#enum_status_codes_checker_variants),*
         }
