@@ -174,7 +174,7 @@ pub fn type_variants_from_reqwest_response(
     let generics_len = ast.generics.params.len();
     let enum_with_serialize_deserialize_logic = proc_macro_helpers::error_occurence::generate_with_serialize_deserialize_version::generate_with_serialize_deserialize_version(
         &supported_enum_variant,
-        data_enum.variants.clone(),
+        &data_enum.variants,
         &with_serialize_deserialize_lower_case,
         &error_occurence_lower_case,
         &vec_lower_case,
@@ -417,7 +417,7 @@ pub fn type_variants_from_reqwest_response(
             };
             let status_enum = proc_macro_helpers::error_occurence::generate_with_serialize_deserialize_version::generate_with_serialize_deserialize_version(
                 &supported_enum_variant,
-                vec_variants.iter().cloned().collect(),
+                &vec_variants.iter().cloned().collect(),
                 &with_serialize_deserialize_lower_case,
                 &error_occurence_lower_case,
                 &vec_lower_case,
