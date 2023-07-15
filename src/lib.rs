@@ -1139,7 +1139,7 @@ pub fn type_variants_from_reqwest_response(
         }
     };
     // if ident == "" {
-    //   println!("{gen}");
+      println!("{gen}");
     // }
     gen.into()
 }
