@@ -259,15 +259,13 @@ fn get_vec_enum_paths(
         false => panic!("{macro_name} {ident} stringified_tokens.len() > 3 == false"),
     }
 }
-
-
 fn generate_from_logic(
     ident: &syn::Ident,
     macro_name: &str,
     ident_response_variants_stringified: &std::string::String,
     variants: &syn::punctuated::Punctuated<syn::Variant, syn::token::Comma>
 ) -> proc_macro2::TokenStream {
-    let ident_with_serialize_deserialize_stringified = format!("{ident}WithSerializeDeserialize");
+    let ident_with_serialize_deserialize_stringified = format!("{ident}{}", proc_macro_helpers::error_occurence::hardcode::with_serialize_deserialize_camel_case());
     let ident_with_serialize_deserialize_token_stream = ident_with_serialize_deserialize_stringified
     .parse::<proc_macro2::TokenStream>()
     .unwrap_or_else(|_| {
@@ -1463,11 +1461,11 @@ pub fn from_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
         panic!("{macro_name} does work only on enums!");
     };
     let generated = vec_enum_paths.into_iter().map(|enum_path| generate_from_logic(
-            ident,
-            macro_name,
-            &enum_path,
-            &variants
-        ));
+        ident,
+        macro_name,
+        &enum_path,
+        &variants
+    ));
     let gen = quote::quote! {
         #(#generated)*
     };
@@ -1491,13 +1489,6 @@ pub fn from_enum_with_lifetime(input: proc_macro::TokenStream) -> proc_macro::To
     let ast: syn::DeriveInput = syn::parse_macro_input!(input as syn::DeriveInput);
     let macro_name = "FromEnumWithLifetime";
     let ident = &ast.ident;
-    let ident_with_serialize_deserialize_stringified = format!("{ident}WithSerializeDeserialize");
-    let ident_with_serialize_deserialize_token_stream =
-        ident_with_serialize_deserialize_stringified
-            .parse::<proc_macro2::TokenStream>()
-            .unwrap_or_else(|_| {
-                panic!("{macro_name} {ident} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE)
-            });
     let attribute = get_macro_attribute(
         &ast.attrs,
         format!("{PATH}::from_enum_paths_with_lifetime"),
@@ -1509,60 +1500,18 @@ pub fn from_enum_with_lifetime(input: proc_macro::TokenStream) -> proc_macro::To
         ident,
         macro_name,
     );
+    let variants = if let syn::Data::Enum(data_enum) = ast.data {
+        data_enum.variants
+    } else {
+        panic!("{macro_name} does work only on enums!");
+    };
     let generated = vec_enum_paths.into_iter().map(|enum_path| {
-        let enum_path_token_stream = enum_path
-            .parse::<proc_macro2::TokenStream>()
-            .unwrap_or_else(|_| {
-                panic!("{macro_name} {ident} {enum_path} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE)
-            });
-        let variants = if let syn::Data::Enum(data_enum) = &ast.data {
-            data_enum.variants.iter().map(|variant| {
-                let variant_ident = &variant.ident;
-                match &variant.fields {
-                    syn::Fields::Named(fields_named) => {
-                        let fields_generated = fields_named.named.iter().map(|field|{
-                            field.ident.clone().unwrap_or_else(|| {
-                                panic!("{macro_name} {ident} {enum_path} field ident is None")
-                            })
-                        });
-                        let fields_generated_cloned = fields_generated.clone();
-                        quote::quote! {
-                            #ident_with_serialize_deserialize_token_stream::#variant_ident { #(#fields_generated),* } => Self::#variant_ident { #(#fields_generated_cloned),* }
-                        }
-                    }
-                    syn::Fields::Unnamed(fields_unnamed) => {
-                        if let false = fields_unnamed.unnamed.len() == 1 {
-                            panic!("{macro_name} {ident} fields_unnamed.unnamed.len() != 1");
-                        }
-                        quote::quote! {
-                            #ident_with_serialize_deserialize_token_stream::#variant_ident(i) => Self::#variant_ident(i)
-                        }
-                    }
-                    syn::Fields::Unit => panic!(
-                        "{macro_name} {ident} works only with syn::Fields::Named and syn::Fields::Unnamed"
-                    ),
-                }
-            })
-        } else {
-            panic!("{macro_name} does work only on enums!");
-        };
-        let variant_gen = quote::quote! {
-            impl<'a> std::convert::From<#ident<'a>>
-                for #enum_path_token_stream
-            {
-                fn from(
-                    val: #ident<'a>,
-                ) -> Self {
-                    match val.into_serialize_deserialize_version() {
-                        #(#variants),*
-                    }
-                }
-            }
-        };
-        // if enum_path == "" {
-        //     println!("{variant_gen}");
-        // }
-        variant_gen
+        generate_from_logic(
+            ident,
+            macro_name,
+            &enum_path,
+            &variants
+        )
     });
     let gen = quote::quote! {
         #(#generated)*
@@ -1580,96 +1529,3 @@ pub fn from_enum_paths_with_lifetime(
 ) -> proc_macro::TokenStream {
     item
 }
-
-////////////
-#[proc_macro_derive(FromEnumWithoutSerializeDeserialize)]
-pub fn from_enum_without_serialize_deserialize(
-    input: proc_macro::TokenStream,
-) -> proc_macro::TokenStream {
-    proc_macro_helpers::panic_location::panic_location(); //panic_location function from https://github.com/kuqmua/proc_macro_helpers
-    let macro_name = "FromEnumWithoutSerializeDeserialize";
-    let ast: syn::DeriveInput = syn::parse_macro_input!(input as syn::DeriveInput);
-    let ident = &ast.ident;
-    let attribute = get_macro_attribute(
-        &ast.attrs,
-        format!("{PATH}::from_enum_paths_without_serialize_deserialize"),
-        ident,
-        macro_name
-    );
-    let vec_enum_paths = get_vec_enum_paths(
-        attribute,
-        ident,
-        macro_name,
-    );
-    let generated = vec_enum_paths.into_iter().map(|enum_path| {
-        let enum_path_token_stream = enum_path
-            .parse::<proc_macro2::TokenStream>()
-            .unwrap_or_else(|_| {
-                panic!("{macro_name} {ident} {enum_path} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE)
-            });
-        let variants = if let syn::Data::Enum(data_enum) = &ast.data {
-            data_enum.variants.iter().map(|variant| {
-                let variant_ident = &variant.ident;
-                match &variant.fields {
-                    syn::Fields::Named(fields_named) => {
-                        let fields_generated = fields_named.named.iter().map(|field|{
-                            field.ident.clone().unwrap_or_else(|| {
-                                panic!("{macro_name} {ident} {enum_path} field ident is None")
-                            })
-                        });
-                        let fields_generated_cloned = fields_generated.clone();
-                        quote::quote! {
-                            #ident::#variant_ident { #(#fields_generated),* } => Self::#variant_ident { #(#fields_generated_cloned),* }
-                        }
-                    }
-                    syn::Fields::Unnamed(fields_unnamed) => {
-                        if let false = fields_unnamed.unnamed.len() == 1 {
-                            panic!("{macro_name} {ident} fields_unnamed.unnamed.len() != 1");
-                        }
-                        quote::quote! {
-                            #ident::#variant_ident(i) => Self::#variant_ident(i)
-                        }
-                    }
-                    syn::Fields::Unit => panic!(
-                        "{macro_name} {ident} works only with syn::Fields::Named and syn::Fields::Unnamed"
-                    ),
-                }
-            })
-        } else {
-            panic!("{macro_name} does work only on enums!");
-        };
-        let variant_gen = quote::quote! {
-            impl std::convert::From<#ident>
-                for #enum_path_token_stream
-            {
-                fn from(
-                    val: #ident,
-                ) -> Self {
-                    match val {
-                        #(#variants),*
-                    }
-                }
-            }
-        };
-        // if enum_path == "" {
-        //     println!("{variant_gen}");
-        // }
-        variant_gen
-    });
-    let gen = quote::quote! {
-        #(#generated)*
-    };
-    // if ident == "" {
-    //     println!("{gen}");
-    // }
-    gen.into()
-}
-
-#[proc_macro_attribute]
-pub fn from_enum_paths_without_serialize_deserialize(
-    _attr: proc_macro::TokenStream,
-    item: proc_macro::TokenStream,
-) -> proc_macro::TokenStream {
-    item
-}
-
