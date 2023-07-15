@@ -1022,6 +1022,12 @@ pub fn type_variants_from_reqwest_response(
     //
     let gen = quote::quote! {
         #enum_with_serialize_deserialize_logic
+        impl From<#ident_response_variants_token_stream> for actix_web::HttpResponse {
+            fn from(val: #ident_response_variants_token_stream) -> Self {
+                let mut actix_web_http_response = actix_web::HttpResponseBuilder::new((&val).into());
+                actix_web_http_response.json(actix_web::web::Json(val))
+            }
+        }
         impl std::convert::From<&#ident_response_variants_token_stream> for http::StatusCode {
             fn from(value: &#ident_response_variants_token_stream) -> Self {
                 match value {
@@ -1139,7 +1145,7 @@ pub fn type_variants_from_reqwest_response(
         }
     };
     // if ident == "" {
-      println!("{gen}");
+    //   println!("{gen}");
     // }
     gen.into()
 }
