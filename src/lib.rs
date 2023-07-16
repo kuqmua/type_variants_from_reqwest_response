@@ -620,28 +620,6 @@ pub fn type_variants_from_reqwest_response(
     let syn_type_path_stringified = proc_macro_helpers::error_occurence::hardcode::syn_type_path_stringified();
     let supports_only_supported_container_stringified = proc_macro_helpers::error_occurence::hardcode::supports_only_supported_container_stringified();
     let generics_len = ast.generics.params.len();
-    let enum_with_serialize_deserialize_logic = proc_macro_helpers::error_occurence::generate_with_serialize_deserialize_version::generate_with_serialize_deserialize_version(
-        &supported_enum_variant,
-        &data_enum.variants,
-        &with_serialize_deserialize_lower_case,
-        &error_occurence_lower_case,
-        &vec_lower_case,
-        &hashmap_lower_case,
-        &key_lower_case,
-        &value_lower_case,
-        &proc_macro_name_ident_stringified,
-        &syn_type_path_stringified,
-        generics_len,
-        &supports_only_supported_container_stringified,
-        &with_serialize_deserialize_camel_case,
-        &unnamed_camel_case,
-        &ident_response_variants_token_stream,
-        Some(quote::quote!{
-            DesirableType(#desirable_type_token_stream)
-        }),
-        false,
-        true
-    );
     let variants_len = data_enum.variants.len();
     let enum_status_codes_checker_name_stringified = format!("{ident}{STATUS_CODES_CHECKER}");
     let enum_status_codes_checker_name_token_stream = enum_status_codes_checker_name_stringified
@@ -1009,30 +987,56 @@ pub fn type_variants_from_reqwest_response(
     let ident_error_named_token_stream = ident_error_named
     .parse::<proc_macro2::TokenStream>()
     .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {ident_error_named} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
-    let from_logic_handle = generate_from_logic(
+    let enum_with_serialize_deserialize_logic_token_stream = proc_macro_helpers::error_occurence::generate_with_serialize_deserialize_version::generate_with_serialize_deserialize_version(
+        &supported_enum_variant,
+        &data_enum.variants,
+        &with_serialize_deserialize_lower_case,
+        &error_occurence_lower_case,
+        &vec_lower_case,
+        &hashmap_lower_case,
+        &key_lower_case,
+        &value_lower_case,
+        &proc_macro_name_ident_stringified,
+        &syn_type_path_stringified,
+        generics_len,
+        &supports_only_supported_container_stringified,
+        &with_serialize_deserialize_camel_case,
+        &unnamed_camel_case,
+        &ident_response_variants_token_stream,
+        Some(quote::quote!{
+            DesirableType(#desirable_type_token_stream)
+        }),
+        false,
+        true
+    );
+    let from_logic_token_stream = generate_from_logic(
         ident,
         macro_name,
         &ident_response_variants_stringified,
         &data_enum.variants
     );
-    let gen = quote::quote! {
-        #enum_with_serialize_deserialize_logic
-        #from_logic_handle
+    let impl_from_ident_response_variants_token_stream_for_actix_web_http_response_logic_token_stream = quote::quote! {
         impl From<#ident_response_variants_token_stream> for actix_web::HttpResponse {
             fn from(val: #ident_response_variants_token_stream) -> Self {
                 let mut actix_web_http_response = actix_web::HttpResponseBuilder::new((&val).into());
                 actix_web_http_response.json(actix_web::web::Json(val))
             }
         }
+    };
+    let impl_std_convert_from_ident_response_variants_token_stream_for_http_status_code_logic_token_stream = quote::quote! {
         impl std::convert::From<&#ident_response_variants_token_stream> for http::StatusCode {
             fn from(value: &#ident_response_variants_token_stream) -> Self {
                 match value {
-                    #ident_response_variants_token_stream :: DesirableType(_) => http :: StatusCode :: OK,
+                    #ident_response_variants_token_stream :: DesirableType(_) => #desirable_type_status_code_token_stream,
                     #(#variants_from_status_code),*
                 }
             }
         }
+    };
+    let generated_status_code_enums_with_from_impls_logic_token_stream = quote::quote! {
         #(#generated_status_code_enums_with_from_impls)*
+    };
+    let impl_std_convert_try_from_reqwest_response_for_ident_response_variants_logic_token_stream = quote::quote! {
         impl std::convert::TryFrom<reqwest::Response> for #ident_response_variants_token_stream {
             type Error = #api_request_unexpected_error_path_token_stream;
             fn try_from(response: reqwest::Response) -> Result<Self, Self::Error> {
@@ -1042,6 +1046,8 @@ pub fn type_variants_from_reqwest_response(
                 #(#status_code_enums_try_from)*
             }
         }
+    };
+    let impl_try_from_ident_response_variants_token_stream_for_desirable_type_logic_token_stream = quote::quote! {
         impl TryFrom<#ident_response_variants_token_stream> for #desirable_type_token_stream
         {
             type Error = #try_error_ident_token_stream;
@@ -1054,6 +1060,8 @@ pub fn type_variants_from_reqwest_response(
                 }
             }
         }
+    };
+    let ident_error_named_logic_token_stream = quote::quote! {
         #[derive(Debug, thiserror::Error, error_occurence::ErrorOccurence)]
         pub enum #ident_error_named_token_stream<'a> {
             ExpectedType {
@@ -1087,7 +1095,9 @@ pub fn type_variants_from_reqwest_response(
                 code_occurence: crate::common::code_occurence::CodeOccurence<'a>,
             },
         }
-        async fn get_extraction_logic<'a>(
+    };
+    let extraction_logic_token_stream = quote::quote! {
+        async fn extraction_logic<'a>(
             future: impl std::future::Future<Output = Result<reqwest::Response, reqwest::Error>>,
         ) -> Result<#desirable_type_token_stream, #ident_error_named_token_stream<'a>>
         {
@@ -1136,13 +1146,27 @@ pub fn type_variants_from_reqwest_response(
                 }),
             }
         }
+    };
+    let enum_status_codes_checker_name_logic_token_stream = quote::quote! {
         pub enum #enum_status_codes_checker_name_token_stream {
             #(#enum_status_codes_checker_variants),*
         }
     };
-    // if ident == "" {
-    //   println!("{gen}");
-    // }
+    let gen = quote::quote! {
+        #enum_with_serialize_deserialize_logic_token_stream
+        #from_logic_token_stream
+        #impl_from_ident_response_variants_token_stream_for_actix_web_http_response_logic_token_stream
+        #impl_std_convert_from_ident_response_variants_token_stream_for_http_status_code_logic_token_stream
+        #generated_status_code_enums_with_from_impls_logic_token_stream
+        #impl_std_convert_try_from_reqwest_response_for_ident_response_variants_logic_token_stream
+        #impl_try_from_ident_response_variants_token_stream_for_desirable_type_logic_token_stream
+        #ident_error_named_logic_token_stream
+        #extraction_logic_token_stream
+        #enum_status_codes_checker_name_logic_token_stream
+    };
+    if ident == "TryPost" {
+      println!("{gen}");
+    }
     gen.into()
 }
 
