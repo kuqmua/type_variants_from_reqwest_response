@@ -810,6 +810,7 @@ pub fn type_variants_from_reqwest_response(
             }
             acc
     });
+    let desirable_type_name_token_stream = quote::quote!{DesirableType};
     let generated_status_code_enums_with_from_impls = {
         let mut is_desirable_type_detected = false;
         let mut generated_status_code_enums_with_from_impls = hashmap_attribute_variants.iter().map(|(attribute, vec_variants)|{
@@ -825,10 +826,10 @@ pub fn type_variants_from_reqwest_response(
                     is_desirable_type_detected = true;
                     (
                         Some(quote::quote! {
-                            DesirableType(#desirable_type_token_stream)
+                            #desirable_type_name_token_stream(#desirable_type_token_stream)
                         }),
                         quote::quote!{
-                            #desirable_type_enum_name::DesirableType(i) => Self::DesirableType(i),
+                            #desirable_type_enum_name::#desirable_type_name_token_stream(i) => Self::#desirable_type_name_token_stream(i),
                         }
                     )
                 },
@@ -899,12 +900,12 @@ pub fn type_variants_from_reqwest_response(
                 generated_status_code_enums_with_from_impls.push(quote::quote!{
                     #[derive(Debug, serde::Serialize, serde::Deserialize)] 
                     enum #desirable_type_enum_name {
-                        DesirableType(#desirable_type_token_stream)
+                        #desirable_type_name_token_stream(#desirable_type_token_stream)
                     } 
                     impl std::convert::From<#desirable_type_enum_name> for #ident_response_variants_token_stream {
                         fn from(value: #desirable_type_enum_name) -> Self {
                             match value { 
-                                #desirable_type_enum_name::DesirableType(i) => Self::DesirableType(i) 
+                                #desirable_type_enum_name::#desirable_type_name_token_stream(i) => Self::#desirable_type_name_token_stream(i) 
                             }
                         }
                     }    
@@ -918,7 +919,7 @@ pub fn type_variants_from_reqwest_response(
     let status_code_enums_try_from = {
         let desirable_type_status_code_case_token_stream = match response_without_body {
             true => quote::quote! {
-                Ok(#ident_response_variants_token_stream::DesirableType(()))
+                Ok(#ident_response_variants_token_stream::#desirable_type_name_token_stream(()))
             },
             false => quote::quote! {
                 let response_text = response.text().await.unwrap_or_else(|_|std::string::String::from(crate::global_variables::hardcode::FAILED_TO_GET_RESPONSE_TEXT));//todo - make it error enum variant
@@ -1014,7 +1015,7 @@ pub fn type_variants_from_reqwest_response(
         &unnamed_camel_case,
         &ident_response_variants_token_stream,
         Some(quote::quote!{
-            DesirableType(#desirable_type_token_stream)
+            #desirable_type_name_token_stream(#desirable_type_token_stream)
         }),
         false,
         true
@@ -1037,7 +1038,7 @@ pub fn type_variants_from_reqwest_response(
         impl std::convert::From<&#ident_response_variants_token_stream> for http::StatusCode {
             fn from(value: &#ident_response_variants_token_stream) -> Self {
                 match value {
-                    #ident_response_variants_token_stream :: DesirableType(_) => #desirable_type_status_code_token_stream,
+                    #ident_response_variants_token_stream::#desirable_type_name_token_stream(_) => #desirable_type_status_code_token_stream,
                     #(#variants_from_status_code),*
                 }
             }
@@ -1063,7 +1064,7 @@ pub fn type_variants_from_reqwest_response(
                     value: #ident_response_variants_token_stream,
                 ) -> Result<Self, Self::Error> {
                     match value {
-                        #ident_response_variants_token_stream :: DesirableType(i) => Ok(i),
+                        #ident_response_variants_token_stream::#desirable_type_name_token_stream(i) => Ok(i),
                         #(#desirable_type_try_from_ident),*
                     }
                 }
@@ -1122,7 +1123,7 @@ pub fn type_variants_from_reqwest_response(
             },
         };
         quote::quote! {
-            async fn extraction_logic<'a>(
+            async fn tvfrr_extraction_logic<'a>(
                 future: impl std::future::Future<Output = Result<reqwest::Response, reqwest::Error>>,
             ) -> Result<#desirable_type_token_stream, #ident_error_named_token_stream<'a>>
             {
