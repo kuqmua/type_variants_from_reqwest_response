@@ -895,28 +895,32 @@ pub fn type_variants_from_reqwest_response(
             }
         }).collect::<Vec<proc_macro2::TokenStream>>();
         if !is_desirable_type_detected {
-            generated_status_code_enums_with_from_impls.push(quote::quote!{
-                #[derive(Debug, serde::Serialize, serde::Deserialize)] 
-                enum #desirable_type_enum_name {
-                    DesirableType(#desirable_type_token_stream)
-                } 
-                impl std::convert::From<#desirable_type_enum_name> for #ident_response_variants_token_stream {
-                    fn from(value: #desirable_type_enum_name) -> Self {
-                        match value { 
-                            #desirable_type_enum_name::DesirableType(i) => Self::DesirableType(i) 
+            if let false = response_without_body {
+                generated_status_code_enums_with_from_impls.push(quote::quote!{
+                    #[derive(Debug, serde::Serialize, serde::Deserialize)] 
+                    enum #desirable_type_enum_name {
+                        DesirableType(#desirable_type_token_stream)
+                    } 
+                    impl std::convert::From<#desirable_type_enum_name> for #ident_response_variants_token_stream {
+                        fn from(value: #desirable_type_enum_name) -> Self {
+                            match value { 
+                                #desirable_type_enum_name::DesirableType(i) => Self::DesirableType(i) 
+                            }
                         }
-                    }
-                }    
-            });
+                    }    
+                });
+            }
         }
         generated_status_code_enums_with_from_impls
     };
     let mut is_last_element_found = false;
     let api_request_unexpected_error_path_token_stream = quote::quote! { crate::common::api_request_unexpected_error::ApiRequestUnexpectedError };
     let status_code_enums_try_from = {
-        let mut status_code_enums_try_from_variants = Vec::with_capacity(unique_status_codes_len + 1);
-        status_code_enums_try_from_variants.push(quote::quote! {
-            if status_code == #desirable_type_status_code_token_stream {
+        let desirable_type_status_code_case_token_stream = match response_without_body {
+            true => quote::quote! {
+                Ok(#ident_response_variants_token_stream::DesirableType(()))
+            },
+            false => quote::quote! {
                 let response_text = response.text().await.unwrap_or_else(|_|std::string::String::from(crate::global_variables::hardcode::FAILED_TO_GET_RESPONSE_TEXT));//todo - make it error enum variant
                 match serde_json::from_str::<#desirable_type_enum_name>(&response_text) {
                     Ok(value) => Ok(#ident_response_variants_token_stream::from(value)),
@@ -927,6 +931,12 @@ pub fn type_variants_from_reqwest_response(
                         response_text
                     }),
                 }
+            },
+        };
+        let mut status_code_enums_try_from_variants = Vec::with_capacity(unique_status_codes_len + 1);
+        status_code_enums_try_from_variants.push(quote::quote! {
+            if status_code == #desirable_type_status_code_token_stream {
+                #desirable_type_status_code_case_token_stream
             }
         });
         unique_status_codes
@@ -1043,19 +1053,22 @@ pub fn type_variants_from_reqwest_response(
             #(#status_code_enums_try_from)*
         }
     };
-    let impl_try_from_ident_response_variants_token_stream_for_desirable_type_logic_token_stream = quote::quote! {
-        impl TryFrom<#ident_response_variants_token_stream> for #desirable_type_token_stream
-        {
-            type Error = #try_error_ident_token_stream;
-            fn try_from(
-                value: #ident_response_variants_token_stream,
-            ) -> Result<Self, Self::Error> {
-                match value {
-                    #ident_response_variants_token_stream :: DesirableType(i) => Ok(i),
-                    #(#desirable_type_try_from_ident),*
+    let impl_try_from_ident_response_variants_token_stream_for_desirable_type_logic_token_stream = match response_without_body {
+        true => quote::quote! {},
+        false => quote::quote! {
+            impl TryFrom<#ident_response_variants_token_stream> for #desirable_type_token_stream
+            {
+                type Error = #try_error_ident_token_stream;
+                fn try_from(
+                    value: #ident_response_variants_token_stream,
+                ) -> Result<Self, Self::Error> {
+                    match value {
+                        #ident_response_variants_token_stream :: DesirableType(i) => Ok(i),
+                        #(#desirable_type_try_from_ident),*
+                    }
                 }
             }
-        }
+        },
     };
     let ident_error_named_logic_token_stream = quote::quote! {
         #[derive(Debug, thiserror::Error, error_occurence::ErrorOccurence)]
