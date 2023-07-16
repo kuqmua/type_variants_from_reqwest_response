@@ -916,6 +916,7 @@ pub fn type_variants_from_reqwest_response(
         let mut status_code_enums_try_from_variants = Vec::with_capacity(unique_status_codes_len + 1);
         status_code_enums_try_from_variants.push(quote::quote! {
             if status_code == #desirable_type_status_code_token_stream {
+                let response_text = response.text().await.unwrap_or_else(|_|std::string::String::from(crate::global_variables::hardcode::FAILED_TO_GET_RESPONSE_TEXT));//todo - make it error enum variant
                 match serde_json::from_str::<#desirable_type_enum_name>(&response_text) {
                     Ok(value) => Ok(#ident_response_variants_token_stream::from(value)),
                     Err(e) => Err(#api_request_unexpected_error_path_token_stream::DeserializeBody { 
@@ -943,6 +944,7 @@ pub fn type_variants_from_reqwest_response(
                         is_last_element_found = true;
                         status_code_enums_try_from_variants.push(quote::quote! {
                             else {
+                                let response_text = response.text().await.unwrap_or_else(|_|std::string::String::from(crate::global_variables::hardcode::FAILED_TO_GET_RESPONSE_TEXT));//todo - make it error enum variant
                                 Err(
                                     #api_request_unexpected_error_path_token_stream::StatusCode {
                                         status_code,
@@ -957,6 +959,7 @@ pub fn type_variants_from_reqwest_response(
                         if let false = desirable_type_attribute == status_code_attribute {
                             status_code_enums_try_from_variants.push(quote::quote! {
                                 else if status_code == #http_status_code_token_stream {
+                                    let response_text = response.text().await.unwrap_or_else(|_|std::string::String::from(crate::global_variables::hardcode::FAILED_TO_GET_RESPONSE_TEXT));//todo - make it error enum variant
                                     match serde_json::from_str::<#status_code_enum_name_token_stream>(&response_text) {
                                         Ok(value) => Ok(#ident_response_variants_token_stream::from(value)), 
                                         Err(e) => Err(
@@ -1036,7 +1039,6 @@ pub fn type_variants_from_reqwest_response(
         async fn try_from_response(response: reqwest::Response) -> Result<#ident_response_variants_token_stream, #api_request_unexpected_error_path_token_stream> {
             let status_code = response.status();
             let headers = response.headers().clone();
-            let response_text = response.text().await.unwrap_or_else(|_|std::string::String::from(crate::global_variables::hardcode::FAILED_TO_GET_RESPONSE_TEXT));//todo - make it error enum variant
             #(#status_code_enums_try_from)*
         }
     };
