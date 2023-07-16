@@ -599,6 +599,7 @@ pub fn type_variants_from_reqwest_response(
             false => panic!("FromEnum {ident} {stringified_tokens}.len() > 3 == false"),
         }
     };
+    let response_without_body = desirable_type_token_stream.to_string() == "()";
     let data_enum = if let syn::Data::Enum(data_enum) = ast.data {
         data_enum
     } else {
@@ -1091,21 +1092,30 @@ pub fn type_variants_from_reqwest_response(
             },
         }
     };
-    let extraction_logic_token_stream = quote::quote! {
-        async fn extraction_logic<'a>(
-            future: impl std::future::Future<Output = Result<reqwest::Response, reqwest::Error>>,
-        ) -> Result<#desirable_type_token_stream, #ident_error_named_token_stream<'a>>
-        {
-            match future.await {
+    let extraction_logic_token_stream = {
+        let response_without_body_logic_token_stream = match response_without_body {
+            true => quote::quote! {
+                Ok(_variants) => Ok(())
+            },
+            false => quote::quote! {
+                Ok(variants) => match #desirable_type_token_stream::try_from(variants)
+                {
+                    Ok(value) => Ok(value),
+                    Err(e) => Err(#ident_error_named_token_stream::ExpectedType {
+                        get: e,
+                        code_occurence: crate::code_occurence_tufa_common!(),
+                    }),
+                }
+            },
+        };
+        quote::quote! {
+            async fn extraction_logic<'a>(
+                future: impl std::future::Future<Output = Result<reqwest::Response, reqwest::Error>>,
+            ) -> Result<#desirable_type_token_stream, #ident_error_named_token_stream<'a>>
+            {
+                match future.await {
                 Ok(response) => match try_from_response(response).await {
-                    Ok(variants) => match #desirable_type_token_stream::try_from(variants)
-                    {
-                        Ok(value) => Ok(value),
-                        Err(e) => Err(#ident_error_named_token_stream::ExpectedType {
-                            get: e,
-                            code_occurence: crate::code_occurence_tufa_common!(),
-                        }),
-                    },
+                    #response_without_body_logic_token_stream,
                     Err(e) => match e {
                         #api_request_unexpected_error_path_token_stream::StatusCode { 
                             status_code,
@@ -1141,6 +1151,7 @@ pub fn type_variants_from_reqwest_response(
                 }),
             }
         }
+    }
     };
     let enum_status_codes_checker_name_logic_token_stream = quote::quote! {
         pub enum #enum_status_codes_checker_name_token_stream {
