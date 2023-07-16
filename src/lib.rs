@@ -1036,15 +1036,12 @@ pub fn type_variants_from_reqwest_response(
     let generated_status_code_enums_with_from_impls_logic_token_stream = quote::quote! {
         #(#generated_status_code_enums_with_from_impls)*
     };
-    let impl_std_convert_try_from_reqwest_response_for_ident_response_variants_logic_token_stream = quote::quote! {
-        impl std::convert::TryFrom<reqwest::Response> for #ident_response_variants_token_stream {
-            type Error = #api_request_unexpected_error_path_token_stream;
-            fn try_from(response: reqwest::Response) -> Result<Self, Self::Error> {
-                let status_code = response.status();
-                let headers = response.headers().clone();
-                let response_text = futures::executor::block_on(response.text()).unwrap_or_else(|_|std::string::String::from(crate::global_variables::hardcode::FAILED_TO_GET_RESPONSE_TEXT));
-                #(#status_code_enums_try_from)*
-            }
+    let try_from_response_logic_token_stream = quote::quote! {
+        async fn try_from_response(response: reqwest::Response) -> Result<#ident_response_variants_token_stream, #api_request_unexpected_error_path_token_stream> {
+            let status_code = response.status();
+            let headers = response.headers().clone();
+            let response_text = response.text().await.unwrap_or_else(|_|std::string::String::from(crate::global_variables::hardcode::FAILED_TO_GET_RESPONSE_TEXT));
+            #(#status_code_enums_try_from)*
         }
     };
     let impl_try_from_ident_response_variants_token_stream_for_desirable_type_logic_token_stream = quote::quote! {
@@ -1102,7 +1099,7 @@ pub fn type_variants_from_reqwest_response(
         ) -> Result<#desirable_type_token_stream, #ident_error_named_token_stream<'a>>
         {
             match future.await {
-                Ok(response) => match #ident_response_variants_token_stream::try_from(response) {
+                Ok(response) => match try_from_response(response).await {//#ident_response_variants_token_stream::try_from(response)
                     Ok(variants) => match #desirable_type_token_stream::try_from(variants)
                     {
                         Ok(value) => Ok(value),
@@ -1158,15 +1155,15 @@ pub fn type_variants_from_reqwest_response(
         #impl_from_ident_response_variants_token_stream_for_actix_web_http_response_logic_token_stream
         #impl_std_convert_from_ident_response_variants_token_stream_for_http_status_code_logic_token_stream
         #generated_status_code_enums_with_from_impls_logic_token_stream
-        #impl_std_convert_try_from_reqwest_response_for_ident_response_variants_logic_token_stream
+        #try_from_response_logic_token_stream
         #impl_try_from_ident_response_variants_token_stream_for_desirable_type_logic_token_stream
         #ident_error_named_logic_token_stream
         #extraction_logic_token_stream
         #enum_status_codes_checker_name_logic_token_stream
     };
-    if ident == "TryPost" {
-      println!("{gen}");
-    }
+    // if ident == "" {
+    //   println!("{gen}");
+    // }
     gen.into()
 }
 
