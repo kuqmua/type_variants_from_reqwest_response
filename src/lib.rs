@@ -912,12 +912,26 @@ pub fn type_variants_from_reqwest_response(
     };
     let mut is_last_element_found = false;
     let api_request_unexpected_error_path_token_stream = quote::quote! { crate::common::api_request_unexpected_error::ApiRequestUnexpectedError };
-    let status_code_enums_try_from_variants = unique_status_codes
+    let status_code_enums_try_from = {
+        let mut status_code_enums_try_from_variants = Vec::with_capacity(unique_status_codes_len + 1);
+        status_code_enums_try_from_variants.push(quote::quote! {
+            if status_code == #desirable_type_status_code_token_stream {
+                match serde_json::from_str::<#desirable_type_enum_name>(&response_text) {
+                    Ok(value) => Ok(#ident_response_variants_token_stream::from(value)),
+                    Err(e) => Err(#api_request_unexpected_error_path_token_stream::DeserializeBody { 
+                        serde: e, 
+                        status_code,
+                        headers,
+                        response_text
+                    }),
+                }
+            }
+        });
+        unique_status_codes
         .into_iter()
         .enumerate()
-        .fold(
-            Vec::with_capacity(unique_status_codes_len),
-            |mut acc, (index, status_code_attribute)| 
+        .for_each(
+            |(index, status_code_attribute)| 
         {
             let status_code_enum_name_stringified = format!("{ident_response_variants_token_stream}{status_code_attribute}");
             let status_code_enum_name_token_stream = status_code_enum_name_stringified
@@ -927,7 +941,7 @@ pub fn type_variants_from_reqwest_response(
             match index == unique_status_codes_len_minus_one{
                     true => {
                         is_last_element_found = true;
-                        acc.push(quote::quote! {
+                        status_code_enums_try_from_variants.push(quote::quote! {
                             else {
                                 Err(
                                     #api_request_unexpected_error_path_token_stream::StatusCode {
@@ -941,7 +955,7 @@ pub fn type_variants_from_reqwest_response(
                     },
                     false => {
                         if let false = desirable_type_attribute == status_code_attribute {
-                            acc.push(quote::quote! {
+                            status_code_enums_try_from_variants.push(quote::quote! {
                                 else if status_code == #http_status_code_token_stream {
                                     match serde_json::from_str::<#status_code_enum_name_token_stream>(&response_text) {
                                         Ok(value) => Ok(#ident_response_variants_token_stream::from(value)), 
@@ -959,26 +973,8 @@ pub fn type_variants_from_reqwest_response(
                         }
                     },
                 }
-            acc
         });
-    let status_code_enums_try_from = {
-        let mut status_code_enums_try_from = vec![quote::quote! {
-            if status_code == #desirable_type_status_code_token_stream {
-                match serde_json::from_str::<#desirable_type_enum_name>(&response_text) {
-                    Ok(value) => Ok(#ident_response_variants_token_stream::from(value)),
-                    Err(e) => Err(#api_request_unexpected_error_path_token_stream::DeserializeBody { 
-                        serde: e, 
-                        status_code,
-                        headers,
-                        response_text
-                    }),
-                }
-            }
-        }];
-        status_code_enums_try_from_variants.into_iter().for_each(|status_code_enums_try_from_element|{
-            status_code_enums_try_from.push(status_code_enums_try_from_element);
-        });
-        status_code_enums_try_from
+        status_code_enums_try_from_variants
     };
     if let false = is_last_element_found {
         panic!("{proc_macro_name_ident_stringified} false = is_last_element_found");
@@ -1040,7 +1036,7 @@ pub fn type_variants_from_reqwest_response(
         async fn try_from_response(response: reqwest::Response) -> Result<#ident_response_variants_token_stream, #api_request_unexpected_error_path_token_stream> {
             let status_code = response.status();
             let headers = response.headers().clone();
-            let response_text = response.text().await.unwrap_or_else(|_|std::string::String::from(crate::global_variables::hardcode::FAILED_TO_GET_RESPONSE_TEXT));
+            let response_text = response.text().await.unwrap_or_else(|_|std::string::String::from(crate::global_variables::hardcode::FAILED_TO_GET_RESPONSE_TEXT));//todo - make it error enum variant
             #(#status_code_enums_try_from)*
         }
     };
@@ -1099,7 +1095,7 @@ pub fn type_variants_from_reqwest_response(
         ) -> Result<#desirable_type_token_stream, #ident_error_named_token_stream<'a>>
         {
             match future.await {
-                Ok(response) => match try_from_response(response).await {//#ident_response_variants_token_stream::try_from(response)
+                Ok(response) => match try_from_response(response).await {
                     Ok(variants) => match #desirable_type_token_stream::try_from(variants)
                     {
                         Ok(value) => Ok(value),
