@@ -1200,7 +1200,7 @@ pub fn type_variants_from_reqwest_response_attribute(
 }
 
 #[proc_macro_derive(
-    EnumStatusCodesChecker,
+    TypeVariantsFromReqwestResponseFromChecker,
     attributes(
         tvfrr_100_continue,
         tvfrr_101_switching_protocols,
@@ -1264,9 +1264,9 @@ pub fn type_variants_from_reqwest_response_attribute(
         tvfrr_511_network_authentication_required,
     )
 )]
-pub fn enum_status_codes_checker(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+pub fn type_variants_from_reqwest_response_from_checker(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     proc_macro_helpers::panic_location::panic_location(); //panic_location function from https://github.com/kuqmua/proc_macro_helpers
-    let macro_name = "TypeVariantsFromReqwestResponse";
+    let macro_name = "TypeVariantsFromReqwestResponseFromChecker";
     let ast: syn::DeriveInput = syn::parse_macro_input!(input as syn::DeriveInput);
     let ident = &ast.ident;
     let proc_macro_name_ident_stringified = format!("{macro_name} {ident}");
@@ -1274,12 +1274,12 @@ pub fn enum_status_codes_checker(input: proc_macro::TokenStream) -> proc_macro::
     let enum_status_codes_checker_name_token_stream = enum_status_codes_checker_stringified
     .parse::<proc_macro2::TokenStream>()
     .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {enum_status_codes_checker_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
-    let data_enum = if let syn::Data::Enum(data_enum) = &ast.data {
-        data_enum
+    let variants = if let syn::Data::Enum(data_enum) = ast.data {
+        data_enum.variants
     } else {
-        panic!("{proc_macro_name_ident_stringified} syn::Data is not a syn::Data::Enum");
+        panic!("{macro_name} does work only on enums!");
     };
-    let enum_status_codes_checker_variants = data_enum.variants.iter().map(|variant|{
+    let enum_status_codes_checker_variants = variants.iter().map(|variant|{
         let mut option_attribute = None;
         variant.attrs.iter().for_each(|attr| {
             if let true = attr.path.segments.len() == 1 {
@@ -1308,7 +1308,7 @@ pub fn enum_status_codes_checker(input: proc_macro::TokenStream) -> proc_macro::
     });
     let attribute = get_macro_attribute(
         &ast.attrs,
-        format!("{PATH}::enum_status_codes_checker_from"),
+        format!("{PATH}::type_variants_from_reqwest_response_from_checker_paths"),
         ident,
         macro_name
     );
@@ -1317,8 +1317,8 @@ pub fn enum_status_codes_checker(input: proc_macro::TokenStream) -> proc_macro::
         ident,
         macro_name,
     );
-    let variants_len = data_enum.variants.len();
-    let variants_from_status_code = data_enum.variants.iter().fold(
+    let variants_len = variants.len();
+    let variants_from_status_code = variants.iter().fold(
          Vec::with_capacity(variants_len),
         |mut acc, variant| {
             let mut option_attribute = None;
@@ -1387,40 +1387,39 @@ pub fn enum_status_codes_checker(input: proc_macro::TokenStream) -> proc_macro::
             .unwrap_or_else(|_| {
                 panic!("{macro_name} {ident} {enum_path_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE)
             });
-        let enum_status_codes_checker_from_impls_variants = if let syn::Data::Enum(data_enum) = &ast.data {
-            data_enum.variants.iter().map(|variant| {
-                let mut option_attribute = None;
-                variant.attrs.iter().for_each(|attr| {
-                    if let true = attr.path.segments.len() == 1 {
-                        if let Ok(named_attribute) =
-                            Attribute::try_from(&attr.path.segments[0].ident.to_string())
-                        {
-                            if let true = option_attribute.is_some() {
-                                panic!(
-                                    "{proc_macro_name_ident_stringified} duplicated attributes are not supported"
-                                );
-                            } else {
-                                option_attribute = Some(named_attribute);
-                            }
+        let enum_status_codes_checker_from_impls_variants = variants.iter().map(|variant| {
+            let mut option_attribute = None;
+            variant.attrs.iter().for_each(|attr| {
+                if let true = attr.path.segments.len() == 1 {
+                    if let Ok(named_attribute) =
+                        Attribute::try_from(&attr.path.segments[0].ident.to_string())
+                    {
+                        if let true = option_attribute.is_some() {
+                            panic!(
+                                "{proc_macro_name_ident_stringified} duplicated attributes are not supported"
+                            );
+                        } else {
+                            option_attribute = Some(named_attribute);
                         }
                     }
-                });
-                let attr = if let Some(attr) = option_attribute {
-                    attr
-                } else {
-                    panic!("{proc_macro_name_ident_stringified} no supported attribute");
-                };
-                let check_variant_ident_stringified = format!("{}{}", variant.ident, attr);
-                let check_variant_ident_token_stream = check_variant_ident_stringified
-                .parse::<proc_macro2::TokenStream>()
-                .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {check_variant_ident_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
-                match &variant.fields {
-                    syn::Fields::Named(_fields_named) => {
+                }
+            });
+            let attr = if let Some(attr) = option_attribute {
+                attr
+            } else {
+                panic!("{proc_macro_name_ident_stringified} no supported attribute");
+            };
+            let check_variant_ident_stringified = format!("{}{}", variant.ident, attr);
+            let check_variant_ident_token_stream = check_variant_ident_stringified
+            .parse::<proc_macro2::TokenStream>()
+            .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {check_variant_ident_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
+            match &variant.fields {
+                syn::Fields::Named(_fields_named) => {
                     quote::quote! {
                         #enum_status_codes_checker_name_token_stream::#check_variant_ident_token_stream => #enum_path_token_stream::#check_variant_ident_token_stream
                     }
                 }
-                    syn::Fields::Unnamed(fields_unnamed) => {
+                syn::Fields::Unnamed(fields_unnamed) => {
                     if let false = fields_unnamed.unnamed.len() == 1 {
                         panic!("{macro_name} {ident} fields_unnamed.unnamed.len() != 1");
                     }
@@ -1428,14 +1427,12 @@ pub fn enum_status_codes_checker(input: proc_macro::TokenStream) -> proc_macro::
                         #enum_status_codes_checker_name_token_stream::#check_variant_ident_token_stream => #enum_path_token_stream::#check_variant_ident_token_stream
                     }
                 }
-                    syn::Fields::Unit => panic!(
-                        "{macro_name} {ident} works only with syn::Fields::Named and syn::Fields::Unnamed"
-                    ),
-                }
-            })
-        } else {
-            panic!("{macro_name} does work only on enums!");
-        };
+                syn::Fields::Unit => panic!(
+                    "{macro_name} {ident} works only with syn::Fields::Named and syn::Fields::Unnamed"
+                ),
+            }
+        });
+        //
         let variant_gen = quote::quote! {
             impl std::convert::From<#enum_status_codes_checker_name_token_stream>
                 for #enum_path_token_stream
@@ -1454,62 +1451,11 @@ pub fn enum_status_codes_checker(input: proc_macro::TokenStream) -> proc_macro::
         // }
         variant_gen
     });
-    let gen = quote::quote! {
-        impl<'a> From<&#ident<'a>> for http::StatusCode {
-            fn from(val: &#ident<'a>) -> Self {
-                match &val {
-                    #(#variants_from_status_code)*
-                }
-            }
-        }
-        #[allow(clippy::enum_variant_names)]
-        enum #enum_status_codes_checker_name_token_stream {
-            #(#enum_status_codes_checker_variants),*
-        }
-        #(#enum_status_codes_checker_from_impls)*
-    };
-    // if ident == "" {
-    //     println!("{gen}");
-    // }
-    gen.into()
-}
-
-#[proc_macro_attribute]
-pub fn enum_status_codes_checker_from(
-    _attr: proc_macro::TokenStream,
-    item: proc_macro::TokenStream,
-) -> proc_macro::TokenStream {
-    item
-}
-
-////////////////////////////////////////////////////////
-#[proc_macro_derive(TypeVariantsFromReqwestResponseFromChecker)]
-pub fn type_variants_from_reqwest_response_from_checker(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    proc_macro_helpers::panic_location::panic_location(); //panic_location function from https://github.com/kuqmua/proc_macro_helpers
-    let macro_name = "TypeVariantsFromReqwestResponseFromChecker";
-    let ast: syn::DeriveInput = syn::parse_macro_input!(input as syn::DeriveInput);
-    let ident = &ast.ident;
-    let attribute = get_macro_attribute(
-        &ast.attrs,
-        format!("{PATH}::type_variants_from_reqwest_response_from_checker_paths"),
-        ident,
-        macro_name
-    );
-    let vec_enum_paths = get_vec_enum_paths(
-        attribute,
-        ident,
-        macro_name,
-    );
-    let variants = if let syn::Data::Enum(data_enum) = ast.data {
-        data_enum.variants
-    } else {
-        panic!("{macro_name} does work only on enums!");
-    };
     let vec_enum_paths_len =  vec_enum_paths.len();
     let (
         generated_response_variants,
         generated_with_serialize_deserialize
-     ) = vec_enum_paths.into_iter().fold(
+     ) = vec_enum_paths.iter().fold(
         (
             Vec::with_capacity(vec_enum_paths_len),
             Vec::with_capacity(vec_enum_paths_len),
@@ -1533,6 +1479,18 @@ pub fn type_variants_from_reqwest_response_from_checker(input: proc_macro::Token
     let gen = quote::quote! {
         #(#generated_response_variants)*
         #(#generated_with_serialize_deserialize)*
+        impl<'a> From<&#ident<'a>> for http::StatusCode {
+            fn from(val: &#ident<'a>) -> Self {
+                match &val {
+                    #(#variants_from_status_code)*
+                }
+            }
+        }
+        #[allow(clippy::enum_variant_names)]
+        enum #enum_status_codes_checker_name_token_stream {
+            #(#enum_status_codes_checker_variants),*
+        }
+        #(#enum_status_codes_checker_from_impls)*
     };
     // if ident == "" {
     //     println!("{gen}");
