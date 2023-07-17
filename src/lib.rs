@@ -1483,15 +1483,15 @@ pub fn enum_status_codes_checker_from(
 }
 
 ////////////////////////////////////////////////////////
-#[proc_macro_derive(FromEnum)]
-pub fn from_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+#[proc_macro_derive(TypeVariantsFromReqwestResponseFromChecker)]
+pub fn type_variants_from_reqwest_response_from_checker(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     proc_macro_helpers::panic_location::panic_location(); //panic_location function from https://github.com/kuqmua/proc_macro_helpers
-    let macro_name = "FromEnum";
+    let macro_name = "TypeVariantsFromReqwestResponseFromChecker";
     let ast: syn::DeriveInput = syn::parse_macro_input!(input as syn::DeriveInput);
     let ident = &ast.ident;
     let attribute = get_macro_attribute(
         &ast.attrs,
-        format!("{PATH}::from_enum_paths"),
+        format!("{PATH}::type_variants_from_reqwest_response_from_checker_paths"),
         ident,
         macro_name
     );
@@ -1541,7 +1541,7 @@ pub fn from_enum(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 }
 
 #[proc_macro_attribute]
-pub fn from_enum_paths(
+pub fn type_variants_from_reqwest_response_from_checker_paths(
     _attr: proc_macro::TokenStream,
     item: proc_macro::TokenStream,
 ) -> proc_macro::TokenStream {
