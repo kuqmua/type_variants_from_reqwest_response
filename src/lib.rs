@@ -1076,7 +1076,7 @@ pub fn type_variants_from_reqwest_response(
         pub enum #ident_error_named_token_stream<'a> {
             ExpectedType {
                 #[eo_display_with_serialize_deserialize]
-                get: #try_error_ident_token_stream,
+                expected_type: #try_error_ident_token_stream,
                 code_occurence: crate::common::code_occurence::CodeOccurence<'a>,
             },
             UnexpectedStatusCode {
@@ -1116,7 +1116,7 @@ pub fn type_variants_from_reqwest_response(
                 {
                     Ok(value) => Ok(value),
                     Err(e) => Err(#ident_error_named_token_stream::ExpectedType {
-                        get: e,
+                        expected_type: e,
                         code_occurence: crate::code_occurence_tufa_common!(),
                     }),
                 }
