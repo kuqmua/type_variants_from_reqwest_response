@@ -921,15 +921,23 @@ pub fn type_variants_from_reqwest_response(
                 Ok(#ident_response_variants_token_stream::#desirable_type_name_token_stream(()))
             },
             false => quote::quote! {
-                let response_text = response.text().await.unwrap_or_else(|_|std::string::String::from(crate::global_variables::hardcode::FAILED_TO_GET_RESPONSE_TEXT));//todo - make it error enum variant
-                match serde_json::from_str::<#desirable_type_enum_name>(&response_text) {
-                    Ok(value) => Ok(#ident_response_variants_token_stream::from(value)),
-                    Err(e) => Err(#api_request_unexpected_error_path_token_stream::DeserializeBody { 
-                        serde: e, 
-                        status_code,
-                        headers,
-                        response_text
-                    }),
+                match response.text().await {
+                    Ok(response_text) => match serde_json::from_str::<#desirable_type_enum_name>(&response_text){
+                        Ok(value) => Ok(#ident_response_variants_token_stream::from(value)), 
+                        Err(e) => Err(
+                            #api_request_unexpected_error_path_token_stream::DeserializeBody{ 
+                                serde: e,
+                                status_code,
+                                headers,response_text
+                            }
+                        ),
+                    },
+                    Err(e) => Err(
+                        #api_request_unexpected_error_path_token_stream::FailedToGetResponseText {
+                            status_code,
+                            headers,
+                        }
+                    ),
                 }
             },
         };
@@ -1087,6 +1095,13 @@ pub fn type_variants_from_reqwest_response(
                 response_text: std::string::String,
                 code_occurence: crate::common::code_occurence::CodeOccurence<'a>,
             },
+            FailedToGetResponseText {
+                #[eo_display]
+                status_code: http::StatusCode,
+                #[eo_display_foreign_type]
+                headers: reqwest::header::HeaderMap,
+                code_occurence: crate::common::code_occurence::CodeOccurence<'a>,
+            },
             DeserializeResponse {
                 #[eo_display]
                 serde: serde_json::Error,
@@ -1142,6 +1157,16 @@ pub fn type_variants_from_reqwest_response(
                                 code_occurence: crate::code_occurence_tufa_common!()
                             }
                         ),
+                        #api_request_unexpected_error_path_token_stream::FailedToGetResponseText { 
+                            status_code, 
+                            headers 
+                        } => Err(
+                            #ident_error_named_token_stream::FailedToGetResponseText {
+                                status_code,
+                                headers,
+                                code_occurence: crate::code_occurence_tufa_common!()
+                            }
+                        ),
                         #api_request_unexpected_error_path_token_stream::DeserializeBody {
                             serde, 
                             status_code,
@@ -1183,9 +1208,9 @@ pub fn type_variants_from_reqwest_response(
         #extraction_logic_token_stream
         #enum_status_codes_checker_name_logic_token_stream
     };
-    // if ident == "" {
-    //   println!("{gen}");
-    // }
+    if ident == "TryGet" {
+      println!("{gen}");
+    }
     gen.into()
 }
 
