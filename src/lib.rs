@@ -914,7 +914,8 @@ pub fn type_variants_from_reqwest_response(
         generated_status_code_enums_with_from_impls
     };
     let mut is_last_element_found = false;
-    let api_request_unexpected_error_path_token_stream = quote::quote! { crate::common::api_request_unexpected_error::ApiRequestUnexpectedError };//todo share crate::common::api_request_unexpected_error::
+    let api_request_unexpected_error_module_path_token_stream = quote::quote! { crate::common::api_request_unexpected_error };
+    let api_request_unexpected_error_path_token_stream = quote::quote! { #api_request_unexpected_error_module_path_token_stream::ApiRequestUnexpectedError };
     let status_code_enums_try_from = {
         let desirable_type_status_code_case_token_stream = match response_without_body {
             true => quote::quote! {
@@ -969,14 +970,14 @@ pub fn type_variants_from_reqwest_response(
                                         #api_request_unexpected_error_path_token_stream::StatusCode {
                                             status_code,
                                             headers,
-                                            response_text_result: crate::common::api_request_unexpected_error::ResponseTextResult::ResponseText(response_text)
+                                            response_text_result: #api_request_unexpected_error_module_path_token_stream::ResponseTextResult::ResponseText(response_text)
                                         },
                                     ),
                                     Err(e) => Err(
                                         #api_request_unexpected_error_path_token_stream::StatusCode {
                                             status_code,
                                             headers,
-                                            response_text_result: crate::common::api_request_unexpected_error::ResponseTextResult::ReqwestError(e),
+                                            response_text_result: #api_request_unexpected_error_module_path_token_stream::ResponseTextResult::ReqwestError(e),
                                         },
                                     ),
                                 }
@@ -1108,7 +1109,7 @@ pub fn type_variants_from_reqwest_response(
                 #[eo_display_foreign_type]
                 headers: reqwest::header::HeaderMap,
                 #[eo_display_foreign_type]
-                response_text_result: crate::common::api_request_unexpected_error::ResponseTextResult,
+                response_text_result: #api_request_unexpected_error_module_path_token_stream::ResponseTextResult,
                 code_occurence: crate::common::code_occurence::CodeOccurence<'a>,
             },
             FailedToGetResponseText {
