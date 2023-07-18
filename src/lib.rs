@@ -914,7 +914,7 @@ pub fn type_variants_from_reqwest_response(
         generated_status_code_enums_with_from_impls
     };
     let mut is_last_element_found = false;
-    let api_request_unexpected_error_path_token_stream = quote::quote! { crate::common::api_request_unexpected_error::ApiRequestUnexpectedError };
+    let api_request_unexpected_error_path_token_stream = quote::quote! { crate::common::api_request_unexpected_error::ApiRequestUnexpectedError };//todo share crate::common::api_request_unexpected_error::
     let status_code_enums_try_from = {
         let desirable_type_status_code_case_token_stream = match response_without_body {
             true => quote::quote! {
@@ -964,35 +964,22 @@ pub fn type_variants_from_reqwest_response(
                         is_last_element_found = true;
                         status_code_enums_try_from_variants.push(quote::quote! {
                             else {
-                                //
-                                // match response.text().await {
-                                //     Ok(response_text) => match serde_json::from_str::<#status_code_enum_name_token_stream>(&response_text){
-                                //         Ok(value) => Ok(#ident_response_variants_token_stream::from(value)), 
-                                //         Err(e) => Err(
-                                //             #api_request_unexpected_error_path_token_stream::DeserializeBody{ 
-                                //                 serde: e,
-                                //                 status_code,
-                                //                 headers,response_text
-                                //             }
-                                //         ),
-                                //     },
-                                //     Err(e) => Err(
-                                //         #api_request_unexpected_error_path_token_stream::StatusCode {
-                                //             status_code,
-                                //             headers,
-                                //             None,
-                                //         },
-                                //     ),
-                                // }
-                                //
-                                let response_text = response.text().await.unwrap_or_else(|_|std::string::String::from(crate::global_variables::hardcode::FAILED_TO_GET_RESPONSE_TEXT));//todo - make it error enum variant
-                                Err(
-                                    #api_request_unexpected_error_path_token_stream::StatusCode {
-                                        status_code,
-                                        headers,
-                                        response_text
-                                    },
-                                )
+                                match response.text().await {
+                                    Ok(response_text) => Err(
+                                        #api_request_unexpected_error_path_token_stream::StatusCode {
+                                            status_code,
+                                            headers,
+                                            response_text_result: crate::common::api_request_unexpected_error::ResponseTextResult::ResponseText(response_text)
+                                        },
+                                    ),
+                                    Err(e) => Err(
+                                        #api_request_unexpected_error_path_token_stream::StatusCode {
+                                            status_code,
+                                            headers,
+                                            response_text_result: crate::common::api_request_unexpected_error::ResponseTextResult::ReqwestError(e),
+                                        },
+                                    ),
+                                }
                             }
                         });
                     },
@@ -1120,8 +1107,8 @@ pub fn type_variants_from_reqwest_response(
                 status_code: http::StatusCode,
                 #[eo_display_foreign_type]
                 headers: reqwest::header::HeaderMap,
-                #[eo_display_with_serialize_deserialize]
-                response_text: std::string::String,
+                #[eo_display_foreign_type]
+                response_text_result: crate::common::api_request_unexpected_error::ResponseTextResult,
                 code_occurence: crate::common::code_occurence::CodeOccurence<'a>,
             },
             FailedToGetResponseText {
@@ -1179,12 +1166,12 @@ pub fn type_variants_from_reqwest_response(
                         #api_request_unexpected_error_path_token_stream::StatusCode { 
                             status_code,
                             headers,
-                            response_text,
+                            response_text_result,
                         } => Err(
                             #ident_error_named_token_stream::UnexpectedStatusCode {
-                                status_code ,
+                                status_code,
                                 headers,
-                                response_text,
+                                response_text_result,
                                 code_occurence: crate::code_occurence_tufa_common!()
                             }
                         ),
@@ -1241,9 +1228,9 @@ pub fn type_variants_from_reqwest_response(
         #extraction_logic_token_stream
         #enum_status_codes_checker_name_logic_token_stream
     };
-    if ident == "TryGet" {
-      println!("{gen}");
-    }
+    // if ident == "" {
+    //   println!("{gen}");
+    // }
     gen.into()
 }
 
