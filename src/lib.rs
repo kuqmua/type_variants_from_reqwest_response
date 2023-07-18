@@ -1018,10 +1018,10 @@ pub fn type_variants_from_reqwest_response(
     if let false = is_last_element_found {
         panic!("{proc_macro_name_ident_stringified} false = is_last_element_found");
     }
-    let ident_error_named  = format!("{ident}ErrorNamed");
-    let ident_error_named_token_stream = ident_error_named
+    let ident_request_error  = format!("{ident}RequestError");
+    let ident_request_error_token_stream = ident_request_error
     .parse::<proc_macro2::TokenStream>()
-    .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {ident_error_named} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
+    .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {ident_request_error} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
     let enum_with_serialize_deserialize_logic_token_stream = proc_macro_helpers::error_occurence::generate_with_serialize_deserialize_version::generate_with_serialize_deserialize_version(
         &supported_enum_variant,
         &data_enum.variants,
@@ -1095,9 +1095,9 @@ pub fn type_variants_from_reqwest_response(
             }
         },
     };
-    let ident_error_named_logic_token_stream = quote::quote! {
+    let ident_request_error_logic_token_stream = quote::quote! {
         #[derive(Debug, thiserror::Error, error_occurence::ErrorOccurence)]
-        pub enum #ident_error_named_token_stream<'a> {
+        pub enum #ident_request_error_token_stream<'a> {
             ExpectedType {
                 #[eo_display_with_serialize_deserialize]
                 expected_type: #try_error_ident_token_stream,
@@ -1148,7 +1148,7 @@ pub fn type_variants_from_reqwest_response(
                 Ok(variants) => match #desirable_type_token_stream::try_from(variants)
                 {
                     Ok(value) => Ok(value),
-                    Err(e) => Err(#ident_error_named_token_stream::ExpectedType {
+                    Err(e) => Err(#ident_request_error_token_stream::ExpectedType {
                         expected_type: e,
                         code_occurence: crate::code_occurence_tufa_common!(),
                     }),
@@ -1158,7 +1158,7 @@ pub fn type_variants_from_reqwest_response(
         quote::quote! {
             async fn tvfrr_extraction_logic<'a>(
                 future: impl std::future::Future<Output = Result<reqwest::Response, reqwest::Error>>,
-            ) -> Result<#desirable_type_token_stream, #ident_error_named_token_stream<'a>>
+            ) -> Result<#desirable_type_token_stream, #ident_request_error_token_stream<'a>>
             {
                 match future.await {
                 Ok(response) => match try_from_response(response).await {
@@ -1169,7 +1169,7 @@ pub fn type_variants_from_reqwest_response(
                             headers,
                             response_text_result,
                         } => Err(
-                            #ident_error_named_token_stream::UnexpectedStatusCode {
+                            #ident_request_error_token_stream::UnexpectedStatusCode {
                                 status_code,
                                 headers,
                                 response_text_result,
@@ -1181,7 +1181,7 @@ pub fn type_variants_from_reqwest_response(
                             status_code, 
                             headers 
                         } => Err(
-                            #ident_error_named_token_stream::FailedToGetResponseText {
+                            #ident_request_error_token_stream::FailedToGetResponseText {
                                 reqwest,
                                 status_code,
                                 headers,
@@ -1194,7 +1194,7 @@ pub fn type_variants_from_reqwest_response(
                             headers,
                             response_text,
                         } => Err(
-                            #ident_error_named_token_stream::DeserializeResponse {
+                            #ident_request_error_token_stream::DeserializeResponse {
                                 serde, 
                                 status_code,
                                 headers,
@@ -1204,7 +1204,7 @@ pub fn type_variants_from_reqwest_response(
                         ),
                     },
                 },
-                Err(e) => Err(#ident_error_named_token_stream::Reqwest {
+                Err(e) => Err(#ident_request_error_token_stream::Reqwest {
                     reqwest: e,
                     code_occurence: crate::code_occurence_tufa_common!(),
                 }),
@@ -1225,7 +1225,7 @@ pub fn type_variants_from_reqwest_response(
         #generated_status_code_enums_with_from_impls_logic_token_stream
         #try_from_response_logic_token_stream
         #impl_try_from_ident_response_variants_token_stream_for_desirable_type_logic_token_stream
-        #ident_error_named_logic_token_stream
+        #ident_request_error_logic_token_stream
         #extraction_logic_token_stream
         #enum_status_codes_checker_name_logic_token_stream
     };
