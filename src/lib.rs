@@ -606,12 +606,6 @@ pub fn type_variants_from_reqwest_response(
     } else {
         panic!("{proc_macro_name_ident_stringified} syn::Data is not a syn::Data::Enum");
     };
-    let supported_enum_variant = proc_macro_helpers::error_occurence::supported_enum_variant::create_supported_enum_variant(
-        &data_enum,
-        &proc_macro_name_ident_stringified
-    );
-    let with_serialize_deserialize_camel_case = proc_macro_helpers::error_occurence::hardcode::with_serialize_deserialize_camel_case();
-    let with_serialize_deserialize_lower_case = proc_macro_helpers::error_occurence::hardcode::with_serialize_deserialize_lower_case();
     let error_occurence_lower_case = proc_macro_helpers::error_occurence::hardcode::error_occurence_lower_case();
     let vec_lower_case = proc_macro_helpers::error_occurence::hardcode::vec_lower_case(); 
     let hashmap_lower_case = proc_macro_helpers::error_occurence::hardcode::hashmap_lower_case();
@@ -809,6 +803,10 @@ pub fn type_variants_from_reqwest_response(
             }
             acc
     });
+    let supported_enum_variant = proc_macro_helpers::error_occurence::supported_enum_variant::create_supported_enum_variant(
+        &data_enum,
+        &proc_macro_name_ident_stringified
+    );
     let desirable_type_name_token_stream = quote::quote!{DesirableType};
     let generated_status_code_enums_with_from_impls = {
         let mut is_desirable_type_detected = false;
@@ -840,7 +838,6 @@ pub fn type_variants_from_reqwest_response(
             let status_enum = proc_macro_helpers::error_occurence::generate_with_serialize_deserialize_version::generate_with_serialize_deserialize_version(
                 &supported_enum_variant,
                 vec_variants,
-                &with_serialize_deserialize_lower_case,
                 &error_occurence_lower_case,
                 &vec_lower_case,
                 &hashmap_lower_case,
@@ -850,7 +847,6 @@ pub fn type_variants_from_reqwest_response(
                 &syn_type_path_stringified,
                 generics_len,
                 &supports_only_supported_container_stringified,
-                &with_serialize_deserialize_camel_case,
                 &status_code_enum_name_token_stream,
                 optional_additional_named_variant,
                 false,
@@ -1024,7 +1020,6 @@ pub fn type_variants_from_reqwest_response(
     let enum_with_serialize_deserialize_logic_token_stream = proc_macro_helpers::error_occurence::generate_with_serialize_deserialize_version::generate_with_serialize_deserialize_version(
         &supported_enum_variant,
         &data_enum.variants.iter().collect(),
-        &with_serialize_deserialize_lower_case,
         &error_occurence_lower_case,
         &vec_lower_case,
         &hashmap_lower_case,
@@ -1034,7 +1029,6 @@ pub fn type_variants_from_reqwest_response(
         &syn_type_path_stringified,
         generics_len,
         &supports_only_supported_container_stringified,
-        &with_serialize_deserialize_camel_case,
         &ident_response_variants_token_stream,
         Some(quote::quote!{
             #desirable_type_name_token_stream(#desirable_type_token_stream)
