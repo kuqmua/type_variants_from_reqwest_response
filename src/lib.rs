@@ -338,8 +338,7 @@ impl TryFrom<&std::string::String> for Attribute {
 fn get_macro_attribute<'a>(
     attrs: &'a [syn::Attribute],
     attribute_path: std::string::String,
-    ident: &syn::Ident,
-    macro_name: &str
+    proc_macro_name_ident_stringified: &std::string::String
 ) -> &'a syn::Attribute {
     let option_attribute = attrs.iter().find(|attr| {
         attribute_path == {
@@ -352,13 +351,12 @@ fn get_macro_attribute<'a>(
         attribute
     }
     else {
-        panic!("{macro_name} {ident}no {attribute_path}");
+        panic!("{proc_macro_name_ident_stringified} no {attribute_path}");
     }
 }
 fn get_vec_enum_paths(
     attribute: &syn::Attribute,
-    ident: &syn::Ident,
-    macro_name: &str
+    proc_macro_name_ident_stringified: &std::string::String
 ) -> Vec<std::string::String> {
     let mut stringified_tokens = quote::ToTokens::to_token_stream(&attribute.tokens).to_string();
     stringified_tokens.retain(|c| !c.is_whitespace());
@@ -366,30 +364,30 @@ fn get_vec_enum_paths(
         true => {
             let mut chars = stringified_tokens.chars();
             match (chars.next(), chars.last()) {
-                (None, None) => panic!("{macro_name} {ident} no first and last token attribute"),
-                (None, Some(_)) => panic!("{macro_name} {ident} no first token attribute"),
-                (Some(_), None) => panic!("{macro_name} {ident} no last token attribute"),
+                (None, None) => panic!("{proc_macro_name_ident_stringified} no first and last token attribute"),
+                (None, Some(_)) => panic!("{proc_macro_name_ident_stringified} no first token attribute"),
+                (Some(_), None) => panic!("{proc_macro_name_ident_stringified} no last token attribute"),
                 (Some(first), Some(last)) => match (first == '(', last == ')') {
                     (true, true) => {
                         match stringified_tokens.get(1..(stringified_tokens.len()-1)) {
                             Some(inner_tokens_str) => {
                                 inner_tokens_str.split(',').map(|str|{str.to_string()}).collect::<Vec<std::string::String>>()
                             },
-                            None => panic!("{macro_name} {ident} cannot get inner_token"),
+                            None => panic!("{proc_macro_name_ident_stringified} cannot get inner_token"),
                         }
                     },
-                    (true, false) => panic!("{macro_name} {ident} last token attribute is not )"),
-                    (false, true) => panic!("{macro_name} {ident} first token attribute is not ("),
-                    (false, false) => panic!("{macro_name} {ident} first token attribute is not ( and last token attribute is not )"),
+                    (true, false) => panic!("{proc_macro_name_ident_stringified} last token attribute is not )"),
+                    (false, true) => panic!("{proc_macro_name_ident_stringified} first token attribute is not ("),
+                    (false, false) => panic!("{proc_macro_name_ident_stringified} first token attribute is not ( and last token attribute is not )"),
                 },
             }
         }
-        false => panic!("{macro_name} {ident} stringified_tokens.len() > 3 == false"),
+        false => panic!("{proc_macro_name_ident_stringified} stringified_tokens.len() > 3 == false"),
     }
 }
 fn generate_from_logic(
     ident: &syn::Ident,
-    macro_name: &str,
+    proc_macro_name_ident_stringified: &std::string::String,
     ident_response_variants_stringified: &std::string::String,
     variants: &syn::punctuated::Punctuated<syn::Variant, syn::token::Comma>
 ) -> proc_macro2::TokenStream {
@@ -397,12 +395,12 @@ fn generate_from_logic(
     let ident_with_serialize_deserialize_token_stream = ident_with_serialize_deserialize_stringified
     .parse::<proc_macro2::TokenStream>()
     .unwrap_or_else(|_| {
-        panic!("{macro_name} {ident} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE)
+        panic!("{proc_macro_name_ident_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE)
     });
     let enum_path_token_stream = ident_response_variants_stringified
         .parse::<proc_macro2::TokenStream>()
         .unwrap_or_else(|_| {
-            panic!("{macro_name} {ident} {ident_response_variants_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE)
+            panic!("{proc_macro_name_ident_stringified} {ident_response_variants_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE)
         });
     let variants = {
         variants.iter().map(|variant| {
@@ -411,7 +409,7 @@ fn generate_from_logic(
                 syn::Fields::Named(fields_named) => {
                     let fields_generated = fields_named.named.iter().map(|field|{
                         field.ident.clone().unwrap_or_else(|| {
-                            panic!("{macro_name} {ident} {ident_response_variants_stringified} field ident is None")
+                            panic!("{proc_macro_name_ident_stringified} {ident_response_variants_stringified} field ident is None")
                         })
                     });
                     let fields_generated_cloned = fields_generated.clone();
@@ -421,14 +419,14 @@ fn generate_from_logic(
                 }
                 syn::Fields::Unnamed(fields_unnamed) => {
                     if let false = fields_unnamed.unnamed.len() == 1 {
-                        panic!("{macro_name} {ident} fields_unnamed.unnamed.len() != 1");
+                        panic!("{proc_macro_name_ident_stringified} fields_unnamed.unnamed.len() != 1");
                     }
                     quote::quote! {
                         #ident_with_serialize_deserialize_token_stream::#variant_ident(i) => Self::#variant_ident(i)
                     }
                 }
                 syn::Fields::Unit => panic!(
-                    "{macro_name} {ident} works only with syn::Fields::Named and syn::Fields::Unnamed"
+                    "{proc_macro_name_ident_stringified} works only with syn::Fields::Named and syn::Fields::Unnamed"
                 ),
             }
         })
@@ -534,8 +532,7 @@ pub fn type_variants_from_reqwest_response(
     let attribute = get_macro_attribute(
         &ast.attrs,
         format!("{PATH}::type_variants_from_reqwest_response_attribute"),
-        ident,
-        macro_name
+        &proc_macro_name_ident_stringified
     );
     let (
         desirable_type_token_stream,
@@ -550,9 +547,9 @@ pub fn type_variants_from_reqwest_response(
             true => {
                 let mut chars = stringified_tokens.chars();
                 match (chars.next(), chars.last()) {
-                        (None, None) => panic!("{macro_name} {ident} no first and last token attribute"),
-                        (None, Some(_)) => panic!("{macro_name} {ident} no first token attribute"),
-                        (Some(_), None) => panic!("{macro_name} {ident} no last token attribute"),
+                        (None, None) => panic!("{proc_macro_name_ident_stringified} no first and last token attribute"),
+                        (None, Some(_)) => panic!("{proc_macro_name_ident_stringified} no first token attribute"),
+                        (Some(_), None) => panic!("{proc_macro_name_ident_stringified} no last token attribute"),
                         (Some(first), Some(last)) => match (first == '(', last == ')') {
                             (true, true) => {
                                 match stringified_tokens.get(1..(stringified_tokens.len()-1)) {
@@ -586,16 +583,16 @@ pub fn type_variants_from_reqwest_response(
                                             },
                                         }
                                     },
-                                    None => panic!("{macro_name} {ident} cannot get inner_token"),
+                                    None => panic!("{proc_macro_name_ident_stringified} cannot get inner_token"),
                                 }
                             },
-                            (true, false) => panic!("{macro_name} {ident} last token attribute is not )"),
-                            (false, true) => panic!("{macro_name} {ident} first token attribute is not ("),
-                            (false, false) => panic!("{macro_name} {ident} first token attribute is not ( and last token attribute is not )"),
+                            (true, false) => panic!("{proc_macro_name_ident_stringified} last token attribute is not )"),
+                            (false, true) => panic!("{proc_macro_name_ident_stringified} first token attribute is not ("),
+                            (false, false) => panic!("{proc_macro_name_ident_stringified} first token attribute is not ( and last token attribute is not )"),
                         },
                     }
             }
-            false => panic!("{macro_name} {ident} {stringified_tokens}.len() > 3 == false"),
+            false => panic!("{proc_macro_name_ident_stringified} {stringified_tokens}.len() > 3 == false"),
         }
     };
     let response_without_body = desirable_type_token_stream.to_string() == "()";
@@ -1046,7 +1043,7 @@ pub fn type_variants_from_reqwest_response(
     );
     let from_logic_token_stream = generate_from_logic(
         ident,
-        macro_name,
+        &proc_macro_name_ident_stringified,
         &ident_response_variants_stringified,
         &data_enum.variants
     );
@@ -1353,13 +1350,11 @@ pub fn type_variants_from_reqwest_response_from_checker(input: proc_macro::Token
     let attribute = get_macro_attribute(
         &ast.attrs,
         format!("{PATH}::type_variants_from_reqwest_response_from_checker_paths"),
-        ident,
-        macro_name
+        &proc_macro_name_ident_stringified
     );
     let vec_enum_paths = get_vec_enum_paths(
         attribute,
-        ident,
-        macro_name,
+        &proc_macro_name_ident_stringified
     );
     let variants_len = variants.len();
     let variants_from_status_code = variants.iter().fold(
@@ -1429,7 +1424,7 @@ pub fn type_variants_from_reqwest_response_from_checker(input: proc_macro::Token
         let enum_path_token_stream = enum_path_stringified
             .parse::<proc_macro2::TokenStream>()
             .unwrap_or_else(|_| {
-                panic!("{macro_name} {ident} {enum_path_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE)
+                panic!("{proc_macro_name_ident_stringified} {enum_path_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE)
             });
         let enum_status_codes_checker_from_impls_variants = variants.iter().map(|variant| {
             let mut option_attribute = None;
@@ -1465,14 +1460,14 @@ pub fn type_variants_from_reqwest_response_from_checker(input: proc_macro::Token
                 }
                 syn::Fields::Unnamed(fields_unnamed) => {
                     if let false = fields_unnamed.unnamed.len() == 1 {
-                        panic!("{macro_name} {ident} fields_unnamed.unnamed.len() != 1");
+                        panic!("{proc_macro_name_ident_stringified} fields_unnamed.unnamed.len() != 1");
                     }
                     quote::quote! {
                         #enum_status_codes_checker_name_token_stream::#check_variant_ident_token_stream => #enum_path_token_stream::#check_variant_ident_token_stream
                     }
                 }
                 syn::Fields::Unit => panic!(
-                    "{macro_name} {ident} works only with syn::Fields::Named and syn::Fields::Unnamed"
+                    "{proc_macro_name_ident_stringified} works only with syn::Fields::Named and syn::Fields::Unnamed"
                 ),
             }
         });
@@ -1507,13 +1502,13 @@ pub fn type_variants_from_reqwest_response_from_checker(input: proc_macro::Token
         |mut acc, enum_path| {
             acc.0.push(generate_from_logic(
                 ident,
-                macro_name,
+                &proc_macro_name_ident_stringified,
                 &format!("{enum_path}{RESPONSE_VARIANTS}"),
                 &variants
             ));
             acc.1.push(generate_from_logic(
                 ident,
-                macro_name,
+                &proc_macro_name_ident_stringified,
                 &format!("{enum_path}{}", proc_macro_helpers::error_occurence::hardcode::with_serialize_deserialize_camel_case()),
                 &variants
             ));
