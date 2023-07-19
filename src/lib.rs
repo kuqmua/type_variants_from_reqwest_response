@@ -606,13 +606,6 @@ pub fn type_variants_from_reqwest_response(
     } else {
         panic!("{proc_macro_name_ident_stringified} syn::Data is not a syn::Data::Enum");
     };
-    let error_occurence_lower_case = proc_macro_helpers::error_occurence::hardcode::error_occurence_lower_case();
-    let vec_lower_case = proc_macro_helpers::error_occurence::hardcode::vec_lower_case(); 
-    let hashmap_lower_case = proc_macro_helpers::error_occurence::hardcode::hashmap_lower_case();
-    let key_lower_case = proc_macro_helpers::error_occurence::hardcode::key_lower_case();
-    let value_lower_case = proc_macro_helpers::error_occurence::hardcode::value_lower_case();
-    let syn_type_path_stringified = proc_macro_helpers::error_occurence::hardcode::syn_type_path_stringified();
-    let supports_only_supported_container_stringified = proc_macro_helpers::error_occurence::hardcode::supports_only_supported_container_stringified();
     let generics_len = ast.generics.params.len();
     let variants_len = data_enum.variants.len();
     let enum_status_codes_checker_name_stringified = format!("{ident}{STATUS_CODES_CHECKER}");
@@ -838,15 +831,8 @@ pub fn type_variants_from_reqwest_response(
             let status_enum = proc_macro_helpers::error_occurence::generate_with_serialize_deserialize_version::generate_with_serialize_deserialize_version(
                 &supported_enum_variant,
                 vec_variants,
-                &error_occurence_lower_case,
-                &vec_lower_case,
-                &hashmap_lower_case,
-                &key_lower_case,
-                &value_lower_case,
                 &proc_macro_name_ident_stringified,
-                &syn_type_path_stringified,
                 generics_len,
-                &supports_only_supported_container_stringified,
                 &status_code_enum_name_token_stream,
                 optional_additional_named_variant,
                 false,
@@ -1020,15 +1006,8 @@ pub fn type_variants_from_reqwest_response(
     let enum_with_serialize_deserialize_logic_token_stream = proc_macro_helpers::error_occurence::generate_with_serialize_deserialize_version::generate_with_serialize_deserialize_version(
         &supported_enum_variant,
         &data_enum.variants.iter().collect(),
-        &error_occurence_lower_case,
-        &vec_lower_case,
-        &hashmap_lower_case,
-        &key_lower_case,
-        &value_lower_case,
         &proc_macro_name_ident_stringified,
-        &syn_type_path_stringified,
         generics_len,
-        &supports_only_supported_container_stringified,
         &ident_response_variants_token_stream,
         Some(quote::quote!{
             #desirable_type_name_token_stream(#desirable_type_token_stream)
