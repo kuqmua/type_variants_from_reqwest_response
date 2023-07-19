@@ -666,7 +666,7 @@ pub fn type_variants_from_reqwest_response(
         unique_status_codes, 
         variants_from_status_code,
         desirable_type_try_from_ident,
-    ) = data_enum.variants.clone().into_iter().fold(
+    ) = data_enum.variants.iter().fold(
         (
             Vec::with_capacity(variants_len),
             Vec::with_capacity(variants_len),
@@ -700,19 +700,19 @@ pub fn type_variants_from_reqwest_response(
             ) = {
                 let variant_ident = &variant.ident;
                 let http_status_code_token_stream = attr.to_http_status_code_quote();
-                match variant.fields {
+                match &variant.fields {
                     syn::Fields::Named(fields_named) => {
                         let fields_named_named_len = fields_named.named.len();
                         let (
                             fields_token_stream_variants_from_status_code,
                             fields_token_stream_desirable_type_try_from_ident,
-                        ) = fields_named.named.into_iter().fold(
+                        ) = fields_named.named.iter().fold(
                             (
                                 Vec::with_capacity(fields_named_named_len),
                                 Vec::with_capacity(fields_named_named_len),
                             ),
                             |mut acc, field| {
-                                let field_ident = field.ident.unwrap_or_else(|| {
+                                let field_ident = field.ident.clone().unwrap_or_else(|| {
                                     panic!("{proc_macro_name_ident_stringified} named field ident is None");
                                 });
                                 acc.0.push(quote::quote! { #field_ident: _ });
@@ -776,7 +776,7 @@ pub fn type_variants_from_reqwest_response(
         )
     };
     let hashmap_attribute_variants = data_enum.variants.iter().fold(
-        std::collections::HashMap::<Attribute, Vec<syn::Variant>>::with_capacity(unique_status_codes_len),
+        std::collections::HashMap::<Attribute, Vec<&syn::Variant>>::with_capacity(unique_status_codes_len),
         |mut acc, variant|{
             let mut option_attribute = None;
             variant.attrs.iter().for_each(|attr| {
@@ -801,10 +801,10 @@ pub fn type_variants_from_reqwest_response(
             };
             match acc.get_mut(&attr) {
                 Some(i) => {
-                    i.push(variant.clone());
+                    i.push(variant);
                 },
                 None => {
-                    acc.insert(attr, vec![variant.clone()]);
+                    acc.insert(attr, vec![variant]);
                 },
             }
             acc
@@ -839,7 +839,7 @@ pub fn type_variants_from_reqwest_response(
             };
             let status_enum = proc_macro_helpers::error_occurence::generate_with_serialize_deserialize_version::generate_with_serialize_deserialize_version(
                 &supported_enum_variant,
-                &vec_variants.iter().cloned().collect(),
+                vec_variants,
                 &with_serialize_deserialize_lower_case,
                 &error_occurence_lower_case,
                 &vec_lower_case,
@@ -1024,7 +1024,7 @@ pub fn type_variants_from_reqwest_response(
     .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {ident_request_error} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
     let enum_with_serialize_deserialize_logic_token_stream = proc_macro_helpers::error_occurence::generate_with_serialize_deserialize_version::generate_with_serialize_deserialize_version(
         &supported_enum_variant,
-        &data_enum.variants,
+        &data_enum.variants.iter().collect(),
         &with_serialize_deserialize_lower_case,
         &error_occurence_lower_case,
         &vec_lower_case,
