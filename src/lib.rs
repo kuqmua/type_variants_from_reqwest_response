@@ -538,11 +538,14 @@ pub fn type_variants_from_reqwest_response(
         desirable_type_token_stream,
         desirable_type_status_code_token_stream,
         desirable_type_enum_name,
-        desirable_type_attribute
+        desirable_type_attribute,
+        response_without_body
     ) = {
-        let mut stringified_tokens =
-            quote::ToTokens::to_token_stream(&attribute.tokens).to_string();
-        stringified_tokens.retain(|c| !c.is_whitespace());
+        let stringified_tokens = {
+            let mut stringified_tokens = quote::ToTokens::to_token_stream(&attribute.tokens).to_string();
+            stringified_tokens.retain(|c| !c.is_whitespace());
+            stringified_tokens
+        };
         match stringified_tokens.len() > 3 {
             true => {
                 let mut chars = stringified_tokens.chars();
@@ -567,10 +570,12 @@ pub fn type_variants_from_reqwest_response(
                                             (Some(_), None) => panic!("{proc_macro_name_ident_stringified} failed to get vec_attr_params.get(1)"),
                                             (Some(first_param), Some(second_param)) => {
                                                 let attribute = Attribute::try_from(second_param).unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} second_param failed to Attribute::try_from"));
-                                                (
-                                                    first_param
+                                                let desirable_type_token_stream = first_param
                                                     .parse::<proc_macro2::TokenStream>()
-                                                    .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {first_param} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE)),
+                                                    .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {first_param} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
+                                                let response_without_body = desirable_type_token_stream.to_string() == "()";
+                                                (
+                                                    desirable_type_token_stream,
                                                     attribute.to_http_status_code_quote(),
                                                     {
                                                         let status_code_enum_name_stingified = format!("{ident_response_variants_token_stream}{attribute}");
@@ -578,7 +583,8 @@ pub fn type_variants_from_reqwest_response(
                                                         .parse::<proc_macro2::TokenStream>()
                                                         .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {status_code_enum_name_stingified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE))
                                                     },
-                                                    attribute
+                                                    attribute,
+                                                    response_without_body
                                                 )
                                             },
                                         }
@@ -595,17 +601,14 @@ pub fn type_variants_from_reqwest_response(
             false => panic!("{proc_macro_name_ident_stringified} {stringified_tokens}.len() > 3 == false"),
         }
     };
-    let response_without_body = desirable_type_token_stream.to_string() == "()";
     let data_enum = if let syn::Data::Enum(data_enum) = ast.data {
         data_enum
     } else {
         panic!("{proc_macro_name_ident_stringified} syn::Data is not a syn::Data::Enum");
     };
-    let unnamed_camel_case = proc_macro_helpers::error_occurence::hardcode::unnamed_camel_case();
     let supported_enum_variant = proc_macro_helpers::error_occurence::supported_enum_variant::create_supported_enum_variant(
         &data_enum,
-        &proc_macro_name_ident_stringified,
-        &unnamed_camel_case,
+        &proc_macro_name_ident_stringified
     );
     let with_serialize_deserialize_camel_case = proc_macro_helpers::error_occurence::hardcode::with_serialize_deserialize_camel_case();
     let with_serialize_deserialize_lower_case = proc_macro_helpers::error_occurence::hardcode::with_serialize_deserialize_lower_case();
@@ -848,7 +851,6 @@ pub fn type_variants_from_reqwest_response(
                 generics_len,
                 &supports_only_supported_container_stringified,
                 &with_serialize_deserialize_camel_case,
-                &unnamed_camel_case,
                 &status_code_enum_name_token_stream,
                 optional_additional_named_variant,
                 false,
@@ -1033,7 +1035,6 @@ pub fn type_variants_from_reqwest_response(
         generics_len,
         &supports_only_supported_container_stringified,
         &with_serialize_deserialize_camel_case,
-        &unnamed_camel_case,
         &ident_response_variants_token_stream,
         Some(quote::quote!{
             #desirable_type_name_token_stream(#desirable_type_token_stream)
