@@ -753,7 +753,10 @@ pub fn type_variants_from_reqwest_response(
         &data_enum,
         &proc_macro_name_ident_stringified
     );
-    let desirable_type_name_token_stream = quote::quote!{DesirableType};
+    let desirable_type_name_stringified = "DesirableType";
+    let desirable_type_name_token_stream = desirable_type_name_stringified
+        .parse::<proc_macro2::TokenStream>()
+        .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {desirable_type_name_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
     let generics_len = ast.generics.params.len();
     let generated_status_code_enums_with_from_impls = {
         let mut is_desirable_type_detected = false;
@@ -1147,25 +1150,68 @@ pub fn type_variants_from_reqwest_response(
             .parse::<proc_macro2::TokenStream>()
             .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {enum_status_codes_checker_name_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE))
         };
-        let enum_status_codes_checker_variants = data_enum.variants.iter().fold(
-            Vec::with_capacity(variants_len),
-            |mut acc, variant| {
+        let enum_status_codes_checker_variants = data_enum.variants.iter().map(
+            |variant| {
                     let attr = get_only_one_attribute(
                         variant,
                         &proc_macro_name_ident_stringified
                     );
                     let check_variant_ident_stringified = format!("{}{}", variant.ident, attr);
-                    acc.push(
-                        check_variant_ident_stringified
+                    check_variant_ident_stringified
                         .parse::<proc_macro2::TokenStream>()
                         .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {check_variant_ident_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE))
-                    );
-                    acc
                 }
             );
         quote::quote! {
             pub enum #enum_status_codes_checker_name_token_stream {
                 #(#enum_status_codes_checker_variants),*
+            }
+        }
+    };
+    let axum_response_into_response_logic_token_stream = {
+        let res_name_token_stream = quote::quote!{res};
+        let mut_res_axum_json_into_response = quote::quote!{let mut #res_name_token_stream = axum::Json(self).into_response()};
+        let star_res_status_mut = quote::quote!{*#res_name_token_stream.status_mut()};
+        let axum_response_into_response_variants = data_enum.variants.iter().map(
+            |variant| match &variant.fields {
+                syn::Fields::Named(fields_named) => {
+                    let fields = fields_named.named.iter().map(|field|{
+                        let field_ident = field.ident.clone().unwrap_or_else(|| panic!(
+                        "{proc_macro_name_ident_stringified} field.ident {}",
+                        proc_macro_helpers::error_occurence::hardcode::IS_NONE_STRINGIFIED
+                    ));
+                        quote::quote! { #field_ident: _ }
+                    });
+                    let status_code_token_stream = get_only_one_attribute(
+                        variant,
+                        &proc_macro_name_ident_stringified
+                    ).to_http_status_code_quote();
+                    let variant_ident = &variant.ident;
+                    quote::quote! {
+                        #ident_response_variants_token_stream::#variant_ident {
+                            #(#fields),*
+                        } => {
+                            #mut_res_axum_json_into_response;
+                            #star_res_status_mut = #status_code_token_stream;
+                            #res_name_token_stream
+                        }
+                    }
+                },
+                _ => panic!("{proc_macro_name_ident_stringified} variant.fields is not syn::Fields::Named"),
+            }
+        );
+        quote::quote! {
+            impl axum::response::IntoResponse for #ident_response_variants_token_stream {
+                fn into_response(self) -> axum::response::Response {
+                    match &self {
+                        #ident_response_variants_token_stream::#desirable_type_name_token_stream(_) => {
+                            #mut_res_axum_json_into_response;
+                            #star_res_status_mut = #desirable_type_status_code_token_stream;
+                            #res_name_token_stream
+                        }
+                        #(#axum_response_into_response_variants),*
+                    }
+                }
             }
         }
     };
@@ -1180,6 +1226,7 @@ pub fn type_variants_from_reqwest_response(
         #ident_request_error_logic_token_stream
         #extraction_logic_token_stream
         #enum_status_codes_checker_name_logic_token_stream
+        #axum_response_into_response_logic_token_stream
     };
     // if ident == "" {
     //   println!("{gen}");
