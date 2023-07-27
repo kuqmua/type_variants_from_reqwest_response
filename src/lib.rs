@@ -982,14 +982,6 @@ pub fn type_variants_from_reqwest_response(
         &ident_response_variants_stringified,
         &data_enum.variants
     );
-    let impl_from_ident_response_variants_token_stream_for_actix_web_http_response_logic_token_stream = quote::quote! {
-        impl From<#ident_response_variants_token_stream> for actix_web::HttpResponse {
-            fn from(val: #ident_response_variants_token_stream) -> Self {
-                let mut actix_web_http_response = actix_web::HttpResponseBuilder::new((&val).into());
-                actix_web_http_response.json(actix_web::web::Json(val))
-            }
-        }
-    };
     let impl_std_convert_from_ident_response_variants_token_stream_for_http_status_code_logic_token_stream = quote::quote! {
         impl std::convert::From<&#ident_response_variants_token_stream> for http::StatusCode {
             fn from(value: &#ident_response_variants_token_stream) -> Self {
@@ -1218,7 +1210,6 @@ pub fn type_variants_from_reqwest_response(
     let gen = quote::quote! {
         #enum_with_serialize_deserialize_logic_token_stream
         #from_logic_token_stream
-        #impl_from_ident_response_variants_token_stream_for_actix_web_http_response_logic_token_stream
         #impl_std_convert_from_ident_response_variants_token_stream_for_http_status_code_logic_token_stream
         #generated_status_code_enums_with_from_impls_logic_token_stream
         #try_from_response_logic_token_stream
