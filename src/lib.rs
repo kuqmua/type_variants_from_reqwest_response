@@ -1192,14 +1192,22 @@ pub fn type_variants_from_reqwest_response(
                 _ => panic!("{proc_macro_name_ident_stringified} variant.fields is not syn::Fields::Named"),
             }
         );
+        let desirable_type_variant_logic_token_stream = match response_without_body {
+            true => quote::quote! {
+                #desirable_type_status_code_token_stream.into_response()
+            },
+            false => quote::quote! {
+                #mut_res_axum_json_into_response;
+                #star_res_status_mut = #desirable_type_status_code_token_stream;
+                #res_name_token_stream
+            },
+        };
         quote::quote! {
             impl axum::response::IntoResponse for #ident_response_variants_token_stream {
                 fn into_response(self) -> axum::response::Response {
                     match &self {
                         #ident_response_variants_token_stream::#desirable_type_name_token_stream(_) => {
-                            #mut_res_axum_json_into_response;
-                            #star_res_status_mut = #desirable_type_status_code_token_stream;
-                            #res_name_token_stream
+                            #desirable_type_variant_logic_token_stream
                         }
                         #(#axum_response_into_response_variants),*
                     }
