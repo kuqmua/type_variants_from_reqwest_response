@@ -432,12 +432,9 @@ fn generate_from_logic(
         })
     };
     let gen = quote::quote! {
-        impl<'a> std::convert::From<#ident<'a>>
-            for #enum_path_token_stream
+        impl std::convert::From<#ident> for #enum_path_token_stream
         {
-            fn from(
-                val: #ident<'a>,
-            ) -> Self {
+            fn from(val: #ident) -> Self {
                 match val.into_serialize_deserialize_version() {
                     #(#variants),*
                 }
@@ -1021,11 +1018,11 @@ pub fn type_variants_from_reqwest_response(
     };
     let ident_request_error_logic_token_stream = quote::quote! {
         #[derive(Debug, thiserror::Error, error_occurence::ErrorOccurence)]
-        pub enum #ident_request_error_token_stream<'a> {
+        pub enum #ident_request_error_token_stream {
             ExpectedType {
                 #[eo_display_with_serialize_deserialize]
                 expected_type: #try_error_ident_token_stream,
-                code_occurence: crate::common::code_occurence::CodeOccurence<'a>,
+                code_occurence: crate::common::code_occurence::CodeOccurence,
             },
             UnexpectedStatusCode {
                 #[eo_display]
@@ -1034,7 +1031,7 @@ pub fn type_variants_from_reqwest_response(
                 headers: reqwest::header::HeaderMap,
                 #[eo_display_foreign_type]
                 response_text_result: #api_request_unexpected_error_module_path_token_stream::ResponseTextResult,
-                code_occurence: crate::common::code_occurence::CodeOccurence<'a>,
+                code_occurence: crate::common::code_occurence::CodeOccurence,
             },
             FailedToGetResponseText {
                 #[eo_display_foreign_type]
@@ -1043,7 +1040,7 @@ pub fn type_variants_from_reqwest_response(
                 status_code: http::StatusCode,
                 #[eo_display_foreign_type]
                 headers: reqwest::header::HeaderMap,
-                code_occurence: crate::common::code_occurence::CodeOccurence<'a>,
+                code_occurence: crate::common::code_occurence::CodeOccurence,
             },
             DeserializeResponse {
                 #[eo_display]
@@ -1054,12 +1051,12 @@ pub fn type_variants_from_reqwest_response(
                 headers: reqwest::header::HeaderMap,
                 #[eo_display_with_serialize_deserialize]
                 response_text: std::string::String,
-                code_occurence: crate::common::code_occurence::CodeOccurence<'a>,
+                code_occurence: crate::common::code_occurence::CodeOccurence,
             },
             Reqwest {
                 #[eo_display_foreign_type]
                 reqwest: reqwest::Error,
-                code_occurence: crate::common::code_occurence::CodeOccurence<'a>,
+                code_occurence: crate::common::code_occurence::CodeOccurence,
             },
         }
     };
@@ -1082,7 +1079,7 @@ pub fn type_variants_from_reqwest_response(
         quote::quote! {
             async fn tvfrr_extraction_logic<'a>(
                 future: impl std::future::Future<Output = Result<reqwest::Response, reqwest::Error>>,
-            ) -> Result<#desirable_token_stream, #ident_request_error_token_stream<'a>> {
+            ) -> Result<#desirable_token_stream, #ident_request_error_token_stream> {
                 match future.await {
                     Ok(response) => match try_from_response(response).await {
                         #response_without_body_logic_token_stream,
@@ -1406,8 +1403,8 @@ pub fn type_variants_from_reqwest_response_from_checker(input: proc_macro::Token
             },
         );
         quote::quote!{
-            impl<'a> From<&#ident<'a>> for http::StatusCode {
-                fn from(val: &#ident<'a>) -> Self {
+            impl From<&#ident> for http::StatusCode {
+                fn from(val: &#ident) -> Self {
                     match &val {
                         #(#variants_from_status_code)*
                     }
