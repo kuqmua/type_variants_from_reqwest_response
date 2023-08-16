@@ -3,7 +3,6 @@ static PATH: &str = "type_variants_from_reqwest_response";
 static RESPONSE_VARIANTS: &str = "ResponseVariants";
 
 #[derive(
-    Debug,
     strum_macros::Display,
     PartialEq,
     Eq,
