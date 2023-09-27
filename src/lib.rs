@@ -543,6 +543,7 @@ pub fn type_variants_from_reqwest_response(
         panic!("{macro_name} {}", proc_macro_helpers::global_variables::hardcode::AST_PARSE_FAILED)
     });
     let ident = &ast.ident;
+    let ident_lower_case_stringified = proc_macro_helpers::to_lower_snake_case::ToLowerSnakeCase::to_lower_snake_case(&ident.to_string());
     let proc_macro_name_ident_stringified = format!("{macro_name} {ident}");
     let ident_response_variants_stringified = format!("{ident}{RESPONSE_VARIANTS}");
     let ident_response_variants_token_stream = ident_response_variants_stringified
@@ -991,8 +992,14 @@ pub fn type_variants_from_reqwest_response(
     let generated_status_code_enums_with_from_impls_logic_token_stream = quote::quote! {
         #(#generated_status_code_enums_with_from_impls)*
     };
+    let try_from_response_token_stream = {
+        let try_from_response_stringified = format!("try_from_response_{ident_lower_case_stringified}");
+        try_from_response_stringified
+        .parse::<proc_macro2::TokenStream>()
+        .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {try_from_response_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE))
+    };
     let try_from_response_logic_token_stream = quote::quote! {
-        async fn try_from_response(response: reqwest::Response) -> Result<#ident_response_variants_token_stream, #api_request_unexpected_error_path_token_stream> {
+        async fn #try_from_response_token_stream(response: reqwest::Response) -> Result<#ident_response_variants_token_stream, #api_request_unexpected_error_path_token_stream> {
             let status_code = response.status();
             let headers = response.headers().clone();
             #(#status_code_enums_try_from)*
@@ -1075,12 +1082,18 @@ pub fn type_variants_from_reqwest_response(
                 }
             },
         };
+        let tvfrr_extraction_logic_token_stream = {
+            let tvfrr_extraction_logic_stringified = format!("tvfrr_extraction_logic_{ident_lower_case_stringified}");
+            tvfrr_extraction_logic_stringified
+            .parse::<proc_macro2::TokenStream>()
+            .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {tvfrr_extraction_logic_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE))
+        };
         quote::quote! {
-            async fn tvfrr_extraction_logic<'a>(
+            async fn #tvfrr_extraction_logic_token_stream<'a>(
                 future: impl std::future::Future<Output = Result<reqwest::Response, reqwest::Error>>,
             ) -> Result<#desirable_token_stream, #ident_request_error_token_stream> {
                 match future.await {
-                    Ok(response) => match try_from_response(response).await {
+                    Ok(response) => match #try_from_response_token_stream(response).await {
                         #response_without_body_logic_token_stream,
                         Err(e) => match e {
                             #api_request_unexpected_error_path_token_stream::StatusCode { 
