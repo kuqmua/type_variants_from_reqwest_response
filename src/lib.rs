@@ -1436,7 +1436,7 @@ pub fn type_variants_from_reqwest_response_from_checker(input: proc_macro::Token
             .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {check_variant_ident_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE))
         });
         quote::quote! {
-            #[allow(clippy::enum_variant_names)]
+            #[allow(clippy::enum_variant_names, dead_code)]
             enum #enum_status_codes_checker_name_token_stream {
                 #(#enum_status_codes_checker_variants),*
             }
