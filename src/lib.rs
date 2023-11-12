@@ -1466,7 +1466,7 @@ pub fn type_variants_from_reqwest_response_from_checker(input: proc_macro::Token
                 match &variant.fields {
                     syn::Fields::Named(_fields_named) => {
                         quote::quote! {
-                            #enum_status_codes_checker_name_token_stream::#check_variant_ident_token_stream => #enum_path_token_stream::#check_variant_ident_token_stream
+                            #enum_status_codes_checker_name_token_stream::#check_variant_ident_token_stream => Self::#check_variant_ident_token_stream
                         }
                     }
                     syn::Fields::Unnamed(fields_unnamed) => {
@@ -1474,7 +1474,7 @@ pub fn type_variants_from_reqwest_response_from_checker(input: proc_macro::Token
                             panic!("{proc_macro_name_ident_stringified} fields_unnamed.unnamed.len() != 1");
                         }
                         quote::quote! {
-                            #enum_status_codes_checker_name_token_stream::#check_variant_ident_token_stream => #enum_path_token_stream::#check_variant_ident_token_stream
+                            #enum_status_codes_checker_name_token_stream::#check_variant_ident_token_stream => Self::#check_variant_ident_token_stream
                         }
                     }
                     syn::Fields::Unit => panic!(
