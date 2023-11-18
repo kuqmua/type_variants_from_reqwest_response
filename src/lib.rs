@@ -599,12 +599,10 @@ pub fn type_variants_from_reqwest_response(
         }
         status_code_enums_try_from_variants
     };
-    let ident_request_error_token_stream = {
-        let ident_request_error  = format!("{ident}RequestError");
-        ident_request_error
-        .parse::<proc_macro2::TokenStream>()
-        .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {ident_request_error} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE))
-    };
+    let ident_request_error_token_stream = proc_macro_helpers::type_variants_from_request_response::ident_request_error_token_stream(
+        &ident,
+        &proc_macro_name_ident_stringified,
+    );
     let enum_with_serialize_deserialize_logic_token_stream = proc_macro_helpers::error_occurence::generate_with_serialize_deserialize_version::generate_with_serialize_deserialize_version(
         &supported_enum_variant,
         &data_enum.variants.iter().collect(),
