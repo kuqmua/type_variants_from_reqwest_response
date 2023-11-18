@@ -783,7 +783,7 @@ pub fn type_variants_from_reqwest_response(
         }
     };
     let enum_status_codes_checker_name_logic_token_stream = {
-        let enum_status_codes_checker_name_token_stream = proc_macro_helpers::type_variants_from_request_response::generate_enum_status_codes_checker_name_token_stream(
+        let enum_status_codes_checker_camel_case_token_stream = proc_macro_helpers::type_variants_from_request_response::generate_enum_status_codes_checker_camel_case_token_stream(
             &ident,
             &proc_macro_name_ident_stringified,
         );
@@ -800,7 +800,7 @@ pub fn type_variants_from_reqwest_response(
                 }
             );
         quote::quote! {
-            pub enum #enum_status_codes_checker_name_token_stream {
+            pub enum #enum_status_codes_checker_camel_case_token_stream {
                 #(#enum_status_codes_checker_variants),*
             }
         }
