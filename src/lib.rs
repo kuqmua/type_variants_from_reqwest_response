@@ -722,12 +722,12 @@ pub fn type_variants_from_reqwest_response(
                 }
             },
         };
-        let tvfrr_extraction_logic_token_stream = proc_macro_helpers::type_variants_from_request_response::generate_tvfrr_extraction_logic_token_stream(
+        let tvfrr_extraction_logic_lower_case_token_stream = proc_macro_helpers::type_variants_from_request_response::generate_tvfrr_extraction_logic_lower_case_token_stream(
             &ident_lower_case_stringified,
             &proc_macro_name_ident_stringified,
         );
         quote::quote! {
-            async fn #tvfrr_extraction_logic_token_stream<'a>(
+            async fn #tvfrr_extraction_logic_lower_case_token_stream<'a>(
                 future: impl std::future::Future<Output = Result<reqwest::Response, reqwest::Error>>,
             ) -> Result<#desirable_token_stream, #ident_request_error_token_stream> {
                 match future.await {
