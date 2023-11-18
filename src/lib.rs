@@ -599,7 +599,7 @@ pub fn type_variants_from_reqwest_response(
         }
         status_code_enums_try_from_variants
     };
-    let ident_request_error_token_stream = proc_macro_helpers::type_variants_from_request_response::generate_ident_request_error_token_stream(
+    let ident_request_error_camel_case_token_stream = proc_macro_helpers::type_variants_from_request_response::generate_ident_request_error_camel_case_token_stream(
         &ident,
         &proc_macro_name_ident_stringified,
     );
@@ -664,7 +664,7 @@ pub fn type_variants_from_reqwest_response(
     };
     let ident_request_error_logic_token_stream = quote::quote! {
         #[derive(Debug, thiserror::Error, error_occurence::ErrorOccurence)]
-        pub enum #ident_request_error_token_stream {
+        pub enum #ident_request_error_camel_case_token_stream {
             ExpectedType {
                 #[eo_display_with_serialize_deserialize]
                 expected_type: #try_error_ident_token_stream,
@@ -715,7 +715,7 @@ pub fn type_variants_from_reqwest_response(
                 Ok(variants) => match #desirable_token_stream::try_from(variants)
                 {
                     Ok(value) => Ok(value),
-                    Err(e) => Err(#ident_request_error_token_stream::ExpectedType {
+                    Err(e) => Err(#ident_request_error_camel_case_token_stream::ExpectedType {
                         expected_type: e,
                         code_occurence: crate::code_occurence_tufa_common!(),
                     }),
@@ -729,7 +729,7 @@ pub fn type_variants_from_reqwest_response(
         quote::quote! {
             async fn #tvfrr_extraction_logic_lower_case_token_stream<'a>(
                 future: impl std::future::Future<Output = Result<reqwest::Response, reqwest::Error>>,
-            ) -> Result<#desirable_token_stream, #ident_request_error_token_stream> {
+            ) -> Result<#desirable_token_stream, #ident_request_error_camel_case_token_stream> {
                 match future.await {
                     Ok(response) => match #try_from_response_lower_case_token_stream(response).await {
                         #response_without_body_logic_token_stream,
@@ -739,7 +739,7 @@ pub fn type_variants_from_reqwest_response(
                                 headers,
                                 response_text_result,
                             } => Err(
-                                #ident_request_error_token_stream::UnexpectedStatusCode {
+                                #ident_request_error_camel_case_token_stream::UnexpectedStatusCode {
                                     status_code,
                                     headers,
                                     response_text_result,
@@ -751,7 +751,7 @@ pub fn type_variants_from_reqwest_response(
                                 status_code, 
                                 headers 
                             } => Err(
-                                #ident_request_error_token_stream::FailedToGetResponseText {
+                                #ident_request_error_camel_case_token_stream::FailedToGetResponseText {
                                     reqwest,
                                     status_code,
                                     headers,
@@ -764,7 +764,7 @@ pub fn type_variants_from_reqwest_response(
                                 headers,
                                 response_text,
                             } => Err(
-                                #ident_request_error_token_stream::DeserializeResponse {
+                                #ident_request_error_camel_case_token_stream::DeserializeResponse {
                                     serde, 
                                     status_code,
                                     headers,
@@ -774,7 +774,7 @@ pub fn type_variants_from_reqwest_response(
                             ),
                         },
                     },
-                    Err(e) => Err(#ident_request_error_token_stream::Reqwest {
+                    Err(e) => Err(#ident_request_error_camel_case_token_stream::Reqwest {
                         reqwest: e,
                         code_occurence: crate::code_occurence_tufa_common!(),
                     }),
