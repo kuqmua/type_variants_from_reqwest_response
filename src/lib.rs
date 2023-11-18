@@ -1,4 +1,3 @@
-static STATUS_CODES_CHECKER: &str = "StatusCodesChecker";
 static PATH: &str = "type_variants_from_reqwest_response";
 static RESPONSE_VARIANTS: &str = "ResponseVariants";
 
@@ -790,12 +789,10 @@ pub fn type_variants_from_reqwest_response(
         }
     };
     let enum_status_codes_checker_name_logic_token_stream = {
-        let enum_status_codes_checker_name_token_stream = {
-            let enum_status_codes_checker_name_stringified = format!("{ident}{STATUS_CODES_CHECKER}");
-            enum_status_codes_checker_name_stringified
-            .parse::<proc_macro2::TokenStream>()
-            .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {enum_status_codes_checker_name_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE))
-        };
+        let enum_status_codes_checker_name_token_stream = proc_macro_helpers::type_variants_from_request_response::generate_enum_status_codes_checker_name_token_stream(
+            &ident,
+            &proc_macro_name_ident_stringified,
+        );
         let enum_status_codes_checker_variants = data_enum.variants.iter().map(
             |variant| {
                     let attr = proc_macro_helpers::attribute::get_only_one_attribute(
@@ -870,10 +867,10 @@ pub fn type_variants_from_reqwest_response(
         }
     };
     // let f = quote::quote! {
-        
+
     // };
     // if ident == "" {
-    //   println!("{f}");
+    //   println!("{f} ");
     // }
     let gen = quote::quote! {
         #enum_with_serialize_deserialize_logic_token_stream
@@ -887,7 +884,7 @@ pub fn type_variants_from_reqwest_response(
         #enum_status_codes_checker_name_logic_token_stream
         #axum_response_into_response_logic_token_stream
     };
-    // if ident == "Kekw" {
+    // if ident == "" {
     //   println!("{gen}");
     // }
     gen.into()
@@ -973,7 +970,10 @@ pub fn type_variants_from_reqwest_response_from_checker(input: proc_macro::Token
     let ident = &ast.ident;
     let proc_macro_name_ident_stringified = format!("{macro_name} {ident}");
     let enum_status_codes_checker_name_token_stream = {
-        let enum_status_codes_checker_stringified = format!("{ident}{STATUS_CODES_CHECKER}");
+        let enum_status_codes_checker_stringified = format!(
+            "{ident}{}",
+            proc_macro_helpers::type_variants_from_request_response::STATUS_CODES_CHECKER
+        );
         enum_status_codes_checker_stringified
         .parse::<proc_macro2::TokenStream>()
         .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {enum_status_codes_checker_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE))
@@ -1096,7 +1096,10 @@ pub fn type_variants_from_reqwest_response_from_checker(input: proc_macro::Token
     let enum_status_codes_checker_from_impls_logic_token_stream = {
         let enum_status_codes_checker_from_impls = vec_enum_paths.iter().map(|enum_path| {
             let enum_path_token_stream = {
-                let enum_path_stringified = format!("{enum_path}{STATUS_CODES_CHECKER}");
+                let enum_path_stringified = format!(
+                    "{enum_path}{}",
+                    proc_macro_helpers::type_variants_from_request_response::STATUS_CODES_CHECKER
+                );
                 enum_path_stringified
                 .parse::<proc_macro2::TokenStream>()
                 .unwrap_or_else(|_| {
