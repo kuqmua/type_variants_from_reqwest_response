@@ -726,12 +726,10 @@ pub fn type_variants_from_reqwest_response(
                 }
             },
         };
-        let tvfrr_extraction_logic_token_stream = {
-            let tvfrr_extraction_logic_stringified = format!("tvfrr_extraction_logic_{ident_lower_case_stringified}");
-            tvfrr_extraction_logic_stringified
-            .parse::<proc_macro2::TokenStream>()
-            .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {tvfrr_extraction_logic_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE))
-        };
+        let tvfrr_extraction_logic_token_stream = proc_macro_helpers::type_variants_from_request_response::generate_tvfrr_extraction_logic_token_stream(
+            &ident_lower_case_stringified,
+            &proc_macro_name_ident_stringified,
+        );
         quote::quote! {
             async fn #tvfrr_extraction_logic_token_stream<'a>(
                 future: impl std::future::Future<Output = Result<reqwest::Response, reqwest::Error>>,
