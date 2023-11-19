@@ -399,101 +399,6 @@ pub fn type_variants_from_reqwest_response(
         .parse::<proc_macro2::TokenStream>()
         .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {desirable_name_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
     let generics_len = ast.generics.params.len();
-    let generated_status_code_enums_with_from_impls = {
-        let mut is_desirable_detected = false;
-        let mut generated_status_code_enums_with_from_impls = hashmap_attribute_variants.iter().map(|(attribute, vec_variants)|{
-            let status_code_enum_name_token_stream = {
-                let status_code_enum_name_stingified = format!("{ident_response_variants_token_stream}{attribute}");
-                status_code_enum_name_stingified
-                .parse::<proc_macro2::TokenStream>()
-                .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {status_code_enum_name_stingified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE))
-            };
-            let (
-                optional_additional_named_variant, 
-                additional_from_variant
-            ) = match attribute == &desirable_attribute {
-                true => {
-                    is_desirable_detected = true;
-                    (
-                        Some(quote::quote! {
-                            #desirable_name_token_stream(#desirable_token_stream)
-                        }),
-                        quote::quote!{
-                            #desirable_enum_name::#desirable_name_token_stream(i) => Self::#desirable_name_token_stream(i),
-                        }
-                    )
-                },
-                false => (
-                    None,
-                    proc_macro2::TokenStream::new()
-                )
-            };
-            let status_enum = proc_macro_helpers::error_occurence::generate_with_serialize_deserialize_version::generate_with_serialize_deserialize_version(
-                &supported_enum_variant,
-                vec_variants,
-                &proc_macro_name_ident_stringified,
-                generics_len,
-                &status_code_enum_name_token_stream,
-                optional_additional_named_variant,
-                false,
-                false
-            );
-            let status_enum_from = {
-                let variants = vec_variants.iter().map(|variant|{
-                    let fields = if let syn::Fields::Named(fields_named) = &variant.fields {
-                        fields_named.named.iter().map(|field| {
-                            let field_ident = &field.ident.clone().unwrap_or_else(|| panic!("{proc_macro_name_ident_stringified} field_ident is None {}",     proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
-                            quote::quote! { #field_ident }
-                        })
-                    }
-                    else {
-                        panic!("{proc_macro_name_ident_stringified} variant.fields is not a if let syn::Fields::Named");
-                    };
-                    let fields_cloned =  fields.clone();
-                    let variant_ident = &variant.ident;
-                    quote::quote! {
-                        #status_code_enum_name_token_stream::#variant_ident{ 
-                            #(#fields_cloned),*
-                        } => Self::#variant_ident{ 
-                            #(#fields),*
-                        }
-                    }
-                });
-                quote::quote!{
-                    impl std::convert::From<#status_code_enum_name_token_stream> for #ident_response_variants_token_stream {
-                        fn from(value : #status_code_enum_name_token_stream) -> Self {
-                            match value {
-                                #additional_from_variant
-                                #(#variants),*
-                            }
-                        }
-                    } 
-                }
-            };
-            quote::quote!{
-                #status_enum
-                #status_enum_from
-            }
-        }).collect::<Vec<proc_macro2::TokenStream>>();
-        if !is_desirable_detected {
-            if let false = response_without_body {
-                generated_status_code_enums_with_from_impls.push(quote::quote!{
-                    #[derive(Debug, serde::Serialize, serde::Deserialize)] 
-                    enum #desirable_enum_name {
-                        #desirable_name_token_stream(#desirable_token_stream)
-                    } 
-                    impl std::convert::From<#desirable_enum_name> for #ident_response_variants_token_stream {
-                        fn from(value: #desirable_enum_name) -> Self {
-                            match value { 
-                                #desirable_enum_name::#desirable_name_token_stream(i) => Self::#desirable_name_token_stream(i) 
-                            }
-                        }
-                    }    
-                });
-            }
-        }
-        generated_status_code_enums_with_from_impls
-    };
     let api_request_unexpected_error_module_path_token_stream = quote::quote! { crate::common::api_request_unexpected_error };
     let api_request_unexpected_error_path_token_stream = quote::quote! { #api_request_unexpected_error_module_path_token_stream::ApiRequestUnexpectedError };
     let status_code_enums_try_from = {
@@ -631,8 +536,105 @@ pub fn type_variants_from_reqwest_response(
             }
         }
     };
-    let generated_status_code_enums_with_from_impls_logic_token_stream = quote::quote! {
-        #(#generated_status_code_enums_with_from_impls)*
+    let generated_status_code_enums_with_from_impls_logic_token_stream = {
+        let generated_status_code_enums_with_from_impls = {
+            let mut is_desirable_detected = false;
+            let mut generated_status_code_enums_with_from_impls = hashmap_attribute_variants.iter().map(|(attribute, vec_variants)|{
+                let status_code_enum_name_token_stream = {
+                    let status_code_enum_name_stingified = format!("{ident_response_variants_token_stream}{attribute}");
+                    status_code_enum_name_stingified
+                    .parse::<proc_macro2::TokenStream>()
+                    .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {status_code_enum_name_stingified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE))
+                };
+                let (
+                    optional_additional_named_variant, 
+                    additional_from_variant
+                ) = match attribute == &desirable_attribute {
+                    true => {
+                        is_desirable_detected = true;
+                        (
+                            Some(quote::quote! {
+                                #desirable_name_token_stream(#desirable_token_stream)
+                            }),
+                            quote::quote!{
+                                #desirable_enum_name::#desirable_name_token_stream(i) => Self::#desirable_name_token_stream(i),
+                            }
+                        )
+                    },
+                    false => (
+                        None,
+                        proc_macro2::TokenStream::new()
+                    )
+                };
+                let status_enum = proc_macro_helpers::error_occurence::generate_with_serialize_deserialize_version::generate_with_serialize_deserialize_version(
+                    &supported_enum_variant,
+                    vec_variants,
+                    &proc_macro_name_ident_stringified,
+                    generics_len,
+                    &status_code_enum_name_token_stream,
+                    optional_additional_named_variant,
+                    false,
+                    false
+                );
+                let status_enum_from = {
+                    let variants = vec_variants.iter().map(|variant|{
+                        let fields = if let syn::Fields::Named(fields_named) = &variant.fields {
+                            fields_named.named.iter().map(|field| {
+                                let field_ident = &field.ident.clone().unwrap_or_else(|| panic!("{proc_macro_name_ident_stringified} field_ident is None {}",     proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
+                                quote::quote! { #field_ident }
+                            })
+                        }
+                        else {
+                            panic!("{proc_macro_name_ident_stringified} variant.fields is not a if let syn::Fields::Named");
+                        };
+                        let fields_cloned =  fields.clone();
+                        let variant_ident = &variant.ident;
+                        quote::quote! {
+                            #status_code_enum_name_token_stream::#variant_ident{ 
+                                #(#fields_cloned),*
+                            } => Self::#variant_ident{ 
+                                #(#fields),*
+                            }
+                        }
+                    });
+                    quote::quote!{
+                        impl std::convert::From<#status_code_enum_name_token_stream> for #ident_response_variants_token_stream {
+                            fn from(value : #status_code_enum_name_token_stream) -> Self {
+                                match value {
+                                    #additional_from_variant
+                                    #(#variants),*
+                                }
+                            }
+                        } 
+                    }
+                };
+                quote::quote!{
+                    #status_enum
+                    #status_enum_from
+                }
+            }).collect::<Vec<proc_macro2::TokenStream>>();
+            if !is_desirable_detected {
+                if let false = response_without_body {
+                    generated_status_code_enums_with_from_impls.push(quote::quote!{
+                        #[derive(Debug, serde::Serialize, serde::Deserialize)] 
+                        enum #desirable_enum_name {
+                            #desirable_name_token_stream(#desirable_token_stream)
+                        } 
+                        impl std::convert::From<#desirable_enum_name> for #ident_response_variants_token_stream {
+                            fn from(value: #desirable_enum_name) -> Self {
+                                match value { 
+                                    #desirable_enum_name::#desirable_name_token_stream(i) => Self::#desirable_name_token_stream(i) 
+                                }
+                            }
+                        }    
+                    });
+                }
+            }
+            generated_status_code_enums_with_from_impls
+        };
+        quote::quote! {
+            #(#generated_status_code_enums_with_from_impls)*
+        }
     };
     let try_from_response_lower_case_token_stream = proc_macro_helpers::type_variants_from_request_response::generate_try_from_response_lower_case_token_stream(
         &ident_lower_case_stringified,
