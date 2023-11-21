@@ -541,7 +541,7 @@ pub fn type_variants_from_reqwest_response(
             let mut is_desirable_detected = false;
             let mut generated_status_code_enums_with_from_impls = hashmap_attribute_variants.iter().map(|(attribute, vec_variants)|{
                 let status_code_enum_name_token_stream = {
-                    let status_code_enum_name_stingified = format!("{ident_response_variants_token_stream}{attribute}");
+                    let status_code_enum_name_stingified = format!("{ident_response_variants_stringified}{attribute}");
                     status_code_enum_name_stingified
                     .parse::<proc_macro2::TokenStream>()
                     .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {status_code_enum_name_stingified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE))
@@ -615,6 +615,7 @@ pub fn type_variants_from_reqwest_response(
             }).collect::<Vec<proc_macro2::TokenStream>>();
             if !is_desirable_detected {
                 if let false = response_without_body {
+                    //todo maybe for desirable status code can be few different response variants - rewrite logic
                     generated_status_code_enums_with_from_impls.push(quote::quote!{
                         #[derive(Debug, serde::Serialize, serde::Deserialize)] 
                         enum #desirable_enum_name {
