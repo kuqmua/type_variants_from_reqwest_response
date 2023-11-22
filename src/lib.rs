@@ -637,12 +637,12 @@ pub fn type_variants_from_reqwest_response(
             #(#generated_status_code_enums_with_from_impls)*
         }
     };
-    let try_from_response_lower_case_token_stream = proc_macro_helpers::type_variants_from_request_response::generate_try_from_response_lower_case_token_stream(
+    let try_from_response_ident_lower_case_token_stream = proc_macro_helpers::type_variants_from_request_response::generate_try_from_response_ident_lower_case_token_stream(
         &ident_lower_case_stringified,
         &proc_macro_name_ident_stringified,
     );
     let try_from_response_logic_token_stream = quote::quote! {
-        async fn #try_from_response_lower_case_token_stream(response: reqwest::Response) -> Result<#ident_response_variants_token_stream, #api_request_unexpected_error_path_token_stream> {
+        async fn #try_from_response_ident_lower_case_token_stream(response: reqwest::Response) -> Result<#ident_response_variants_token_stream, #api_request_unexpected_error_path_token_stream> {
             let status_code = response.status();
             let headers = response.headers().clone();
             #(#status_code_enums_try_from)*
@@ -734,7 +734,7 @@ pub fn type_variants_from_reqwest_response(
                 future: impl std::future::Future<Output = Result<reqwest::Response, reqwest::Error>>,
             ) -> Result<#desirable_token_stream, #ident_request_error_camel_case_token_stream> {
                 match future.await {
-                    Ok(response) => match #try_from_response_lower_case_token_stream(response).await {
+                    Ok(response) => match #try_from_response_ident_lower_case_token_stream(response).await {
                         #response_without_body_logic_token_stream,
                         Err(e) => match e {
                             #api_request_unexpected_error_path_token_stream::StatusCode { 
