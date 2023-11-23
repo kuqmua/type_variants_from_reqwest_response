@@ -242,7 +242,7 @@ pub fn type_variants_from_reqwest_response(
                                                     desirable_token_stream,
                                                     attribute.to_http_status_code_quote(),
                                                     {
-                                                        let status_code_enum_name_stingified = format!("{ident_response_variants_token_stream}{attribute}");
+                                                        let status_code_enum_name_stingified = format!("{ident_response_variants_stringified}{attribute}");
                                                         status_code_enum_name_stingified
                                                         .parse::<proc_macro2::TokenStream>()
                                                         .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {status_code_enum_name_stingified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE))
