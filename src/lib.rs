@@ -884,7 +884,11 @@ pub fn type_variants_from_reqwest_response(
         #axum_response_into_response_logic_token_stream
     };
     // if ident == "" {
-    //   println!("{gen}");
+    //     proc_macro_helpers::write_token_stream_into_file::write_token_stream_into_file(
+    //         &macro_name,
+    //         &gen,
+    //         &proc_macro_name_ident_stringified
+    //     );
     // }
     gen.into()
 }
