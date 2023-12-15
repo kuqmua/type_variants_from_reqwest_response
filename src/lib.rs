@@ -1,25 +1,6 @@
 static PATH: &str = "type_variants_from_reqwest_response";
 static RESPONSE_VARIANTS: &str = "ResponseVariants";
 
-fn get_macro_attribute<'a>(
-    attrs: &'a [syn::Attribute],
-    attribute_path: std::string::String,
-    proc_macro_name_ident_stringified: &std::string::String
-) -> &'a syn::Attribute {
-    let option_attribute = attrs.iter().find(|attr| {
-        attribute_path == {
-            let mut stringified_path = quote::ToTokens::to_token_stream(&attr.path).to_string();
-            stringified_path.retain(|c| !c.is_whitespace());
-            stringified_path
-        }
-    });
-    if let Some(attribute) = option_attribute {
-        attribute
-    }
-    else {
-        panic!("{proc_macro_name_ident_stringified} no {attribute_path}");
-    }
-}
 fn get_vec_enum_paths(
     attribute: &syn::Attribute,
     proc_macro_name_ident_stringified: &std::string::String
@@ -987,7 +968,7 @@ pub fn type_variants_from_reqwest_response_from_checker(input: proc_macro::Token
         panic!("{macro_name} does work only on enums!");
     };
     let vec_enum_paths = get_vec_enum_paths(
-        get_macro_attribute(
+        proc_macro_helpers::get_macro_attribute::get_macro_attribute(
             &ast.attrs,
             format!("{PATH}::type_variants_from_reqwest_response_from_checker_paths"),
             &proc_macro_name_ident_stringified
