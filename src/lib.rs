@@ -970,7 +970,7 @@ pub fn type_variants_from_reqwest_response_from_checker(input: proc_macro::Token
     let vec_enum_paths = get_vec_enum_paths(
         proc_macro_helpers::get_macro_attribute::get_macro_attribute(
             &ast.attrs,
-            format!("{PATH}::type_variants_from_reqwest_response_from_checker_paths"),
+            &format!("{PATH}::type_variants_from_reqwest_response_from_checker_paths"),
             &proc_macro_name_ident_stringified
         ),
         &proc_macro_name_ident_stringified
