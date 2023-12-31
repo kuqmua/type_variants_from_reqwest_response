@@ -1010,7 +1010,7 @@ pub fn type_variants_from_reqwest_response_from_checker(input: proc_macro::Token
                     proc_macro_helpers::attribute::get_only_one_attribute(
                         variant,
                         &proc_macro_name_ident_stringified
-                    ).to_http_status_code_quote()
+                    ).to_http_status_code_token_stream()
                 };
                 let variant_ident = &variant.ident;
                 match &variant.fields {
