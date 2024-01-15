@@ -382,7 +382,7 @@ fn generate_from_logic(
 //     let generics_len = ast.generics.params.len();
 //     let api_request_unexpected_error_module_path_token_stream = quote::quote! { crate::common::api_request_unexpected_error };
 //     let api_request_unexpected_error_path_token_stream = quote::quote! { #api_request_unexpected_error_module_path_token_stream::ApiRequestUnexpectedError };
-//     let ident_request_error_camel_case_token_stream = proc_macro_helpers::type_variants_from_request_response::generate_ident_request_error_camel_case_token_stream(
+//     let ident_request_error_upper_camel_case_token_stream = proc_macro_helpers::type_variants_from_request_response::generate_ident_request_error_upper_camel_case_token_stream(
 //         &ident,
 //         &proc_macro_name_ident_stringified,
 //     );
@@ -650,7 +650,7 @@ fn generate_from_logic(
 //     };
 //     let ident_request_error_logic_token_stream = quote::quote! {
 //         #[derive(Debug, thiserror::Error, error_occurence::ErrorOccurence)]
-//         pub enum #ident_request_error_camel_case_token_stream {
+//         pub enum #ident_request_error_upper_camel_case_token_stream {
 //             ExpectedType {
 //                 #[eo_display_with_serialize_deserialize]
 //                 expected_type: #try_error_ident_token_stream,
@@ -701,7 +701,7 @@ fn generate_from_logic(
 //                 Ok(variants) => match #desirable_token_stream::try_from(variants)
 //                 {
 //                     Ok(value) => Ok(value),
-//                     Err(e) => Err(#ident_request_error_camel_case_token_stream::ExpectedType {
+//                     Err(e) => Err(#ident_request_error_upper_camel_case_token_stream::ExpectedType {
 //                         expected_type: e,
 //                         code_occurence: crate::code_occurence_tufa_common!(),
 //                     }),
@@ -715,7 +715,7 @@ fn generate_from_logic(
 //         quote::quote! {
 //             async fn #tvfrr_extraction_logic_lower_case_token_stream<'a>(
 //                 future: impl std::future::Future<Output = Result<reqwest::Response, reqwest::Error>>,
-//             ) -> Result<#desirable_token_stream, #ident_request_error_camel_case_token_stream> {
+//             ) -> Result<#desirable_token_stream, #ident_request_error_upper_camel_case_token_stream> {
 //                 match future.await {
 //                     Ok(response) => match #try_from_response_ident_lower_case_token_stream(response).await {
 //                         #response_without_body_logic_token_stream,
@@ -725,7 +725,7 @@ fn generate_from_logic(
 //                                 headers,
 //                                 response_text_result,
 //                             } => Err(
-//                                 #ident_request_error_camel_case_token_stream::UnexpectedStatusCode {
+//                                 #ident_request_error_upper_camel_case_token_stream::UnexpectedStatusCode {
 //                                     status_code,
 //                                     headers,
 //                                     response_text_result,
@@ -737,7 +737,7 @@ fn generate_from_logic(
 //                                 status_code, 
 //                                 headers 
 //                             } => Err(
-//                                 #ident_request_error_camel_case_token_stream::FailedToGetResponseText {
+//                                 #ident_request_error_upper_camel_case_token_stream::FailedToGetResponseText {
 //                                     reqwest,
 //                                     status_code,
 //                                     headers,
@@ -750,7 +750,7 @@ fn generate_from_logic(
 //                                 headers,
 //                                 response_text,
 //                             } => Err(
-//                                 #ident_request_error_camel_case_token_stream::DeserializeResponse {
+//                                 #ident_request_error_upper_camel_case_token_stream::DeserializeResponse {
 //                                     serde, 
 //                                     status_code,
 //                                     headers,
@@ -760,7 +760,7 @@ fn generate_from_logic(
 //                             ),
 //                         },
 //                     },
-//                     Err(e) => Err(#ident_request_error_camel_case_token_stream::Reqwest {
+//                     Err(e) => Err(#ident_request_error_upper_camel_case_token_stream::Reqwest {
 //                         reqwest: e,
 //                         code_occurence: crate::code_occurence_tufa_common!(),
 //                     }),
@@ -769,7 +769,7 @@ fn generate_from_logic(
 //         }
 //     };
 //     let enum_status_codes_checker_name_logic_token_stream = {
-//         let enum_status_codes_checker_camel_case_token_stream = proc_macro_helpers::type_variants_from_request_response::generate_enum_status_codes_checker_camel_case_token_stream(
+//         let enum_status_codes_checker_upper_camel_case_token_stream = proc_macro_helpers::type_variants_from_request_response::generate_enum_status_codes_checker_upper_camel_case_token_stream(
 //             &ident,
 //             &proc_macro_name_ident_stringified,
 //         );
@@ -786,7 +786,7 @@ fn generate_from_logic(
 //                 }
 //             );
 //         quote::quote! {
-//             pub enum #enum_status_codes_checker_camel_case_token_stream {
+//             pub enum #enum_status_codes_checker_upper_camel_case_token_stream {
 //                 #(#enum_status_codes_checker_variants),*
 //             }
 //         }
