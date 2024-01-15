@@ -168,7 +168,7 @@ fn generate_from_logic(
 //         panic!("{macro_name} {}", proc_macro_helpers::global_variables::hardcode::AST_PARSE_FAILED)
 //     });
 //     let ident = &ast.ident;
-//     let ident_lower_case_stringified = proc_macro_helpers::to_lower_snake_case::ToLowerSnakeCase::to_lower_snake_case(&ident.to_string());
+//     let ident_snake_case_stringified = proc_macro_helpers::to_snake_case::ToSnakeCase::to_snake_case(&ident.to_string());
 //     let proc_macro_name_ident_stringified = format!("{macro_name} {ident}");
 //     let ident_response_variants_stringified = format!("{ident}{RESPONSE_VARIANTS}");
 //     let ident_response_variants_token_stream = ident_response_variants_stringified
@@ -515,8 +515,8 @@ fn generate_from_logic(
 //             #(#generated_status_code_enums_with_from_impls)*
 //         }
 //     };
-//     let try_from_response_ident_lower_case_token_stream = proc_macro_helpers::type_variants_from_request_response::generate_try_from_response_ident_lower_case_token_stream(
-//         &ident_lower_case_stringified,
+//     let try_from_response_ident_snake_case_token_stream = proc_macro_helpers::type_variants_from_request_response::generate_try_from_response_ident_snake_case_token_stream(
+//         &ident_snake_case_stringified,
 //         &proc_macro_name_ident_stringified,
 //     );
 //     let try_from_response_logic_token_stream = {
@@ -624,7 +624,7 @@ fn generate_from_logic(
 //             status_code_enums_try_from_variants
 //         };
 //         quote::quote! {
-//             async fn #try_from_response_ident_lower_case_token_stream(response: reqwest::Response) -> Result<#ident_response_variants_token_stream, #api_request_unexpected_error_path_token_stream> {
+//             async fn #try_from_response_ident_snake_case_token_stream(response: reqwest::Response) -> Result<#ident_response_variants_token_stream, #api_request_unexpected_error_path_token_stream> {
 //                 let status_code = response.status();
 //                 let headers = response.headers().clone();
 //                 #(#status_code_enums_try_from)*
@@ -708,16 +708,16 @@ fn generate_from_logic(
 //                 }
 //             },
 //         };
-//         let tvfrr_extraction_logic_lower_case_token_stream = proc_macro_helpers::type_variants_from_request_response::generate_tvfrr_extraction_logic_lower_case_token_stream(
-//             &ident_lower_case_stringified,
+//         let tvfrr_extraction_logic_snake_case_token_stream = proc_macro_helpers::type_variants_from_request_response::generate_tvfrr_extraction_logic_snake_case_token_stream(
+//             &ident_snake_case_stringified,
 //             &proc_macro_name_ident_stringified,
 //         );
 //         quote::quote! {
-//             async fn #tvfrr_extraction_logic_lower_case_token_stream<'a>(
+//             async fn #tvfrr_extraction_logic_snake_case_token_stream<'a>(
 //                 future: impl std::future::Future<Output = Result<reqwest::Response, reqwest::Error>>,
 //             ) -> Result<#desirable_token_stream, #ident_request_error_upper_camel_case_token_stream> {
 //                 match future.await {
-//                     Ok(response) => match #try_from_response_ident_lower_case_token_stream(response).await {
+//                     Ok(response) => match #try_from_response_ident_snake_case_token_stream(response).await {
 //                         #response_without_body_logic_token_stream,
 //                         Err(e) => match e {
 //                             #api_request_unexpected_error_path_token_stream::StatusCode { 
