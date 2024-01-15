@@ -38,7 +38,7 @@ fn generate_from_logic(
     ident_response_variants_stringified: &std::string::String,
     variants: &syn::punctuated::Punctuated<syn::Variant, syn::token::Comma>
 ) -> proc_macro2::TokenStream {
-    let ident_with_serialize_deserialize_stringified = format!("{ident}{}", proc_macro_helpers::error_occurence::hardcode::with_serialize_deserialize_camel_case());
+    let ident_with_serialize_deserialize_stringified = format!("{ident}{}", proc_macro_helpers::error_occurence::hardcode::with_serialize_deserialize_upper_camel_case());
     let ident_with_serialize_deserialize_token_stream = ident_with_serialize_deserialize_stringified
     .parse::<proc_macro2::TokenStream>()
     .unwrap_or_else(|_| {
@@ -253,7 +253,7 @@ fn generate_from_logic(
 //     };
 //     let variants_len = data_enum.variants.len();
 //     let try_error_ident_token_stream = {
-//         let try_error_ident_stringified = format!("{ident}{}", proc_macro_helpers::error_occurence::hardcode::with_serialize_deserialize_camel_case());
+//         let try_error_ident_stringified = format!("{ident}{}", proc_macro_helpers::error_occurence::hardcode::with_serialize_deserialize_upper_camel_case());
 //         try_error_ident_stringified
 //         .parse::<proc_macro2::TokenStream>()
 //         .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {try_error_ident_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE))
@@ -994,7 +994,7 @@ pub fn type_variants_from_reqwest_response_from_checker(input: proc_macro::Token
                 |enum_path| generate_from_logic(
                     ident,
                     &proc_macro_name_ident_stringified,
-                    &format!("{enum_path}{}", proc_macro_helpers::error_occurence::hardcode::with_serialize_deserialize_camel_case()),
+                    &format!("{enum_path}{}", proc_macro_helpers::error_occurence::hardcode::with_serialize_deserialize_upper_camel_case()),
                     &variants
                 )
             )
