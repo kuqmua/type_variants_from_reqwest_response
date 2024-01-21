@@ -42,12 +42,12 @@ fn generate_from_logic(
     let ident_with_serialize_deserialize_token_stream = ident_with_serialize_deserialize_stringified
     .parse::<proc_macro2::TokenStream>()
     .unwrap_or_else(|_| {
-        panic!("{proc_macro_name_ident_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE)
+        panic!("{proc_macro_name_ident_stringified} {}", proc_macro_common::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE)
     });
     let enum_path_token_stream = ident_response_variants_stringified
         .parse::<proc_macro2::TokenStream>()
         .unwrap_or_else(|_| {
-            panic!("{proc_macro_name_ident_stringified} {ident_response_variants_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE)
+            panic!("{proc_macro_name_ident_stringified} {ident_response_variants_stringified} {}", proc_macro_common::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE)
         });
     let variants = {
         variants.iter().map(|variant| {
@@ -165,7 +165,7 @@ fn generate_from_logic(
 //     proc_macro_common::panic_location::panic_location(); //panic_location function from https://github.com/kuqmua/proc_macro_helpers
 //     let macro_name = "TypeVariantsFromReqwestResponse";
 //     let ast: syn::DeriveInput = syn::parse(input).unwrap_or_else(|_| {
-//         panic!("{macro_name} {}", proc_macro_helpers::global_variables::hardcode::AST_PARSE_FAILED)
+//         panic!("{macro_name} {}", proc_macro_common::global_variables::hardcode::AST_PARSE_FAILED)
 //     });
 //     let ident = &ast.ident;
 //     let ident_snake_case_stringified = proc_macro_helpers::to_snake_case::ToSnakeCase::to_snake_case(&ident.to_string());
@@ -173,7 +173,7 @@ fn generate_from_logic(
 //     let ident_response_variants_stringified = format!("{ident}{RESPONSE_VARIANTS}");
 //     let ident_response_variants_token_stream = ident_response_variants_stringified
 //     .parse::<proc_macro2::TokenStream>()
-//     .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {ident_response_variants_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
+//     .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {ident_response_variants_stringified} {}", proc_macro_common::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
 //     let attribute = get_macro_attribute(
 //         &ast.attrs,
 //         format!("{PATH}::type_variants_from_reqwest_response_attribute"),
@@ -217,7 +217,7 @@ fn generate_from_logic(
 //                                                 let attribute = proc_macro_helpers::attribute::Attribute::try_from(second_param).unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} second_param failed to Attribute::try_from"));
 //                                                 let desirable_token_stream = first_param
 //                                                     .parse::<proc_macro2::TokenStream>()
-//                                                     .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {first_param} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
+//                                                     .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {first_param} {}", proc_macro_common::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
 //                                                 let response_without_body = desirable_token_stream.to_string() == "()";
 //                                                 (
 //                                                     desirable_token_stream,
@@ -226,7 +226,7 @@ fn generate_from_logic(
 //                                                         let status_code_enum_name_stingified = format!("{ident_response_variants_stringified}{attribute}");
 //                                                         status_code_enum_name_stingified
 //                                                         .parse::<proc_macro2::TokenStream>()
-//                                                         .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {status_code_enum_name_stingified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE))
+//                                                         .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {status_code_enum_name_stingified} {}", proc_macro_common::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE))
 //                                                     },
 //                                                     attribute,
 //                                                     response_without_body
@@ -256,7 +256,7 @@ fn generate_from_logic(
 //         let try_error_ident_stringified = format!("{ident}{}", proc_macro_helpers::naming_conventions::with_serialize_deserialize_upper_camel_case());
 //         try_error_ident_stringified
 //         .parse::<proc_macro2::TokenStream>()
-//         .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {try_error_ident_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE))
+//         .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {try_error_ident_stringified} {}", proc_macro_common::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE))
 //     };
 //     let (
 //         unique_status_codes, 
@@ -378,7 +378,7 @@ fn generate_from_logic(
 //     let desirable_name_stringified = "Desirable";
 //     let desirable_name_token_stream = desirable_name_stringified
 //         .parse::<proc_macro2::TokenStream>()
-//         .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {desirable_name_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
+//         .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {desirable_name_stringified} {}", proc_macro_common::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
 //     let generics_len = ast.generics.params.len();
 //     let api_request_unexpected_error_module_path_token_stream = quote::quote! { crate::common::api_request_unexpected_error };
 //     let api_request_unexpected_error_path_token_stream = quote::quote! { #api_request_unexpected_error_module_path_token_stream::ApiRequestUnexpectedError };
@@ -422,7 +422,7 @@ fn generate_from_logic(
 //                     let status_code_enum_name_stingified = format!("{ident_response_variants_stringified}{attribute}");
 //                     status_code_enum_name_stingified
 //                     .parse::<proc_macro2::TokenStream>()
-//                     .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {status_code_enum_name_stingified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE))
+//                     .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {status_code_enum_name_stingified} {}", proc_macro_common::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE))
 //                 };
 //                 let (
 //                     optional_additional_named_variant, 
@@ -458,7 +458,7 @@ fn generate_from_logic(
 //                     let variants = vec_variants.iter().map(|variant|{
 //                         let fields = if let syn::Fields::Named(fields_named) = &variant.fields {
 //                             fields_named.named.iter().map(|field| {
-//                                 let field_ident = &field.ident.clone().unwrap_or_else(|| panic!("{proc_macro_name_ident_stringified} field_ident is None {}",     proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
+//                                 let field_ident = &field.ident.clone().unwrap_or_else(|| panic!("{proc_macro_name_ident_stringified} field_ident is None {}",     proc_macro_common::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
 //                                 quote::quote! { #field_ident }
 //                             })
 //                         }
@@ -563,7 +563,7 @@ fn generate_from_logic(
 //                 let status_code_enum_name_stringified = format!("{ident_response_variants_token_stream}{status_code_attribute}");
 //                 let status_code_enum_name_token_stream = status_code_enum_name_stringified
 //                     .parse::<proc_macro2::TokenStream>()
-//                     .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {status_code_enum_name_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
+//                     .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {status_code_enum_name_stringified} {}", proc_macro_common::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE));
 //                 let http_status_code_token_stream = status_code_attribute.to_http_status_code_quote();
 //                 match index == unique_status_codes_len_minus_one{
 //                     true => {
@@ -782,7 +782,7 @@ fn generate_from_logic(
 //                     let check_variant_ident_stringified = format!("{}{}", variant.ident, attr);
 //                     check_variant_ident_stringified
 //                         .parse::<proc_macro2::TokenStream>()
-//                         .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {check_variant_ident_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE))
+//                         .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {check_variant_ident_stringified} {}", proc_macro_common::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE))
 //                 }
 //             );
 //         quote::quote! {
@@ -960,7 +960,7 @@ pub fn type_variants_from_reqwest_response_from_checker(input: proc_macro::Token
         );
         enum_status_codes_checker_stringified
         .parse::<proc_macro2::TokenStream>()
-        .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {enum_status_codes_checker_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE))
+        .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {enum_status_codes_checker_stringified} {}", proc_macro_common::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE))
     };
     let variants = if let syn::Data::Enum(data_enum) = ast.data {
         data_enum.variants
@@ -1068,7 +1068,7 @@ pub fn type_variants_from_reqwest_response_from_checker(input: proc_macro::Token
             let check_variant_ident_stringified = format!("{}{}", variant.ident, attr);
             check_variant_ident_stringified
             .parse::<proc_macro2::TokenStream>()
-            .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {check_variant_ident_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE))
+            .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {check_variant_ident_stringified} {}", proc_macro_common::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE))
         });
         quote::quote! {
             #[allow(clippy::enum_variant_names, dead_code)]
@@ -1087,7 +1087,7 @@ pub fn type_variants_from_reqwest_response_from_checker(input: proc_macro::Token
                 enum_path_stringified
                 .parse::<proc_macro2::TokenStream>()
                 .unwrap_or_else(|_| {
-                    panic!("{proc_macro_name_ident_stringified} {enum_path_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE)
+                    panic!("{proc_macro_name_ident_stringified} {enum_path_stringified} {}", proc_macro_common::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE)
                 })
             };
             let enum_status_codes_checker_from_impls_variants = variants.iter().map(|variant| {
@@ -1099,7 +1099,7 @@ pub fn type_variants_from_reqwest_response_from_checker(input: proc_macro::Token
                     let check_variant_ident_stringified = format!("{}{}", variant.ident, attr);
                     check_variant_ident_stringified
                     .parse::<proc_macro2::TokenStream>()
-                    .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {check_variant_ident_stringified} {}", proc_macro_helpers::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE))
+                    .unwrap_or_else(|_| panic!("{proc_macro_name_ident_stringified} {check_variant_ident_stringified} {}", proc_macro_common::global_variables::hardcode::PARSE_PROC_MACRO2_TOKEN_STREAM_FAILED_MESSAGE))
                 };
                 match &variant.fields {
                     syn::Fields::Named(_fields_named) => {
