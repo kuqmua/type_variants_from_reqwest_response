@@ -162,7 +162,7 @@ fn generate_from_logic(
 // pub fn type_variants_from_reqwest_response(
 //     input: proc_macro::TokenStream,
 // ) -> proc_macro::TokenStream {
-//     proc_macro_helpers::panic_location::panic_location(); //panic_location function from https://github.com/kuqmua/proc_macro_helpers
+//     proc_macro_common::panic_location::panic_location(); //panic_location function from https://github.com/kuqmua/proc_macro_helpers
 //     let macro_name = "TypeVariantsFromReqwestResponse";
 //     let ast: syn::DeriveInput = syn::parse(input).unwrap_or_else(|_| {
 //         panic!("{macro_name} {}", proc_macro_helpers::global_variables::hardcode::AST_PARSE_FAILED)
@@ -948,7 +948,7 @@ fn generate_from_logic(
     )
 )]
 pub fn type_variants_from_reqwest_response_from_checker(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    proc_macro_helpers::panic_location::panic_location(); //panic_location function from https://github.com/kuqmua/proc_macro_helpers
+    proc_macro_common::panic_location::panic_location(); //panic_location function from https://github.com/kuqmua/proc_macro_helpers
     let macro_name = "TypeVariantsFromReqwestResponseFromChecker";
     let ast: syn::DeriveInput = syn::parse_macro_input!(input as syn::DeriveInput);
     let ident = &ast.ident;
