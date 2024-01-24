@@ -1007,7 +1007,7 @@ pub fn type_variants_from_reqwest_response_from_checker(input: proc_macro::Token
         let variants_from_status_code = variants.iter().map(
             |variant| {
                 let http_status_code_token_stream = {
-                    proc_macro_helpers::attribute::get_only_one_attribute(
+                    proc_macro_helpers::status_code::get_only_one_attribute(
                         variant,
                         &proc_macro_name_ident_stringified
                     ).to_http_status_code_token_stream()
@@ -1061,7 +1061,7 @@ pub fn type_variants_from_reqwest_response_from_checker(input: proc_macro::Token
     };
     let enum_status_codes_checker_logic_token_stream = {
         let enum_status_codes_checker_variants = variants.iter().map(|variant|{
-            let attr = proc_macro_helpers::attribute::get_only_one_attribute(
+            let attr = proc_macro_helpers::status_code::get_only_one_attribute(
                 variant,
                 &proc_macro_name_ident_stringified
             );
@@ -1091,7 +1091,7 @@ pub fn type_variants_from_reqwest_response_from_checker(input: proc_macro::Token
                 })
             };
             let enum_status_codes_checker_from_impls_variants = variants.iter().map(|variant| {
-                let attr = proc_macro_helpers::attribute::get_only_one_attribute(
+                let attr = proc_macro_helpers::status_code::get_only_one_attribute(
                     variant,
                     &proc_macro_name_ident_stringified
                 );
